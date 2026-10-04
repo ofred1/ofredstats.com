@@ -1,19 +1,692 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hoops Lab — College basketball rankings</title><style>
-:root{font-family:Inter,system-ui,sans-serif;color:#192522;background:#f4f5f0}*{box-sizing:border-box}body{margin:0}header{background:#172d27;color:white;padding:24px 5%;display:flex;justify-content:space-between;align-items:center}header b{letter-spacing:-1px;font-size:25px}.tag{font-size:12px;letter-spacing:2px;color:#b3d8c4}main{max-width:1300px;margin:auto;padding:48px 5%}h1{font-size:clamp(34px,5vw,58px);letter-spacing:-2px;margin:12px 0}p{line-height:1.6;color:#5b6862}.eyebrow{font-size:12px;color:#42785f;font-weight:700;letter-spacing:2px}.hero{display:flex;justify-content:space-between;gap:25px;align-items:center}.formula{background:#e5ebdf;border:1px solid #d0dac8;border-radius:12px;padding:24px;min-width:240px}.formula strong{display:block;font-size:22px;margin:10px 0}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:30px 0}.card{background:white;padding:20px;border:1px solid #dfe4dc;border-radius:10px}.card small{color:#69746e;display:block;margin-bottom:10px}.card strong{font-size:24px}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:24px 0}input,select,button,.upload{font:inherit;padding:12px 16px;border-radius:7px;border:1px solid #cfd7ce;background:white;color:#192522}input{flex:1;min-width:190px}button,.upload{cursor:pointer}.upload{background:#234d3d;color:white;border-color:#234d3d}button:hover,.upload:hover{filter:brightness(.94)}input:focus,button:focus,select:focus,.upload:focus-within{outline:2px solid #6f967d;outline-offset:2px}.tablewrap{overflow:auto;background:white;border:1px solid #dfe4dc;border-radius:12px}table{border-collapse:collapse;width:100%;white-space:nowrap;text-align:left}th{background:#edf0e8;font-size:11px;letter-spacing:1px;text-transform:uppercase}th button{border:0;background:none;padding:16px 12px;font-size:inherit;font-weight:700;letter-spacing:inherit}td{padding:17px 12px;border-top:1px solid #edf0e8;font-size:14px}td:nth-child(2){font-weight:650}td:last-child{font-weight:700;color:#285c42}tbody tr:hover{background:#f7faf5}.num{text-align:right;font-variant-numeric:tabular-nums}.count{font-size:13px;color:#66756b;margin:12px 0}.notice{padding:12px 16px;background:#ebeee5;border-radius:6px;font-size:13px;color:#4a5c4f}details{margin-top:30px;background:#fff;border:1px solid #dfe4dc;border-radius:10px;padding:20px}summary{cursor:pointer;font-weight:650}pre{overflow:auto;padding:16px;background:#f1f4ef;border-radius:6px;font-size:12px}footer{margin:28px 0;color:#708074;font-size:12px}#file{position:absolute;width:1px;height:1px;opacity:0}@media(max-width:720px){.hero{display:block}.formula{margin-top:20px}.cards{grid-template-columns:1fr}.card{padding:15px}main{padding-top:30px}header .tag{display:none}}
-</style></head><body><header><b>HOOPS <span style="color:#c5ef96">LAB.</span></b><span class="tag">COLLEGE BASKETBALL / STATISTICAL RANKINGS</span></header><main><div class="hero"><div><div class="eyebrow">MEN’S COLLEGE BASKETBALL · 2025–26</div><h1>The game, by the numbers.</h1><p>A working lab for your own college basketball ratings.<br>Compare teams. Explore the numbers. Refine the formula.</p></div><div class="formula"><div class="eyebrow">TEST FORMULA</div><strong>Points ÷ max(turnovers, 1)</strong><span>Calculated per game, then averaged.</span></div></div><div class="cards"><div class="card"><small>TEAMS IN THIS DATASET</small><strong id="teams">—</strong></div><div class="card"><small>HIGHEST RATED</small><strong id="leader">—</strong></div><div class="card"><small>DATA UPDATED</small><strong id="updated" style="font-size:17px">Source refresh unknown</strong></div></div><div class="notice" id="notice">Shared R export: all 365 teams. Automatic updates are not connected yet.</div><div class="toolbar"><input id="search" type="search" placeholder="Search teams…" aria-label="Search teams"><select id="conference" aria-label="Filter conference"><option value="">All conferences</option></select><label class="upload">Import R results<input id="file" type="file" accept=".json,application/json"></label><button id="reset">Load shared results</button></div><div class="tablewrap"><table><thead><tr id="head"></tr></thead><tbody id="body"></tbody></table></div><div class="count" id="count" aria-live="polite"></div><details><summary>Export your results from R</summary><p>Run this after calculating <code>rankings</code>, then import <code>rankings.json</code> above. Imported results stay in this browser only. The published page loads the shared R export automatically. Manual imports temporarily override it in your browser; Load shared results restores the published dataset.</p><pre>install.packages("jsonlite") # Once only
-jsonlite::write_json(
-  list(
-    updated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
-    rankings = rankings
-  ),
-  "rankings.json",
-  dataframe = "rows",
-  auto_unbox = TRUE,
-  pretty = TRUE,
-  na = "null"
-)</pre><p>Rating is the average of each game's ratio; it is not PPG divided by average turnovers. Zero turnovers use a denominator of 1. Missing box scores are excluded. Division I filtering remains provisional. This is a test metric, not an opponent-adjusted strength rating.</p></details><footer>HOOPS LAB · Independent basketball analysis · Data source: CollegeBasketballData.com</footer></main><script>
-const cols=[['rank','Rank'],['team','Team'],['conference','Conference'],['games_rated','Games rated'],['wins','W'],['losses','L'],['ppg','PPG'],['turnovers_per_game','TO / game'],['rating','Rating']];let dataset,sortKey='rating',direction=-1;const $=id=>document.getElementById(id);const fmt=(v,k)=>v==null?'—':typeof v==='number'?(['rating','ppg','turnovers_per_game'].includes(k)?v.toFixed(2):String(v)):String(v);
-function apply(d,local=false){dataset=d;const conf=$('conference');conf.replaceChildren(new Option('All conferences',''));[...new Set(d.rankings.map(r=>r.conference).filter(Boolean))].sort().forEach(c=>conf.add(new Option(c,c)));$('teams').textContent=d.rankings.length;const top=[...d.rankings].filter(r=>Number.isFinite(r.rating)).sort((a,b)=>b.rating-a.rating)[0];$('leader').textContent=top?.team||'—';const stamp=typeof d.updated_at==='string'?d.updated_at:d.exported_at;$('updated').textContent=stamp?new Date(stamp).toLocaleString()+' ('+(d.updated_at?'refreshed':'exported')+')':'Source refresh unknown';$('notice').textContent=local?'Your imported R results are displayed in this browser. Automatic updates are not connected yet.':'Shared R export: all 365 teams. Automatic updates are not connected yet.';render();}
-function render(){const q=$('search').value.toLowerCase(),c=$('conference').value;const rows=dataset.rankings.filter(r=>r.team.toLowerCase().includes(q)&&(!c||r.conference===c));rows.sort((a,b)=>{if(a[sortKey]==null)return b[sortKey]==null?0:1;if(b[sortKey]==null)return -1;return (typeof a[sortKey]==='number'?a[sortKey]-b[sortKey]:String(a[sortKey]).localeCompare(String(b[sortKey])))*direction});$('head').replaceChildren();for(const [key,label]of cols){const th=document.createElement('th');th.scope='col';if(key===sortKey)th.setAttribute('aria-sort',direction===1?'ascending':'descending');const b=document.createElement('button');b.textContent=label+(sortKey===key?(direction===1?' ↑':' ↓'):'');b.onclick=()=>{direction=sortKey===key?-direction:(key==='team'||key==='conference'||key==='rank'?1:-1);sortKey=key;render()};th.append(b);$('head').append(th)}$('body').replaceChildren();for(const r of rows){const tr=document.createElement('tr');for(const [key]of cols){const td=document.createElement('td');td.textContent=fmt(r[key],key);if(key!=='team'&&key!=='conference')td.className='num';tr.append(td)}$('body').append(tr)}$('count').textContent=`Showing ${rows.length} of ${dataset.rankings.length} teams`;if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=cols.length;td.textContent='No teams match your search.';tr.append(td);$('body').append(tr)}}
-$('search').oninput=render;$('conference').onchange=render;$('file').onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d.rankings)||!d.rankings.length||d.rankings.some(r=>typeof r.team!=='string'||!Number.isFinite(r.team_id)||(r.rating!=null&&!Number.isFinite(r.rating))))throw Error('Expected rankings with team, numeric team_id, and numeric rating.');if(d.updated_at&&!Number.isFinite(Date.parse(d.updated_at)))throw Error('Invalid updated_at timestamp.');$('search').value='';apply(d,true);try{localStorage.setItem('hoops-data-v2',JSON.stringify(d))}catch(storageError){$('notice').textContent='Imported '+d.rankings.length+' teams. Browser storage is unavailable; results last until you reload.'}}catch(err){$('notice').textContent='Import failed: '+err.message}e.target.value=''};$('reset').onclick=async()=>{try{localStorage.removeItem('hoops-data-v2')}catch(e){};$('search').value='';apply(await fetch('rankings.json').then(r=>r.json()))};(async()=>{try{let saved=null;try{saved=localStorage.getItem('hoops-data-v2')}catch(e){};apply(saved?JSON.parse(saved):await fetch('rankings.json').then(r=>r.json()),!!saved)}catch(e){$('notice').textContent='Could not load rankings. Use Import R results to load your data.'}})();
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Independent men's college basketball rankings and statistical analysis by OFred Stats.">
+<title>OFred Stats | College Basketball Rankings</title>
+<style>
+:root {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #18243c;
+  background: #f5f7fa;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; }
+header { background: white; border-bottom: 1px solid #dde3ed; }
+.nav {
+  max-width: 1320px;
+  padding: 21px 32px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+.brand {
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.brand span { color: #2864da; }
+.navlinks { display: flex; gap: 25px; font-size: 13px; font-weight: 600; }
+.navlinks a { text-decoration: none; }
+.navlinks a:first-child { color: #2864da; }
+.nav small {
+  margin-left: auto;
+  color: #69758b;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+main { max-width: 1320px; margin: auto; padding: 40px 32px; }
+.intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+.eyebrow {
+  color: #2864da;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+h1 { font-size: 38px; letter-spacing: -1.4px; margin: 10px 0; }
+p { color: #69758b; font-size: 14px; line-height: 1.7; }
+.season {
+  border: 1px solid #d9e1ec;
+  background: white;
+  border-radius: 6px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.panel {
+  margin-top: 28px;
+  background: white;
+  border: 1px solid #dde3ed;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.paneltitle {
+  padding: 23px 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.paneltitle h2 { font-size: 18px; margin: 0; letter-spacing: -.4px; }
+.metricname { font-size: 11px; color: #758096; }
+.badge {
+  margin-left: auto;
+  font-size: 10px;
+  color: #4d6180;
+  background: #eff3f9;
+  padding: 6px 9px;
+  border-radius: 4px;
+}
+.toolbar { padding: 20px 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+input, select, button { font: inherit; }
+input[type=search], select {
+  background: #f8f9fc;
+  border: 1px solid #dce3ed;
+  border-radius: 6px;
+  padding: 11px 13px;
+  font-size: 13px;
+  color: #25344f;
+}
+input[type=search] { min-width: 170px; flex: 1; }
+button { cursor: pointer; }
+.btn {
+  background: white;
+  border: 1px solid #dce3ed;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #25344f;
+  font-size: 12px;
+}
+button:hover { background: #edf3fe; }
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, summary:focus-visible {
+  outline: 2px solid #2864da;
+  outline-offset: 3px;
+}
+.tablewrap { overflow: auto; max-height: 700px; }
+table { border-collapse: collapse; width: 100%; white-space: nowrap; text-align: left; }
+th {
+  position: sticky;
+  top: 0;
+  background: #f6f8fc;
+  z-index: 1;
+  border-block: 1px solid #e6eaf1;
+}
+th button {
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  color: #68768d;
+  font-weight: 700;
+}
+td { padding: 13px 16px; border-bottom: 1px solid #eff2f6; font-size: 12px; }
+tr:hover td { background: #f7faff; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.num button { text-align: right; }
+.teamlink {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-weight: 650;
+  color: #172840;
+  font-size: 12px;
+  text-align: left;
+}
+.rankcell { color: #6a7890; }
+.score { font-weight: 750; color: #2864da; background: #f7faff; }
+.count {
+  padding: 15px 24px;
+  color: #748095;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.notice { font-size: 12px; color: #65728a; margin-top: 14px; line-height: 1.6; }
+.method {
+  margin-top: 35px;
+  padding: 25px;
+  background: white;
+  border: 1px solid #dde3ed;
+  border-radius: 9px;
+}
+.method h2 { margin: 10px 0 14px; font-size: 20px; }
+.formula {
+  font-family: ui-monospace, monospace;
+  font-size: 15px;
+  background: #f2f5fb;
+  border-left: 3px solid #2864da;
+  padding: 17px;
+}
+.method p { max-width: 840px; }
+.method small { color: #748095; line-height: 1.6; display: block; }
+.metricmethod { border-top: 1px solid #e6eaf1; padding-top: 12px; }
+.metricmethod h3, .moremetrics h3 { font-size: 16px; }
+.metricmethod h3 span {
+  font-size: 11px;
+  background: #edf3fe;
+  color: #2864da;
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-left: 8px;
+}
+.moremetrics { border-top: 1px solid #e6eaf1; margin-top: 22px; padding-top: 10px; }
+.moremetrics p { margin-bottom: 0; }
+details { margin-top: 23px; color: #65728a; font-size: 12px; }
+summary { cursor: pointer; font-weight: 600; }
+#importfile { display: block; margin: 16px 0; max-width: 100%; }
+footer {
+  font-size: 11px;
+  color: #8993a4;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 28px 0;
+}
+dialog {
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  max-width: 550px;
+  width: calc(100% - 32px);
+  padding: 26px;
+  color: #18243c;
+}
+dialog::backdrop { background: #13223b70; }
+.dialoghead { display: flex; justify-content: space-between; align-items: center; }
+.dialoghead h2 { margin: 0; font-size: 25px; }
+.detailgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+.detailgrid div { padding: 16px; background: #f4f7fb; border-radius: 6px; }
+.detailgrid small { display: block; color: #758096; font-size: 11px; margin-bottom: 8px; }
+.detailgrid strong { font-size: 22px; }
+#column-tip {
+  position: fixed;
+  z-index: 100;
+  width: 280px;
+  background: #172840;
+  color: white;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 28px #17284030;
+  pointer-events: none;
+}
+#column-tip strong { display: block; font-size: 12px; margin-bottom: 7px; }
+#column-tip span { display: block; font-size: 12px; line-height: 1.6; color: #dce6f7; }
+.visually-hidden {
+  position: absolute;
+  clip-path: inset(100%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .nav { padding: 18px; gap: 20px; }
+  .nav small { display: none; }
+  .navlinks { gap: 14px; }
+  main { padding: 28px 16px; }
+  .intro { display: block; }
+  h1 { font-size: 31px; }
+  .season { display: inline-block; margin-top: 10px; }
+  .paneltitle, .toolbar { padding-left: 16px; padding-right: 16px; }
+  .count { padding-inline: 16px; }
+  .badge { font-size: 9px; }
+  .method { padding: 20px; }
+  .formula { font-size: 12px; }
+  .metricname { display: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <nav class="nav" aria-label="Main navigation">
+    <a href="#" class="brand">OFred<span>Stats.</span></a>
+    <div class="navlinks">
+      <a href="#rankings">Team rankings</a>
+      <a href="#methodology">Methodology</a>
+    </div>
+    <small>INDEPENDENT BASKETBALL ANALYSIS</small>
+  </nav>
+</header>
+
+<main>
+  <section class="intro">
+    <div>
+      <div class="eyebrow">NCAA Men’s Basketball</div>
+      <h1>College basketball, measured.</h1>
+      <p>Explore team performance through the numbers. Rankings built from individual game results.</p>
+    </div>
+    <div class="season" id="season">2025–26 season</div>
+  </section>
+
+  <section class="panel" id="rankings">
+    <div class="paneltitle">
+      <h2>Team rankings</h2>
+      <span class="metricname">Sorted by PPT</span>
+      <span class="badge">POINTS PER TURNOVER</span>
+    </div>
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search a team…" aria-label="Search teams">
+      <select id="conference" aria-label="Filter conference">
+        <option value="">All conferences</option>
+      </select>
+      <button class="btn" id="clear">Clear filters</button>
+      <button class="btn" id="download">Download table</button>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <caption class="visually-hidden">
+          Team rankings. Select a column heading to sort or a team to see its details.
+        </caption>
+        <thead><tr id="head"></tr></thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div class="count">
+      <span id="count" aria-live="polite">Loading rankings…</span>
+      <span>Click a team for details</span>
+    </div>
+  </section>
+
+  <div class="notice" id="notice" role="status">
+    Season snapshot · Daily automatic updates are not connected yet.
+  </div>
+
+  <section class="method" id="methodology">
+    <div class="eyebrow">Behind the numbers</div>
+    <h2>Our statistics &amp; formulas</h2>
+    <p>Explore the definitions behind our statistics. Each metric measures a different part of team performance.</p>
+
+    <div class="metricmethod">
+      <h3>Points per turnover <span>PPT</span></h3>
+      <div class="formula">
+        PPT = average of [game points ÷ max(game turnovers, 1)]
+      </div>
+      <p>
+        Each game receives a points-per-turnover score. Those scores are averaged
+        with equal weight across the team’s rated games. Higher PPT ranks higher.
+        A zero-turnover game uses a denominator of one.
+      </p>
+      <p>
+        PPT measures scoring relative to turnovers. It does not adjust for
+        opponent strength or pace. PPT is the average of individual game ratios,
+        rather than the ratio of season averages.
+      </p>
+      <small>
+        <strong>Game coverage:</strong> “Rated / played” shows how many games
+        have usable points and turnover data, compared with the reported season
+        total. Missing box scores are excluded. Division I membership uses a
+        provisional conference filter.
+      </small>
+    </div>
+
+    <div class="moremetrics">
+      <h3>More metrics to come</h3>
+      <p>Additional statistics and their formulas will appear here as they are introduced.</p>
+    </div>
+
+    <details>
+      <summary>Manage a local data preview</summary>
+      <p>
+        Choose an R-exported JSON file to preview results in this browser.
+        It does not publish results for other visitors.
+      </p>
+      <input id="importfile" type="file" accept=".json,application/json" aria-label="Import local rankings JSON">
+      <button class="btn" id="reset">Restore published results</button>
+    </details>
+  </section>
+
+  <footer>
+    <span>© OFred Stats · Independent statistical analysis</span>
+    <span>Data provided by <a href="https://collegebasketballdata.com/">CollegeBasketballData.com</a></span>
+  </footer>
+</main>
+
+<dialog id="detail">
+  <div class="dialoghead">
+    <h2 id="detailname"></h2>
+    <button class="btn" id="close" aria-label="Close team details">Close</button>
+  </div>
+  <p id="detailconf"></p>
+  <div class="detailgrid" id="detailstats"></div>
+  <p id="coverage"></p>
+</dialog>
+
+<div id="column-tip" role="tooltip" hidden>
+  <strong></strong>
+  <span></span>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const columns = [
+  ['rank', 'Rank'],
+  ['team', 'Team'],
+  ['conference', 'Conference'],
+  ['record', 'Record'],
+  ['coverage', 'Rated / played'],
+  ['ppg', 'PPG'],
+  ['turnovers_per_game', 'TO / game'],
+  ['rating', 'PPT']
+];
+
+const definitions = {
+  rank: ['Rank', 'Teams ordered by PPT, highest first. Equal PPT values share a rank.'],
+  team: ['Team', 'Select a team to view its statistics.'],
+  conference: ['Conference', 'The conference reported in the dataset.'],
+  record: ['Record', 'Season wins – season losses.'],
+  coverage: ['Rated / played', 'Games with usable points and turnover data ÷ reported season games.'],
+  ppg: ['Points per game', 'Total points in rated games ÷ number of rated games.'],
+  turnovers_per_game: ['Turnovers per game', 'Total turnovers in rated games ÷ number of rated games.'],
+  rating: ['Points per turnover (PPT)', 'Average across rated games of: points ÷ max(turnovers, 1).']
+};
+
+let dataset = null;
+let sortKey = 'rank';
+let direction = 1;
+
+const numeric = ['rank', 'ppg', 'turnovers_per_game', 'rating', 'games_rated'];
+
+function showTip(button, key) {
+  const tip = $('column-tip');
+  tip.children[0].textContent = definitions[key][0];
+  tip.children[1].textContent = definitions[key][1];
+  tip.hidden = false;
+
+  const box = button.getBoundingClientRect();
+  tip.style.left = Math.max(12, Math.min(box.left, innerWidth - 292)) + 'px';
+  tip.style.top = Math.min(box.bottom + 9, innerHeight - tip.offsetHeight - 12) + 'px';
+}
+
+function hideTip() {
+  $('column-tip').hidden = true;
+}
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') hideTip();
+});
+window.addEventListener('scroll', hideTip, true);
+
+function value(row, key) {
+  if (key === 'record') return `${row.wins ?? '—'}–${row.losses ?? '—'}`;
+  if (key === 'coverage') return `${row.games_rated ?? '—'} / ${row.games ?? '—'}`;
+  return row[key];
+}
+
+function fmt(value, key) {
+  if (value == null) return '—';
+  if (typeof value === 'number' &&
+      ['ppg', 'turnovers_per_game', 'rating'].includes(key)) {
+    return value.toFixed(2);
+  }
+  return String(value);
+}
+
+function validate(data) {
+  if (!Array.isArray(data.rankings) || !data.rankings.length) {
+    throw Error('The file must contain a nonempty rankings array.');
+  }
+  for (const row of data.rankings) {
+    if (typeof row.team !== 'string' ||
+        (row.rating != null && !Number.isFinite(row.rating))) {
+      throw Error('Each row needs a team name and a numeric rating or null.');
+    }
+  }
+  return data;
+}
+
+function apply(data, local = false) {
+  dataset = validate(data);
+  const rows = data.rankings;
+
+  if (Number.isInteger(data.season)) {
+    $('season').textContent =
+      `${data.season - 1}–${String(data.season).slice(-2)} season`;
+  }
+
+  $('conference').replaceChildren(new Option('All conferences', ''));
+
+  [...new Set(rows.map(row => row.conference).filter(Boolean))]
+    .sort()
+    .forEach(conference => {
+      $('conference').add(new Option(conference, conference));
+    });
+
+  $('notice').textContent = local
+    ? 'Local preview · Only this browser shows these imported results.'
+    : 'Season snapshot · Daily automatic updates are not connected yet.';
+
+  render();
+}
+
+function filtered() {
+  const query = $('search').value.toLowerCase().trim();
+  const conference = $('conference').value;
+
+  return dataset.rankings
+    .filter(row =>
+      row.team.toLowerCase().includes(query) &&
+      (!conference || row.conference === conference)
+    )
+    .sort((a, b) => {
+      const key = sortKey === 'coverage' ? 'games_rated' : sortKey;
+      const av = value(a, key);
+      const bv = value(b, key);
+
+      if (av == null) return bv == null ? 0 : 1;
+      if (bv == null) return -1;
+
+      const difference = numeric.includes(key)
+        ? Number(av) - Number(bv)
+        : String(av).localeCompare(String(bv));
+
+      return difference * direction || a.team.localeCompare(b.team);
+    });
+}
+
+function render() {
+  if (!dataset) return;
+
+  $('head').replaceChildren();
+
+  for (const [key, label] of columns) {
+    const th = document.createElement('th');
+    th.scope = 'col';
+
+    if (key === sortKey) {
+      th.setAttribute('aria-sort', direction === 1 ? 'ascending' : 'descending');
+    }
+    if (!['team', 'conference', 'record'].includes(key)) {
+      th.className = 'num';
+    }
+
+    const button = document.createElement('button');
+    button.textContent = label +
+      (sortKey === key ? (direction === 1 ? ' ↑' : ' ↓') : '');
+
+    button.setAttribute('aria-describedby', 'column-tip');
+    button.onmouseenter = () => showTip(button, key);
+    button.onfocus = () => showTip(button, key);
+    button.onmouseleave = hideTip;
+    button.onblur = hideTip;
+
+    button.onclick = () => {
+      hideTip();
+      direction = sortKey === key
+        ? -direction
+        : (['rating', 'ppg'].includes(key) ? -1 : 1);
+      sortKey = key;
+      render();
+    };
+
+    th.append(button);
+    $('head').append(th);
+  }
+
+  const rows = filtered();
+  $('body').replaceChildren();
+
+  for (const row of rows) {
+    const tr = document.createElement('tr');
+
+    for (const [key] of columns) {
+      const td = document.createElement('td');
+
+      if (key === 'team') {
+        const button = document.createElement('button');
+        button.className = 'teamlink';
+        button.textContent = row.team;
+        button.onclick = () => showTeam(row);
+        td.append(button);
+      } else {
+        td.textContent = fmt(value(row, key), key);
+      }
+
+      if (!['team', 'conference', 'record'].includes(key)) {
+        td.className = 'num';
+      }
+      if (key === 'rank') td.classList.add('rankcell');
+      if (key === 'rating') td.classList.add('score');
+
+      tr.append(td);
+    }
+
+    $('body').append(tr);
+  }
+
+  if (!rows.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 8;
+    td.textContent = 'No teams match your filters.';
+    tr.append(td);
+    $('body').append(tr);
+  }
+
+  $('count').textContent = `${rows.length} of ${dataset.rankings.length} teams`;
+}
+
+function showTeam(row) {
+  $('detailname').textContent = row.team;
+  $('detailconf').textContent =
+    (row.conference || 'Conference unavailable') +
+    ' · ' + value(row, 'record') + ' record';
+
+  $('detailstats').replaceChildren();
+
+  const stats = [
+    ['Rank', fmt(row.rank, 'rank')],
+    ['PPT', fmt(row.rating, 'rating')],
+    ['Points per game', fmt(row.ppg, 'ppg')],
+    ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
+  ];
+
+  for (const [label, value] of stats) {
+    const div = document.createElement('div');
+    const small = document.createElement('small');
+    const strong = document.createElement('strong');
+    small.textContent = label;
+    strong.textContent = value;
+    div.append(small, strong);
+    $('detailstats').append(div);
+  }
+
+  $('coverage').textContent =
+    `${row.games_rated ?? '—'} of ${row.games ?? '—'} games included in the rating.`;
+
+  $('detail').showModal();
+}
+
+$('close').onclick = () => $('detail').close();
+$('search').oninput = render;
+$('conference').onchange = render;
+
+$('clear').onclick = () => {
+  $('search').value = '';
+  $('conference').value = '';
+  render();
+};
+
+$('download').onclick = () => {
+  if (!dataset) return;
+
+  const keys = [
+    'rank', 'team_id', 'team', 'conference', 'games', 'games_rated',
+    'wins', 'losses', 'ppg', 'turnovers_per_game', 'rating'
+  ];
+
+  const escape = value =>
+    '"' + String(value ?? '').replaceAll('"', '""') + '"';
+
+  const csv = [
+    keys.join(','),
+    ...filtered().map(row => keys.map(key => escape(row[key])).join(','))
+  ].join('\r\n');
+
+  const url = URL.createObjectURL(
+    new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  );
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'ofredstats-rankings.csv';
+  link.click();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+async function loadPublished() {
+  const response = await fetch('rankings.json', { cache: 'no-store' });
+  if (!response.ok) {
+    throw Error('Could not load rankings.json (' + response.status + ').');
+  }
+
+  $('search').value = '';
+  apply(await response.json());
+}
+
+$('reset').onclick = () => {
+  loadPublished().catch(error => {
+    $('notice').textContent = error.message;
+  });
+};
+
+$('importfile').onchange = async event => {
+  if (!event.target.files[0]) return;
+
+  try {
+    const data = validate(JSON.parse(await event.target.files[0].text()));
+    $('search').value = '';
+    apply(data, true);
+  } catch (error) {
+    $('notice').textContent = 'Import failed: ' + error.message;
+  }
+
+  event.target.value = '';
+};
+
+loadPublished().catch(error => {
+  $('count').textContent = 'Rankings unavailable';
+  $('notice').textContent =
+    error.message + ' You can load a local export under Methodology.';
+});
+</script>
+</body>
+</html>
