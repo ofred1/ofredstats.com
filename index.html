@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Independent men's college basketball rankings and statistical analysis by OFred Stats.">
-<title>OFred Stats | College Basketball Rankings</title>
+<meta name="description" content="OFred Stats men's college basketball team rankings and statistics.">
+<title>OFred Stats | Team Rankings</title>
 <style>
 :root {
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -32,22 +32,15 @@ header { background: white; border-bottom: 1px solid #dde3ed; }
   white-space: nowrap;
 }
 .brand span { color: #2864da; }
-.navlinks { display: flex; gap: 25px; font-size: 13px; font-weight: 600; }
+.navlinks {
+  display: flex;
+  gap: 25px;
+  font-size: 13px;
+  font-weight: 600;
+}
 .navlinks a { text-decoration: none; }
 .navlinks a:first-child { color: #2864da; }
-.nav small {
-  margin-left: auto;
-  color: #69758b;
-  font-size: 11px;
-  letter-spacing: 1px;
-}
 main { max-width: 1320px; margin: auto; padding: 40px 32px; }
-.intro {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-}
 .eyebrow {
   color: #2864da;
   font-size: 11px;
@@ -55,7 +48,6 @@ main { max-width: 1320px; margin: auto; padding: 40px 32px; }
   font-weight: 750;
   text-transform: uppercase;
 }
-h1 { font-size: 38px; letter-spacing: -1.4px; margin: 10px 0; }
 p { color: #69758b; font-size: 14px; line-height: 1.7; }
 .season {
   border: 1px solid #d9e1ec;
@@ -67,29 +59,30 @@ p { color: #69758b; font-size: 14px; line-height: 1.7; }
   white-space: nowrap;
 }
 .panel {
-  margin-top: 28px;
   background: white;
   border: 1px solid #dde3ed;
   border-radius: 9px;
   overflow: hidden;
 }
 .paneltitle {
-  padding: 23px 24px 0;
+  padding: 28px 24px 0;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
 }
-.paneltitle h2 { font-size: 18px; margin: 0; letter-spacing: -.4px; }
-.metricname { font-size: 11px; color: #758096; }
-.badge {
-  margin-left: auto;
-  font-size: 10px;
-  color: #4d6180;
-  background: #eff3f9;
-  padding: 6px 9px;
-  border-radius: 4px;
+.paneltitle h1 {
+  font-size: 34px;
+  letter-spacing: -1px;
+  margin: 8px 0 0;
+  font-weight: 800;
 }
-.toolbar { padding: 20px 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+.toolbar {
+  padding: 20px 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 input, select, button { font: inherit; }
 input[type=search], select {
   background: #f8f9fc;
@@ -110,13 +103,18 @@ button { cursor: pointer; }
   font-size: 12px;
 }
 button:hover { background: #edf3fe; }
-button:focus-visible, a:focus-visible, input:focus-visible,
-select:focus-visible, summary:focus-visible {
+button:focus-visible, a:focus-visible,
+input:focus-visible, select:focus-visible {
   outline: 2px solid #2864da;
   outline-offset: 3px;
 }
 .tablewrap { overflow: auto; max-height: 700px; }
-table { border-collapse: collapse; width: 100%; white-space: nowrap; text-align: left; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  white-space: nowrap;
+  text-align: left;
+}
 th {
   position: sticky;
   top: 0;
@@ -136,19 +134,36 @@ th button {
   color: #68768d;
   font-weight: 700;
 }
-td { padding: 13px 16px; border-bottom: 1px solid #eff2f6; font-size: 12px; }
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid #eff2f6;
+  font-size: 12px;
+}
 tr:hover td { background: #f7faff; }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
 .num button { text-align: right; }
 .teamlink {
+  display: flex;
+  align-items: center;
+  gap: 11px;
   border: 0;
   background: none;
   padding: 0;
   font-weight: 650;
   color: #172840;
-  font-size: 12px;
+  font-size: 13px;
   text-align: left;
 }
+.logoslot {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.logoslot img { width: 100%; height: 100%; object-fit: contain; }
+.logoslot.large { width: 56px; height: 56px; }
 .rankcell { color: #6a7890; }
 .score { font-weight: 750; color: #2864da; background: #f7faff; }
 .count {
@@ -159,7 +174,13 @@ tr:hover td { background: #f7faff; }
   justify-content: space-between;
   gap: 12px;
 }
-.notice { font-size: 12px; color: #65728a; margin-top: 14px; line-height: 1.6; }
+.notice {
+  font-size: 12px;
+  color: #65728a;
+  margin-top: 14px;
+  line-height: 1.6;
+}
+.notice[hidden] { display: none; }
 .method {
   margin-top: 35px;
   padding: 25px;
@@ -167,7 +188,16 @@ tr:hover td { background: #f7faff; }
   border: 1px solid #dde3ed;
   border-radius: 9px;
 }
-.method h2 { margin: 10px 0 14px; font-size: 20px; }
+.method h2 { margin: 0 0 14px; font-size: 25px; }
+.method h3 { font-size: 16px; }
+.method h3 span {
+  font-size: 11px;
+  background: #edf3fe;
+  color: #2864da;
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-left: 8px;
+}
 .formula {
   font-family: ui-monospace, monospace;
   font-size: 15px;
@@ -177,21 +207,6 @@ tr:hover td { background: #f7faff; }
 }
 .method p { max-width: 840px; }
 .method small { color: #748095; line-height: 1.6; display: block; }
-.metricmethod { border-top: 1px solid #e6eaf1; padding-top: 12px; }
-.metricmethod h3, .moremetrics h3 { font-size: 16px; }
-.metricmethod h3 span {
-  font-size: 11px;
-  background: #edf3fe;
-  color: #2864da;
-  border-radius: 4px;
-  padding: 5px 8px;
-  margin-left: 8px;
-}
-.moremetrics { border-top: 1px solid #e6eaf1; margin-top: 22px; padding-top: 10px; }
-.moremetrics p { margin-bottom: 0; }
-details { margin-top: 23px; color: #65728a; font-size: 12px; }
-summary { cursor: pointer; font-weight: 600; }
-#importfile { display: block; margin: 16px 0; max-width: 100%; }
 footer {
   font-size: 11px;
   color: #8993a4;
@@ -210,11 +225,27 @@ dialog {
   color: #18243c;
 }
 dialog::backdrop { background: #13223b70; }
-.dialoghead { display: flex; justify-content: space-between; align-items: center; }
-.dialoghead h2 { margin: 0; font-size: 25px; }
-.detailgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+.dialoghead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.teamheading { display: flex; align-items: center; gap: 14px; }
+.dialoghead h2 { margin: 0; font-size: 23px; }
+.detailgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
 .detailgrid div { padding: 16px; background: #f4f7fb; border-radius: 6px; }
-.detailgrid small { display: block; color: #758096; font-size: 11px; margin-bottom: 8px; }
+.detailgrid small {
+  display: block;
+  color: #758096;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
 .detailgrid strong { font-size: 22px; }
 #column-tip {
   position: fixed;
@@ -228,7 +259,12 @@ dialog::backdrop { background: #13223b70; }
   pointer-events: none;
 }
 #column-tip strong { display: block; font-size: 12px; margin-bottom: 7px; }
-#column-tip span { display: block; font-size: 12px; line-height: 1.6; color: #dce6f7; }
+#column-tip span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #dce6f7;
+}
 .visually-hidden {
   position: absolute;
   clip-path: inset(100%);
@@ -237,58 +273,51 @@ dialog::backdrop { background: #13223b70; }
   overflow: hidden;
 }
 @media (max-width: 700px) {
-  .nav { padding: 18px; gap: 20px; }
-  .nav small { display: none; }
-  .navlinks { gap: 14px; }
+  .nav { padding: 18px; gap: 16px; }
+  .navlinks { gap: 14px; font-size: 12px; }
   main { padding: 28px 16px; }
-  .intro { display: block; }
-  h1 { font-size: 31px; }
-  .season { display: inline-block; margin-top: 10px; }
+  .paneltitle { gap: 12px; }
+  .paneltitle h1 { font-size: 27px; }
   .paneltitle, .toolbar { padding-left: 16px; padding-right: 16px; }
+  .season { font-size: 11px; padding: 9px; }
   .count { padding-inline: 16px; }
-  .badge { font-size: 9px; }
   .method { padding: 20px; }
   .formula { font-size: 12px; }
-  .metricname { display: none; }
+  .teamheading { gap: 10px; }
+  .dialoghead h2 { font-size: 19px; }
 }
 </style>
 </head>
 <body>
+
 <header>
   <nav class="nav" aria-label="Main navigation">
     <a href="#" class="brand">OFred<span>Stats.</span></a>
     <div class="navlinks">
       <a href="#rankings">Team rankings</a>
-      <a href="#methodology">Methodology</a>
+      <a href="#methodology">Formulas</a>
     </div>
-    <small>INDEPENDENT BASKETBALL ANALYSIS</small>
   </nav>
 </header>
 
 <main>
-  <section class="intro">
-    <div>
-      <div class="eyebrow">NCAA Men’s Basketball</div>
-      <h1>College basketball, measured.</h1>
-      <p>Explore team performance through the numbers. Rankings built from individual game results.</p>
-    </div>
-    <div class="season" id="season">2025–26 season</div>
-  </section>
-
   <section class="panel" id="rankings">
     <div class="paneltitle">
-      <h2>Team rankings</h2>
-      <span class="metricname">Sorted by PPT</span>
-      <span class="badge">POINTS PER TURNOVER</span>
+      <div>
+        <div class="eyebrow">NCAA Men’s Basketball</div>
+        <h1>Team rankings</h1>
+      </div>
+      <div class="season" id="season">2025–26 season</div>
     </div>
+
     <div class="toolbar">
       <input type="search" id="search" placeholder="Search a team…" aria-label="Search teams">
       <select id="conference" aria-label="Filter conference">
         <option value="">All conferences</option>
       </select>
       <button class="btn" id="clear">Clear filters</button>
-      <button class="btn" id="download">Download table</button>
     </div>
+
     <div class="tablewrap">
       <table>
         <caption class="visually-hidden">
@@ -298,21 +327,17 @@ dialog::backdrop { background: #13223b70; }
         <tbody id="body"></tbody>
       </table>
     </div>
+
     <div class="count">
       <span id="count" aria-live="polite">Loading rankings…</span>
       <span>Click a team for details</span>
     </div>
   </section>
 
-  <div class="notice" id="notice" role="status">
-    Season snapshot · Daily automatic updates are not connected yet.
-  </div>
+  <div class="notice" id="notice" role="status" hidden></div>
 
   <section class="method" id="methodology">
-    <div class="eyebrow">Behind the numbers</div>
-    <h2>Our statistics &amp; formulas</h2>
-    <p>Explore the definitions behind our statistics. Each metric measures a different part of team performance.</p>
-
+    <h2>Formulas</h2>
     <div class="metricmethod">
       <h3>Points per turnover <span>PPT</span></h3>
       <div class="formula">
@@ -328,28 +353,8 @@ dialog::backdrop { background: #13223b70; }
         opponent strength or pace. PPT is the average of individual game ratios,
         rather than the ratio of season averages.
       </p>
-      <small>
-        <strong>Game coverage:</strong> “Rated / played” shows how many games
-        have usable points and turnover data, compared with the reported season
-        total. Missing box scores are excluded. Division I membership uses a
-        provisional conference filter.
-      </small>
+      <small>Games with missing points or turnover data are excluded.</small>
     </div>
-
-    <div class="moremetrics">
-      <h3>More metrics to come</h3>
-      <p>Additional statistics and their formulas will appear here as they are introduced.</p>
-    </div>
-
-    <details>
-      <summary>Manage a local data preview</summary>
-      <p>
-        Choose an R-exported JSON file to preview results in this browser.
-        It does not publish results for other visitors.
-      </p>
-      <input id="importfile" type="file" accept=".json,application/json" aria-label="Import local rankings JSON">
-      <button class="btn" id="reset">Restore published results</button>
-    </details>
   </section>
 
   <footer>
@@ -360,12 +365,14 @@ dialog::backdrop { background: #13223b70; }
 
 <dialog id="detail">
   <div class="dialoghead">
-    <h2 id="detailname"></h2>
+    <div class="teamheading">
+      <span id="detaillogo"></span>
+      <h2 id="detailname"></h2>
+    </div>
     <button class="btn" id="close" aria-label="Close team details">Close</button>
   </div>
   <p id="detailconf"></p>
   <div class="detailgrid" id="detailstats"></div>
-  <p id="coverage"></p>
 </dialog>
 
 <div id="column-tip" role="tooltip" hidden>
@@ -374,6 +381,115 @@ dialog::backdrop { background: #13223b70; }
 </div>
 
 <script>
+const teamLogoIds = {
+  "Arkansas":"8","Purdue":"2509","Illinois":"356","Wisconsin":"275",
+  "High Point":"2272","VMI":"2678","UNC Greensboro":"2430","Alabama":"333",
+  "UCLA":"26","NC State":"152","Houston":"248","South Alabama":"6",
+  "Northwestern":"77","Vanderbilt":"238","Gonzaga":"2250","Wofford":"2747",
+  "Liberty":"2335","North Carolina":"153","Miami (OH)":"193","Chattanooga":"236",
+  "Samford":"2535","Yale":"43","Denver":"2172","UAB":"5","UMBC":"2378",
+  "George Mason":"2244","St. Thomas-Minnesota":"2900","Queens University":"2511",
+  "Florida Gulf Coast":"526","North Dakota":"155","Oklahoma":"201","Clemson":"228",
+  "Purdue Fort Wayne":"2870","McNeese":"2377","Bradley":"71","BYU":"252",
+  "Florida":"57","Xavier":"2752","Auburn":"2","Ole Miss":"145",
+  "Texas A&M":"245","Iowa":"2294","Georgia":"61","Temple":"218",
+  "Nebraska":"158","Utah State":"328","Washington":"264","Wichita State":"2724",
+  "Stephen F. Austin":"2617","Santa Clara":"2541","Princeton":"163",
+  "Northern Iowa":"2460","Arizona":"12","Richmond":"257","Nevada":"2440",
+  "Iowa State":"66","Akron":"2006","Colorado":"38","South Florida":"58",
+  "Villanova":"222","Western Kentucky":"98","Bellarmine":"91",
+  "UNC Wilmington":"350","Toledo":"2649","Western Carolina":"2717",
+  "Duquesne":"2184","Oakland":"2473","Baylor":"239","St. John's":"2599",
+  "Texas":"251","New Mexico":"167","Mercer":"2382","Montana State":"147",
+  "Tulsa":"202","West Georgia":"2698","Northern Colorado":"2458",
+  "Indiana":"84","Elon":"2210","East Tennessee State":"2193","Texas Tech":"2641",
+  "Georgia Southern":"290","SMU":"2567","South Carolina":"2579","VCU":"2670",
+  "California":"25","LSU":"99","North Dakota State":"2449","Kentucky":"96",
+  "Fairfield":"2217","Ohio State":"194","Penn State":"213","Florida State":"52",
+  "New Mexico State":"166","Duke":"150","Lipscomb":"288","Austin Peay":"2046",
+  "San José State":"23","Sacramento State":"16","Syracuse":"183",
+  "Northern Kentucky":"94","Winthrop":"2737","UConn":"41",
+  "Loyola Maryland":"2352","Vermont":"261","Kansas":"2305","Colgate":"2142",
+  "Idaho":"70","Davidson":"2166","Virginia Tech":"259","Central Arkansas":"2110",
+  "Buffalo":"2084","Michigan":"130","Mercyhurst":"2385","Saint Louis":"139",
+  "Rutgers":"164","Milwaukee":"270","Weber State":"2692",
+  "Cal State Fullerton":"2239","UT Rio Grande Valley":"292","Miami":"2390",
+  "Merrimack":"2771","Wright State":"2750","Virginia":"258","South Dakota":"233",
+  "Stanford":"24","Ohio":"195","Mississippi State":"344","Murray State":"93",
+  "William & Mary":"2729","Cornell":"172","Georgetown":"46","Wake Forest":"154",
+  "Marshall":"276","Oklahoma State":"197","Bowling Green":"189",
+  "Illinois State":"2287","Saint Mary's":"2608","Drake":"2181",
+  "Providence":"2507","Belmont":"2057","Butler":"2086","Quinnipiac":"2514",
+  "Green Bay":"2739","Charleston":"232","American University":"44",
+  "App State":"2026","Omaha":"2437","Portland State":"2502",
+  "IU Indianapolis":"85","TCU":"2628","UC San Diego":"28",
+  "Kennesaw State":"338","Northern Arizona":"2464","Hofstra":"2275",
+  "Siena":"2561","Old Dominion":"295","Wyoming":"2751","Incarnate Word":"2916",
+  "UCF":"2116","Louisville":"97","San Francisco":"2539","The Citadel":"2643",
+  "Jacksonville":"294","Holy Cross":"107","Coastal Carolina":"324",
+  "Marquette":"269","Idaho State":"304","Lafayette":"322",
+  "Eastern Kentucky":"2198","Dayton":"2168","Sam Houston":"2534",
+  "Jacksonville State":"55","Northeastern":"111","Cincinnati":"2132",
+  "South Dakota State":"2571","West Virginia":"277","Pennsylvania":"219",
+  "Manhattan":"2363","Michigan State":"127","UNLV":"2439","Boise State":"68",
+  "Furman":"231","South Carolina Upstate":"2908","Chicago State":"2130",
+  "North Florida":"2454","USC":"30","Georgia State":"2247","Minnesota":"135",
+  "Central Connecticut":"2115","Campbell":"2097","Iona":"314","Utah Tech":"3101",
+  "Detroit Mercy":"2174","Troy":"2653","Tennessee":"2633","Creighton":"156",
+  "Boston College":"103","St. Bonaventure":"179","Norfolk State":"2450",
+  "Tulane":"2655","Valparaiso":"2674","Towson":"119","Navy":"2426",
+  "Kent State":"2309","Middle Tennessee":"2393","Loyola Marymount":"2351",
+  "Missouri State":"2623","Morehead State":"2413","Southeast Missouri State":"2546",
+  "Tennessee State":"2634","Boston University":"104","Prairie View A&M":"2504",
+  "Hampton":"2261","George Washington":"45","Saint Joseph's":"2603",
+  "Notre Dame":"87","Monmouth":"2405","Harvard":"108","Sacred Heart":"2529",
+  "Rice":"242","James Madison":"256","Youngstown State":"2754","Dartmouth":"159",
+  "UTSA":"2636","Utah":"254","UMass Lowell":"2349","Arizona State":"9",
+  "Marist":"2368","Radford":"2515","Colorado State":"36","North Texas":"249",
+  "California Baptist":"2856","Stony Brook":"2619","Southern":"2582",
+  "Seton Hall":"2550","Florida Atlantic":"2226","Ball State":"2050",
+  "San Diego State":"21","Seattle U":"2547","Cal State Northridge":"2463",
+  "Western Michigan":"2711","New Hampshire":"160","UIC":"82","Louisiana":"309",
+  "UC Irvine":"300","Morgan State":"2415","Washington State":"265",
+  "Florida International":"2229","Saint Peter's":"2612","Kansas State":"2306",
+  "Nicholls":"2447","NJIT":"2885","Pittsburgh":"221","East Carolina":"151",
+  "UC Riverside":"27","UTEP":"2638","Eastern Washington":"331",
+  "Charlotte":"2429","Missouri":"142","Southern Indiana":"88",
+  "Grand Canyon":"2253","Charleston Southern":"2127","UNC Asheville":"2427",
+  "SIU Edwardsville":"2565","UC Santa Barbara":"2540","Lehigh":"2329",
+  "Southern Illinois":"79","UC Davis":"302","UL Monroe":"2433",
+  "Cleveland State":"325","Alabama A&M":"2010","Fairleigh Dickinson":"161",
+  "Robert Morris":"2523","Army":"349","New Haven":"2441","Oregon":"2483",
+  "Texas State":"326","Long Beach State":"299","Fordham":"2230",
+  "Stetson":"56","Massachusetts":"113","Howard":"47","Northwestern State":"2466",
+  "Rider":"2520","Long Island University":"112358","UAlbany":"399",
+  "La Salle":"2325","DePaul":"305","Columbia":"171","Hawai'i":"62",
+  "North Alabama":"2453","San Diego":"301","Fresno State":"278",
+  "Oregon State":"204","Arkansas State":"2032","North Carolina Central":"2428",
+  "Delaware":"48","Southern Miss":"2572","Wagner":"2681","Arkansas-Pine Bluff":"2029",
+  "East Texas A&M":"2837","Lindenwood":"2815","Little Rock":"2031",
+  "Pacific":"279","St. Francis (PA)":"2598","Utah Valley":"3084",
+  "North Carolina A&T":"2448","Eastern Michigan":"2199","Binghamton":"2066",
+  "Drexel":"2182","Houston Christian":"2277","Central Michigan":"2117",
+  "Maine":"311","Georgia Tech":"59","Lamar":"2320","Texas Southern":"2640",
+  "Maryland":"120","Louisiana Tech":"2348","Longwood":"2344","Cal Poly":"13",
+  "Rhode Island":"227","Pepperdine":"2492","Montana":"149","Brown":"225",
+  "Tennessee Tech":"2635","Bucknell":"2083","Portland":"2501",
+  "Alabama State":"2011","Southern Utah":"253","Memphis":"235",
+  "SE Louisiana":"2545","Oral Roberts":"198","Western Illinois":"2710",
+  "Bethune-Cookman":"2065","Texas A&M-Corpus Christi":"357","Niagara":"315",
+  "Cal State Bakersfield":"2934","Presbyterian":"2506","Le Moyne":"2330",
+  "Kansas City":"140","Indiana State":"282","Loyola Chicago":"2350",
+  "Stonehill":"284","Eastern Illinois":"2197","Tarleton State":"2627",
+  "Gardner-Webb":"2241","New Orleans":"2443","Alcorn State":"2016",
+  "Canisius":"2099","Evansville":"339","Jackson State":"2296","Bryant":"2803",
+  "UT Martin":"2630","Abilene Christian":"2000","UT Arlington":"250",
+  "Grambling":"2755","Florida A&M":"50","Northern Illinois":"2459",
+  "Delaware State":"2169","South Carolina State":"2569",
+  "Mississippi Valley State":"2400","Mount St. Mary's":"116",
+  "Maryland Eastern Shore":"2379","Coppin State":"2154","Air Force":"2005"
+};
+
 const $ = id => document.getElementById(id);
 
 const columns = [
@@ -381,7 +497,6 @@ const columns = [
   ['team', 'Team'],
   ['conference', 'Conference'],
   ['record', 'Record'],
-  ['coverage', 'Rated / played'],
   ['ppg', 'PPG'],
   ['turnovers_per_game', 'TO / game'],
   ['rating', 'PPT']
@@ -392,7 +507,6 @@ const definitions = {
   team: ['Team', 'Select a team to view its statistics.'],
   conference: ['Conference', 'The conference reported in the dataset.'],
   record: ['Record', 'Season wins – season losses.'],
-  coverage: ['Rated / played', 'Games with usable points and turnover data ÷ reported season games.'],
   ppg: ['Points per game', 'Total points in rated games ÷ number of rated games.'],
   turnovers_per_game: ['Turnovers per game', 'Total turnovers in rated games ÷ number of rated games.'],
   rating: ['Points per turnover (PPT)', 'Average across rated games of: points ÷ max(turnovers, 1).']
@@ -402,7 +516,28 @@ let dataset = null;
 let sortKey = 'rank';
 let direction = 1;
 
-const numeric = ['rank', 'ppg', 'turnovers_per_game', 'rating', 'games_rated'];
+const numeric = ['rank', 'ppg', 'turnovers_per_game', 'rating'];
+
+function makeLogo(row, large = false) {
+  const slot = document.createElement('span');
+  slot.className = 'logoslot' + (large ? ' large' : '');
+
+  const id = teamLogoIds[row.team];
+
+  if (id) {
+    const image = document.createElement('img');
+    image.src = 'https://a.espncdn.com/i/teamlogos/ncaa/500/' + id + '.png';
+    image.alt = '';
+    image.width = large ? 56 : 28;
+    image.height = large ? 56 : 28;
+    image.loading = large ? 'eager' : 'lazy';
+    image.decoding = 'async';
+    image.onerror = () => image.remove();
+    slot.append(image);
+  }
+
+  return slot;
+}
 
 function showTip(button, key) {
   const tip = $('column-tip');
@@ -425,17 +560,20 @@ document.addEventListener('keydown', event => {
 window.addEventListener('scroll', hideTip, true);
 
 function value(row, key) {
-  if (key === 'record') return `${row.wins ?? '—'}–${row.losses ?? '—'}`;
-  if (key === 'coverage') return `${row.games_rated ?? '—'} / ${row.games ?? '—'}`;
+  if (key === 'record') {
+    return `${row.wins ?? '—'}–${row.losses ?? '—'}`;
+  }
   return row[key];
 }
 
 function fmt(value, key) {
   if (value == null) return '—';
+
   if (typeof value === 'number' &&
       ['ppg', 'turnovers_per_game', 'rating'].includes(key)) {
     return value.toFixed(2);
   }
+
   return String(value);
 }
 
@@ -443,18 +581,19 @@ function validate(data) {
   if (!Array.isArray(data.rankings) || !data.rankings.length) {
     throw Error('The file must contain a nonempty rankings array.');
   }
+
   for (const row of data.rankings) {
     if (typeof row.team !== 'string' ||
         (row.rating != null && !Number.isFinite(row.rating))) {
       throw Error('Each row needs a team name and a numeric rating or null.');
     }
   }
+
   return data;
 }
 
-function apply(data, local = false) {
+function apply(data) {
   dataset = validate(data);
-  const rows = data.rankings;
 
   if (Number.isInteger(data.season)) {
     $('season').textContent =
@@ -463,15 +602,11 @@ function apply(data, local = false) {
 
   $('conference').replaceChildren(new Option('All conferences', ''));
 
-  [...new Set(rows.map(row => row.conference).filter(Boolean))]
+  [...new Set(data.rankings.map(row => row.conference).filter(Boolean))]
     .sort()
     .forEach(conference => {
       $('conference').add(new Option(conference, conference));
     });
-
-  $('notice').textContent = local
-    ? 'Local preview · Only this browser shows these imported results.'
-    : 'Season snapshot · Daily automatic updates are not connected yet.';
 
   render();
 }
@@ -486,14 +621,13 @@ function filtered() {
       (!conference || row.conference === conference)
     )
     .sort((a, b) => {
-      const key = sortKey === 'coverage' ? 'games_rated' : sortKey;
-      const av = value(a, key);
-      const bv = value(b, key);
+      const av = value(a, sortKey);
+      const bv = value(b, sortKey);
 
       if (av == null) return bv == null ? 0 : 1;
       if (bv == null) return -1;
 
-      const difference = numeric.includes(key)
+      const difference = numeric.includes(sortKey)
         ? Number(av) - Number(bv)
         : String(av).localeCompare(String(bv));
 
@@ -511,8 +645,12 @@ function render() {
     th.scope = 'col';
 
     if (key === sortKey) {
-      th.setAttribute('aria-sort', direction === 1 ? 'ascending' : 'descending');
+      th.setAttribute(
+        'aria-sort',
+        direction === 1 ? 'ascending' : 'descending'
+      );
     }
+
     if (!['team', 'conference', 'record'].includes(key)) {
       th.className = 'num';
     }
@@ -551,8 +689,12 @@ function render() {
 
       if (key === 'team') {
         const button = document.createElement('button');
+        const name = document.createElement('span');
+
         button.className = 'teamlink';
-        button.textContent = row.team;
+        name.textContent = row.team;
+
+        button.append(makeLogo(row), name);
         button.onclick = () => showTeam(row);
         td.append(button);
       } else {
@@ -562,6 +704,7 @@ function render() {
       if (!['team', 'conference', 'record'].includes(key)) {
         td.className = 'num';
       }
+
       if (key === 'rank') td.classList.add('rankcell');
       if (key === 'rating') td.classList.add('score');
 
@@ -574,16 +717,20 @@ function render() {
   if (!rows.length) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 8;
+
+    td.colSpan = columns.length;
     td.textContent = 'No teams match your filters.';
+
     tr.append(td);
     $('body').append(tr);
   }
 
-  $('count').textContent = `${rows.length} of ${dataset.rankings.length} teams`;
+  $('count').textContent =
+    `${rows.length} of ${dataset.rankings.length} teams`;
 }
 
 function showTeam(row) {
+  $('detaillogo').replaceChildren(makeLogo(row, true));
   $('detailname').textContent = row.team;
   $('detailconf').textContent =
     (row.conference || 'Conference unavailable') +
@@ -598,18 +745,17 @@ function showTeam(row) {
     ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
   ];
 
-  for (const [label, value] of stats) {
+  for (const [label, stat] of stats) {
     const div = document.createElement('div');
     const small = document.createElement('small');
     const strong = document.createElement('strong');
+
     small.textContent = label;
-    strong.textContent = value;
+    strong.textContent = stat;
+
     div.append(small, strong);
     $('detailstats').append(div);
   }
-
-  $('coverage').textContent =
-    `${row.games_rated ?? '—'} of ${row.games ?? '—'} games included in the rating.`;
 
   $('detail').showModal();
 }
@@ -624,68 +770,22 @@ $('clear').onclick = () => {
   render();
 };
 
-$('download').onclick = () => {
-  if (!dataset) return;
-
-  const keys = [
-    'rank', 'team_id', 'team', 'conference', 'games', 'games_rated',
-    'wins', 'losses', 'ppg', 'turnovers_per_game', 'rating'
-  ];
-
-  const escape = value =>
-    '"' + String(value ?? '').replaceAll('"', '""') + '"';
-
-  const csv = [
-    keys.join(','),
-    ...filtered().map(row => keys.map(key => escape(row[key])).join(','))
-  ].join('\r\n');
-
-  const url = URL.createObjectURL(
-    new Blob([csv], { type: 'text/csv;charset=utf-8' })
-  );
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'ofredstats-rankings.csv';
-  link.click();
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-};
-
 async function loadPublished() {
   const response = await fetch('rankings.json', { cache: 'no-store' });
+
   if (!response.ok) {
     throw Error('Could not load rankings.json (' + response.status + ').');
   }
 
-  $('search').value = '';
   apply(await response.json());
 }
 
-$('reset').onclick = () => {
-  loadPublished().catch(error => {
-    $('notice').textContent = error.message;
-  });
-};
-
-$('importfile').onchange = async event => {
-  if (!event.target.files[0]) return;
-
-  try {
-    const data = validate(JSON.parse(await event.target.files[0].text()));
-    $('search').value = '';
-    apply(data, true);
-  } catch (error) {
-    $('notice').textContent = 'Import failed: ' + error.message;
-  }
-
-  event.target.value = '';
-};
-
 loadPublished().catch(error => {
   $('count').textContent = 'Rankings unavailable';
+  $('notice').hidden = false;
   $('notice').textContent =
-    error.message + ' You can load a local export under Methodology.';
+    'Unable to load team rankings. Please try again later.';
+  console.error(error);
 });
 </script>
 </body>
