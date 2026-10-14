@@ -286,6 +286,32 @@ dialog::backdrop { background: #13223b70; }
   .teamheading { gap: 10px; }
   .dialoghead h2 { font-size: 19px; }
 }
+
+/* Compact rankings with document-level vertical scrolling. */
+main { padding: 24px 24px; }
+.panel { overflow: visible; }
+.paneltitle { padding: 20px 18px 0; }
+.paneltitle h1 { font-size: 28px; margin-top: 5px; }
+.toolbar { padding: 14px 18px; gap: 9px; }
+input[type=search], select { padding: 8px 11px; font-size: 12px; }
+.btn { padding: 8px 11px; }
+.tablewrap { overflow: visible; max-height: none; }
+th button { padding: 10px 10px; font-size: 10px; }
+td { padding: 4px 10px; font-size: 12px; height: 29px; }
+.teamlink { font-size: 12px; gap: 8px; }
+.logoslot { width: 20px; height: 20px; }
+.logoslot.large { width: 56px; height: 56px; }
+.count { padding: 12px 18px; }
+@media (max-width: 700px) {
+  main { padding: 18px 10px; }
+  .paneltitle { padding: 16px 12px 0; }
+  .paneltitle h1 { font-size: 25px; }
+  .toolbar { padding: 12px; }
+  .tablewrap { overflow-x: auto; max-height: none; }
+  th button { padding: 9px 8px; font-size: 9px; }
+  td { padding: 4px 8px; font-size: 11px; }
+  .teamlink { font-size: 11px; }
+}
 </style>
 </head>
 <body>
@@ -294,8 +320,8 @@ dialog::backdrop { background: #13223b70; }
   <nav class="nav" aria-label="Main navigation">
     <a href="#" class="brand">OFred<span>Stats.</span></a>
     <div class="navlinks">
-      <a href="#rankings">Team rankings</a>
-      <a href="#methodology">Formulas</a>
+      <a href="index.html">Team rankings</a>
+      <a href="formulas.html">Formulas</a>
     </div>
   </nav>
 </header>
@@ -335,27 +361,6 @@ dialog::backdrop { background: #13223b70; }
   </section>
 
   <div class="notice" id="notice" role="status" hidden></div>
-
-  <section class="method" id="methodology">
-    <h2>Formulas</h2>
-    <div class="metricmethod">
-      <h3>Points per turnover <span>PPT</span></h3>
-      <div class="formula">
-        PPT = PPG ÷ turnovers per game
-      </div>
-      <p>
-        PPT divides average points per game by average turnovers per game.
-        Both averages use the same games with available points and turnover data.
-        Higher PPT ranks higher.
-      </p>
-      <p>
-        PPT measures scoring relative to turnovers. It does not adjust for
-        opponent strength or pace. PPT also equals total points divided by total turnovers across those games.
-        If average turnovers are zero, PPT is unavailable.
-      </p>
-      <small>Games with missing points or turnover data are excluded.</small>
-    </div>
-  </section>
 
   <footer>
     <span>© OFred Stats · Independent statistical analysis</span>
