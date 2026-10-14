@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Definitions and formulas for OFred Stats college basketball metrics.">
+<title>OFred Stats | Formulas</title>
+<style>
+:root {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #18243c;
+  background: #f5f7fa;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; }
+header { background: white; border-bottom: 1px solid #dde3ed; }
+.nav {
+  max-width: 1320px;
+  padding: 21px 32px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+.brand {
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.brand span { color: #2864da; }
+.navlinks {
+  display: flex;
+  gap: 25px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.navlinks a { text-decoration: none; }
+.navlinks a:first-child { color: #2864da; }
+main { max-width: 1320px; margin: auto; padding: 40px 32px; }
+.eyebrow {
+  color: #2864da;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+p { color: #69758b; font-size: 14px; line-height: 1.7; }
+.season {
+  border: 1px solid #d9e1ec;
+  background: white;
+  border-radius: 6px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.panel {
+  background: white;
+  border: 1px solid #dde3ed;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.paneltitle {
+  padding: 28px 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.paneltitle h1 {
+  font-size: 34px;
+  letter-spacing: -1px;
+  margin: 8px 0 0;
+  font-weight: 800;
+}
+.toolbar {
+  padding: 20px 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+input, select, button { font: inherit; }
+input[type=search], select {
+  background: #f8f9fc;
+  border: 1px solid #dce3ed;
+  border-radius: 6px;
+  padding: 11px 13px;
+  font-size: 13px;
+  color: #25344f;
+}
+input[type=search] { min-width: 170px; flex: 1; }
+button { cursor: pointer; }
+.btn {
+  background: white;
+  border: 1px solid #dce3ed;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #25344f;
+  font-size: 12px;
+}
+button:hover { background: #edf3fe; }
+button:focus-visible, a:focus-visible,
+input:focus-visible, select:focus-visible {
+  outline: 2px solid #2864da;
+  outline-offset: 3px;
+}
+.tablewrap { overflow: auto; max-height: 700px; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  white-space: nowrap;
+  text-align: left;
+}
+th {
+  position: sticky;
+  top: 0;
+  background: #f6f8fc;
+  z-index: 1;
+  border-block: 1px solid #e6eaf1;
+}
+th button {
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  color: #68768d;
+  font-weight: 700;
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid #eff2f6;
+  font-size: 12px;
+}
+tr:hover td { background: #f7faff; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.num button { text-align: right; }
+.teamlink {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-weight: 650;
+  color: #172840;
+  font-size: 13px;
+  text-align: left;
+}
+.logoslot {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.logoslot img { width: 100%; height: 100%; object-fit: contain; }
+.logoslot.large { width: 56px; height: 56px; }
+.rankcell { color: #6a7890; }
+.score { font-weight: 750; color: #2864da; background: #f7faff; }
+.count {
+  padding: 15px 24px;
+  color: #748095;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.notice {
+  font-size: 12px;
+  color: #65728a;
+  margin-top: 14px;
+  line-height: 1.6;
+}
+.notice[hidden] { display: none; }
+.method {
+  margin-top: 35px;
+  padding: 25px;
+  background: white;
+  border: 1px solid #dde3ed;
+  border-radius: 9px;
+}
+.method h2 { margin: 0 0 14px; font-size: 25px; }
+.method h3 { font-size: 16px; }
+.method h3 span {
+  font-size: 11px;
+  background: #edf3fe;
+  color: #2864da;
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-left: 8px;
+}
+.formula {
+  font-family: ui-monospace, monospace;
+  font-size: 15px;
+  background: #f2f5fb;
+  border-left: 3px solid #2864da;
+  padding: 17px;
+}
+.method p { max-width: 840px; }
+.method small { color: #748095; line-height: 1.6; display: block; }
+footer {
+  font-size: 11px;
+  color: #8993a4;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 28px 0;
+}
+dialog {
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  max-width: 550px;
+  width: calc(100% - 32px);
+  padding: 26px;
+  color: #18243c;
+}
+dialog::backdrop { background: #13223b70; }
+.dialoghead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.teamheading { display: flex; align-items: center; gap: 14px; }
+.dialoghead h2 { margin: 0; font-size: 23px; }
+.detailgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+.detailgrid div { padding: 16px; background: #f4f7fb; border-radius: 6px; }
+.detailgrid small {
+  display: block;
+  color: #758096;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.detailgrid strong { font-size: 22px; }
+#column-tip {
+  position: fixed;
+  z-index: 100;
+  width: 280px;
+  background: #172840;
+  color: white;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 28px #17284030;
+  pointer-events: none;
+}
+#column-tip strong { display: block; font-size: 12px; margin-bottom: 7px; }
+#column-tip span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #dce6f7;
+}
+.visually-hidden {
+  position: absolute;
+  clip-path: inset(100%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .nav { padding: 18px; gap: 16px; }
+  .navlinks { gap: 14px; font-size: 12px; }
+  main { padding: 28px 16px; }
+  .paneltitle { gap: 12px; }
+  .paneltitle h1 { font-size: 27px; }
+  .paneltitle, .toolbar { padding-left: 16px; padding-right: 16px; }
+  .season { font-size: 11px; padding: 9px; }
+  .count { padding-inline: 16px; }
+  .method { padding: 20px; }
+  .formula { font-size: 12px; }
+  .teamheading { gap: 10px; }
+  .dialoghead h2 { font-size: 19px; }
+}
+.navlinks a:first-child{color:#18243c}.navlinks a:last-child{color:#2864da}.method{margin-top:0}.method h2{font-size:32px}.metricmethod{margin-top:24px} main{max-width:1000px}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav" aria-label="Main navigation">
+    <a href="#" class="brand">OFred<span>Stats.</span></a>
+    <div class="navlinks">
+      <a href="index.html">Team rankings</a>
+      <a href="formulas.html">Formulas</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="method" id="methodology">
+    <h2>Formulas</h2>
+    <div class="metricmethod">
+      <h3>Points per turnover <span>PPT</span></h3>
+      <div class="formula">
+        PPT = PPG ÷ turnovers per game
+      </div>
+      <p>
+        PPT divides average points per game by average turnovers per game.
+        Both averages use the same games with available points and turnover data.
+        Higher PPT ranks higher.
+      </p>
+      <p>
+        PPT measures scoring relative to turnovers. It does not adjust for
+        opponent strength or pace. PPT also equals total points divided by total turnovers across those games.
+        If average turnovers are zero, PPT is unavailable.
+      </p>
+      <small>Games with missing points or turnover data are excluded.</small>
+    </div>
+  </section>
+
+  <footer>
+    <span>© OFred Stats · Independent statistical analysis</span>
+    <span>Data provided by <a href="https://collegebasketballdata.com/">CollegeBasketballData.com</a></span>
+  </footer>
+</main>
+
+</body>
+</html>
