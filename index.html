@@ -341,17 +341,17 @@ dialog::backdrop { background: #13223b70; }
     <div class="metricmethod">
       <h3>Points per turnover <span>PPT</span></h3>
       <div class="formula">
-        PPT = average of [game points ÷ max(game turnovers, 1)]
+        PPT = PPG ÷ turnovers per game
       </div>
       <p>
-        Each game receives a points-per-turnover score. Those scores are averaged
-        with equal weight across the team’s rated games. Higher PPT ranks higher.
-        A zero-turnover game uses a denominator of one.
+        PPT divides average points per game by average turnovers per game.
+        Both averages use the same games with available points and turnover data.
+        Higher PPT ranks higher.
       </p>
       <p>
         PPT measures scoring relative to turnovers. It does not adjust for
-        opponent strength or pace. PPT is the average of individual game ratios,
-        rather than the ratio of season averages.
+        opponent strength or pace. PPT also equals total points divided by total turnovers across those games.
+        If average turnovers are zero, PPT is unavailable.
       </p>
       <small>Games with missing points or turnover data are excluded.</small>
     </div>
@@ -509,7 +509,7 @@ const definitions = {
   record: ['Record', 'Season wins – season losses.'],
   ppg: ['Points per game', 'Total points in rated games ÷ number of rated games.'],
   turnovers_per_game: ['Turnovers per game', 'Total turnovers in rated games ÷ number of rated games.'],
-  rating: ['Points per turnover (PPT)', 'Average across rated games of: points ÷ max(turnovers, 1).']
+  rating: ['Points per turnover (PPT)', 'PPG ÷ turnovers per game, using the same games for both averages.']
 };
 
 let dataset = null;
