@@ -1,4 +1,4 @@
-# Hoops Lab: average of per-game points / max(turnovers, 1).
+# OFred Stats PPT: points per game / turnovers per game.
 # Save this file in your RStudio project folder.
 # Install packages and configure your cbbdr API key separately, once.
 # Existing cache files from our earlier work are reused.
@@ -126,10 +126,14 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
                    is.finite(points) & points > 0 & is.finite(turnovers) & turnovers >= 0)
   rating_games <- all_games[usable, , drop = FALSE]
   if (!nrow(rating_games)) stop("No usable box scores; existing exports are unchanged.")
-  rating_games$game_rating <- with(rating_games, points / pmax(turnovers, 1))
-  averages <- aggregate(cbind(points, turnovers, game_rating) ~ team_id, rating_games, mean)
-  names(averages) <- c("team_id", "ppg", "turnovers_per_game", "rating")
-  counts <- aggregate(game_rating ~ team_id, rating_games, length)
+  averages <- aggregate(cbind(points, turnovers) ~ team_id, rating_games, mean)
+  names(averages) <- c("team_id", "ppg", "turnovers_per_game")
+  averages$rating <- with(averages, ifelse(turnovers_per_game > 0,
+                                         ppg / turnovers_per_game, NA_real_))
+  if (!any(is.finite(averages$rating))) {
+    stop("No finite PPT values; existing exports are unchanged.")
+  }
+  counts <- aggregate(points ~ team_id, rating_games, length)
   names(counts) <- c("team_id", "games_rated")
   rankings <- merge(merge(teams, averages, by = "team_id", all.x = TRUE), counts,
                     by = "team_id", all.x = TRUE)
@@ -149,7 +153,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   payload <- list(updated_at = if (is.null(source_updated)) NULL else source_updated,
                   exported_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
-                  season = season, formula = "mean(points / max(turnovers, 1))",
+                  season = season, formula = "ppg / turnovers_per_game",
                   rankings = rankings)
   temp_json <- tempfile(tmpdir = ".", fileext = ".json")
   jsonlite::write_json(payload, temp_json, dataframe = "rows", auto_unbox = TRUE,
