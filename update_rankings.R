@@ -3,13 +3,15 @@
 # Install packages and configure your cbbdr API key separately, once.
 # Existing cache files from our earlier work are reused.
 
-SEASON <- 2026L                 # 2025-26; change to 2027 for 2026-27
-MODE <- "cached"                # "cached", "daily", or "rebuild"
+SEASON <- 2027L                 # 2026-27; 2026 is the previous season
+PUBLISH_ACTIVE <- TRUE         # TRUE explicitly updates the website rankings.json
+MODE <- "daily"                # "cached", "daily", or "rebuild"
 LOOKBACK_DAYS <- 7L
 
-update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
+update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
-            length(season) == 1L, is.finite(season),
+            length(season) == 1L, is.finite(season), season == as.integer(season),
+            is.logical(publish_active), length(publish_active) == 1L, !is.na(publish_active),
             lookback_days >= 1L)
   if (!requireNamespace("jsonlite", quietly = TRUE)) {
     stop("Install jsonlite once before running this script.")
@@ -21,6 +23,9 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
   games_path <- sprintf("data/all_games_%s.rds", season)
   teams_path <- sprintf("data/team_stats_%s.rds", season)
   state_path <- sprintf("data/update_state_%s.rds", season)
+
+  export_path <- sprintf("rankings_%s.json", season)
+  status_path <- sprintf("season_status_%s.json", season)
 
   get_number <- function(x, ...) {
     for (name in list(...)) {
@@ -62,6 +67,37 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
     replace_file(temp, path)
   }
 
+  write_json_safe <- function(payload, path) {
+    temp <- tempfile(tmpdir = dirname(path), fileext = ".json")
+    on.exit(unlink(temp), add = TRUE)
+    jsonlite::write_json(payload, temp, dataframe = "rows", auto_unbox = TRUE,
+                         pretty = TRUE, na = "null", digits = NA)
+    replace_file(temp, path)
+  }
+  pending <- function(status, detail) {
+    # Status files are not rankings files and never contain a rankings array.
+    write_json_safe(list(season = season, status = status, message = detail,
+                         checked_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")),
+                    status_path)
+    message(detail, " No rankings export was replaced. Status: ", status_path)
+    invisible(NULL)
+  }
+  # Preserve the current website snapshot under its actual season before any
+  # new-season download. Never infer the season from today's date.
+  if (file.exists("rankings.json")) {
+    existing <- jsonlite::read_json("rankings.json", simplifyVector = TRUE)
+    if (length(existing$season) != 1L || !is.numeric(existing$season) ||
+        !is.finite(existing$season) || existing$season != as.integer(existing$season) ||
+        !is.data.frame(existing$rankings) || !nrow(existing$rankings) ||
+        !any(is.finite(existing$rankings$rating))) {
+      stop("Cannot safely archive rankings.json: inspect its season and rankings first.")
+    }
+    archive <- sprintf("rankings_%s.json", existing$season)
+    if (!file.exists(archive) && !file.copy("rankings.json", archive)) {
+      stop("Could not preserve the previous season; no new export was written.")
+    }
+  }
+
   all_games <- if (file.exists(games_path)) raw_columns(readRDS(games_path)) else NULL
   team_stats <- if (file.exists(teams_path)) readRDS(teams_path) else NULL
   state <- if (file.exists(state_path)) readRDS(state_path) else NULL
@@ -74,7 +110,9 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
       stop("Cached mode needs both saved RDS files. Use MODE = 'daily' for the first download.")
     }
   } else {
-    if (finish <= season_start) stop("The selected season has not started; no export was replaced.")
+    if (finish <= season_start) {
+      return(pending("not_started", "The selected season is outside the download window."))
+    }
     team_stats <- cbbdr::get_team_season_stats(season = season)
     # First run/rebuild downloads the full season to date. Later daily runs
     # overlap seven days and catch up from the last successful update.
@@ -95,12 +133,12 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
       schedule <- cbbdr::get_games(season = season,
                                   start_date_range = from, end_date_range = to)
       # Never include live games in the rating.
-      if (nrow(schedule)) {
+      if (!is.null(schedule) && nrow(schedule)) {
         check_columns(schedule, c("id", "status"), "Game schedule")
         if (length(unique(schedule$id)) >= 3000L) stop("Date batch reached the API limit; use smaller batches.")
         final_ids <- schedule$id[!is.na(schedule$status) & schedule$status == "final"]
       } else final_ids <- integer()
-      if (nrow(new)) {
+      if (!is.null(new) && nrow(new)) {
         check_columns(new, c("game_id", "team_id", "team_stats"), "Game box scores")
         new <- raw_columns(new[new$game_id %in% final_ids, , drop = FALSE])
         all_games <- combine_records(all_games, new)
@@ -108,9 +146,16 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
     }
   }
 
-  if (is.null(all_games) || !nrow(all_games)) stop("No completed game data; existing exports are unchanged.")
+  if (is.null(all_games) || !nrow(all_games)) {
+    return(pending("no_completed_games", "No completed game data is available for this season."))
+  }
   check_columns(all_games, c("game_id", "team_id", "team_stats"), "Saved games")
   check_columns(team_stats, c("team_id", "team", "conference", "games", "wins", "losses"), "Team statistics")
+  for (x in list(all_games, team_stats)) {
+    if ("season" %in% names(x) && any(is.na(x$season) | x$season != season)) {
+      stop("Season mismatch in input data; existing rankings are unchanged.")
+    }
+  }
   if (anyNA(all_games$game_id) || anyNA(all_games$team_id)) stop("Missing game/team IDs.")
   if (anyDuplicated(team_stats$team_id)) stop("Duplicate team IDs in season statistics.")
   # Keep the NEWEST copy of every team/game record.
@@ -125,14 +170,14 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
   usable <- with(all_games, team_id %in% teams$team_id &
                    is.finite(points) & points > 0 & is.finite(turnovers) & turnovers >= 0)
   rating_games <- all_games[usable, , drop = FALSE]
-  if (!nrow(rating_games)) stop("No usable box scores; existing exports are unchanged.")
+  if (!nrow(rating_games)) {
+    return(pending("no_usable_box_scores", "Completed games exist, but none have usable D1 box scores."))
+  }
   averages <- aggregate(cbind(points, turnovers) ~ team_id, rating_games, mean)
   names(averages) <- c("team_id", "ppg", "turnovers_per_game")
   averages$rating <- with(averages, ifelse(turnovers_per_game > 0,
                                          ppg / turnovers_per_game, NA_real_))
-  if (!any(is.finite(averages$rating))) {
-    stop("No finite PPT values; existing exports are unchanged.")
-  }
+  if (!any(is.finite(averages$rating))) stop("No finite PPT values; exports unchanged.")
   counts <- aggregate(points ~ team_id, rating_games, length)
   names(counts) <- c("team_id", "games_rated")
   rankings <- merge(merge(teams, averages, by = "team_id", all.x = TRUE), counts,
@@ -151,15 +196,17 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
   # pretend to have downloaded fresh data. Old caches have unknown freshness.
   source_updated <- if (mode == "cached") state$source_updated_at else
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-  payload <- list(updated_at = if (is.null(source_updated)) NULL else source_updated,
+  payload <- list(status = "ready", metric = "PPT", updated_at = if (is.null(source_updated)) NULL else source_updated,
                   exported_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
                   season = season, formula = "ppg / turnovers_per_game",
                   rankings = rankings)
   temp_json <- tempfile(tmpdir = ".", fileext = ".json")
+  on.exit(unlink(temp_json), add = TRUE)
   jsonlite::write_json(payload, temp_json, dataframe = "rows", auto_unbox = TRUE,
                        pretty = TRUE, na = "null", digits = NA)
   exported <- jsonlite::read_json(temp_json, simplifyVector = TRUE)
-  stopifnot(nrow(exported$rankings) == nrow(rankings), !anyNA(exported$rankings$team_id))
+  stopifnot(nrow(exported$rankings) == nrow(rankings), !anyNA(exported$rankings$team_id),
+            any(is.finite(exported$rankings$rating)), exported$season == season)
 
   # Downloads/calculations/validation must succeed before replacing outputs.
   if (mode != "cached") {
@@ -167,10 +214,90 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L) {
     save_rds(team_stats, teams_path)
     save_rds(list(checked_through = as.character(finish - 1L), source_updated_at = source_updated), state_path)
   }
-  replace_file(temp_json, "rankings.json")
-  message("Exported ", nrow(rankings), " teams to rankings.json (", mode, " mode).")
+  replace_file(temp_json, export_path)
+  write_json_safe(list(season = season, status = "ready", export = export_path,
+                       exported_at = payload$exported_at), status_path)
+  if (publish_active) {
+    # Publish only the already validated, nonempty season export.
+    temp_active <- tempfile(tmpdir = ".", fileext = ".json")
+    on.exit(unlink(temp_active), add = TRUE)
+    if (!file.copy(export_path, temp_active)) stop("Could not stage the active export.")
+    replace_file(temp_active, "rankings.json")
+    message("Active website data updated to season ", season, ".")
+  }
+  message("Exported ", nrow(rankings), " teams to ", export_path, " (", mode, " mode).")
   rankings
 }
 
-rankings <- update_rankings(SEASON, MODE, LOOKBACK_DAYS)
-print(head(rankings, 25))
+
+upload_rankings <- function(path = "rankings.json", expected_season) {
+  for (package in c("gh", "base64enc", "jsonlite")) {
+    if (!requireNamespace(package, quietly = TRUE)) stop("Install ", package, " first.")
+  }
+  local <- jsonlite::read_json(path, simplifyVector = TRUE)
+  if (!identical(as.integer(local$season), as.integer(expected_season)) ||
+      !is.data.frame(local$rankings) || !nrow(local$rankings) ||
+      !any(is.finite(local$rankings$rating)) ||
+      !identical(local$formula, "ppg / turnovers_per_game")) {
+    stop("Upload blocked: wrong season, formula, or empty rankings.")
+  }
+  owner <- "ofred1"
+  repo <- "ofredstats.com"
+  repository <- gh::gh("GET /repos/{owner}/{repo}", owner = owner, repo = repo)
+  branch <- repository$default_branch
+  get_file <- function(file) {
+    gh::gh("GET /repos/{owner}/{repo}/contents/{path}",
+           owner = owner, repo = repo, path = file, ref = branch)
+  }
+  decode <- function(file) {
+    rawToChar(base64enc::base64decode(gsub("\\s", "", file$content)))
+  }
+  put_file <- function(file, content, sha) {
+    gh::gh("PUT /repos/{owner}/{repo}/contents/{path}",
+           owner = owner, repo = repo, path = file, branch = branch, sha = sha,
+           message = paste("Update PPT rankings for season", expected_season),
+           content = base64enc::base64encode(charToRaw(enc2utf8(content))))
+  }
+  remote_json <- get_file("rankings.json")
+  remote_page <- get_file("index.html")
+  html <- decode(remote_page)
+  opening <- '<script id="rankings-data" type="application/json">'
+  begin <- regexpr(opening, html, fixed = TRUE)[1]
+  if (begin < 1L) stop("Website is missing the embedded-data slot; nothing uploaded.")
+  data_start <- begin + nchar(opening)
+  remainder <- substring(html, data_start)
+  closing <- regexpr("</script>", remainder, fixed = TRUE)[1]
+  if (closing < 1L) stop("Website data slot is invalid; nothing uploaded.")
+  data_end <- data_start + closing - 2L
+  # Compare data, not timestamps; repair either file independently on retries.
+  same_data <- function(other) {
+    isTRUE(all.equal(local$season, other$season)) &&
+      isTRUE(all.equal(local$rankings, other$rankings)) &&
+      identical(local$formula, other$formula)
+  }
+  previous_embedded <- jsonlite::fromJSON(substr(html, data_start, data_end))
+  remote_data <- jsonlite::fromJSON(decode(remote_json))
+  # Escape '<' so a data string cannot close its HTML script container.
+  json <- as.character(jsonlite::toJSON(local, dataframe = "rows",
+                        auto_unbox = TRUE, na = "null", null = "null", digits = NA))
+  safe_json <- paste(strsplit(json, "<", fixed = TRUE)[[1]], collapse = "\\u003c")
+  updated_html <- paste0(substr(html, 1L, data_start - 1L),
+                         safe_json, substring(html, data_end + 1L))
+  if (!same_data(remote_data)) {
+    put_file("rankings.json", json, remote_json$sha)
+    message("Updated rankings.json on GitHub.")
+  }
+  if (!same_data(previous_embedded)) {
+    put_file("index.html", updated_html, remote_page$sha)
+    message("Updated the website's embedded rankings. GitHub Pages will deploy it.")
+  } else {
+    message("Website rankings are already current.")
+  }
+}
+
+# Run once. No-data runs return NULL and do not upload anything.
+rankings <- update_rankings(SEASON, MODE, LOOKBACK_DAYS, PUBLISH_ACTIVE)
+if (!is.null(rankings)) {
+  print(head(rankings, 25))
+  if (isTRUE(PUBLISH_ACTIVE)) upload_rankings("rankings.json", SEASON)
+}
