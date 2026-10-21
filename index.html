@@ -347,6 +347,11 @@ th button[data-sort="descending"]::after { content: '↓'; }
  td { padding: 4px 3px; }
  th button { padding: 10px 3px; }
 }
+
+/* Anchor team logos and names beside their ranks; stats stay centered. */
+th[data-column="team"], td[data-column="team"] { text-align: left; padding-left: 3px; }
+th[data-column="team"] button { text-align: left; padding-left: 3px; }
+td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; margin-right: 0; text-align: left; }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
