@@ -205,6 +205,12 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   snapshot <- jsonlite::read_json(preseason_path, simplifyVector = TRUE)
   if (snapshot$season != season) stop("Preseason season mismatch.")
   base <- snapshot$rankings
+  # Rebuild the fixed preseason score using the current no-ties convention,
+  # including when an older local snapshot is cached.
+  base <- base[order(base$preseason_average_rank, base$kenpom_preseason_rank,
+                    base$evanmiya_roster_rank, base$team), ]
+  base$rank <- seq_len(nrow(base))
+  base$preseason_score <- 100 * (nrow(base) - base$rank) / (nrow(base) - 1)
   team_key <- function(x) gsub("[^a-z0-9]", "",
     tolower(iconv(x, to = "ASCII//TRANSLIT")))
   match_id <- match(team_key(rankings$team), team_key(base$team))
@@ -241,8 +247,10 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   rankings$overall_score <- rankings$preseason_score
   rankings$overall_score[played] <- with(rankings[played, ],
     preseason_weight * preseason_score + (1 - preseason_weight) * inseason_score)
-  rankings$rank <- rank(-rankings$overall_score, ties.method = "min", na.last = "keep")
-  rankings <- rankings[order(rankings$rank, rankings$team), ]
+  # Unique ranks: composite score, then original source ranks resolve exact ties.
+  rankings <- rankings[order(-rankings$overall_score,
+    rankings$kenpom_preseason_rank, rankings$evanmiya_roster_rank, rankings$team), ]
+  rankings$rank <- seq_len(nrow(rankings))
   rownames(rankings) <- NULL
   if (any(rankings$games_rated != rankings$games)) {
     warning("Some games_rated counts differ from season games. Check coverage before publication.")
