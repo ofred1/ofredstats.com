@@ -305,6 +305,20 @@ dialog::backdrop { background: #13223b70; }
 <main>
   <section class="method" id="methodology">
     <h2>Formulas</h2>
+<div class="metricmethod">
+<h3>Preseason rankings</h3>
+<div class="formula">Preseason average = (KenPom preseason rank + EvanMiya preseason roster rank) ÷ 2</div>
+<p>Lower averages rank higher; equal averages share a rank. The source rankings are frozen at the preseason snapshot. PPT is a separate statistic and does not determine the overall ranking.</p>
+<p>Sources: <a href="https://kenpom.com/">KenPom preseason team rankings</a> and <a href="https://evanmiya.com/team-ratings">EvanMiya preseason roster-strength rankings</a>. Snapshot: October 21, 2026.</p>
+</div>
+<div class="metricmethod">
+<h3>Preseason weight</h3>
+<div class="formula">Preseason weight = max(0, (12 − games played) ÷ 12)</div>
+<p>The preseason component fades by 1/12 per completed game and reaches zero after each team’s 12th game. For blending, preseason ranks are converted to a 0–100 score: 100 × (N − rank) ÷ (N − 1).</p>
+<div class="formula">Overall score = preseason weight × preseason score + (1 − preseason weight) × in-season score</div>
+<p>The current table is preseason-only. The in-season overall model has not yet been selected; PPT will not be substituted for it.</p>
+</div>
+
     <div class="metricmethod">
       <h3>Points per turnover <span>PPT</span></h3>
       <div class="formula">
