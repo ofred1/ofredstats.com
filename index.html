@@ -549,6 +549,7 @@ const $ = id => document.getElementById(id);
 const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","Clutch"],["ofs","OFS"]];
 
 const definitions = {
+  pace: ['Pace', 'Estimated possessions per 40 minutes. Possessions = FGA + 0.44 × FTA − offensive rebounds + turnovers. Uses both teams’ estimates and adjusts for overtime. Not adjusted for opponent strength.'],
   net_rating: ['Net rating', 'Adjusted offensive efficiency − adjusted defensive efficiency. Expected point margin per 100 possessions against an average opponent. Higher is better.'],
   adjusted_offensive_efficiency: ['Offensive efficiency', 'Points scored per 100 possessions, adjusted for opponent defensive strength. Higher is better.'],
   adjusted_defensive_efficiency: ['Defensive efficiency', 'Points allowed per 100 possessions, adjusted for opponent offensive strength. Lower is better.'],
@@ -622,7 +623,7 @@ function fmt(value, key) {
   if (value == null) return '—';
 
   if (typeof value === 'number' &&
-      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating'].includes(key)) {
+      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace'].includes(key)) {
     return value.toFixed(2);
   }
 
@@ -724,7 +725,7 @@ function render() {
       hideTip();
       direction = sortKey === key
         ? -direction
-        : (['rating', 'ppg', 'adjusted_offensive_efficiency', 'net_rating'].includes(key) ? -1 : 1);
+        : (['rating', 'ppg', 'adjusted_offensive_efficiency', 'net_rating', 'pace'].includes(key) ? -1 : 1);
       sortKey = key;
       render();
     };
@@ -803,6 +804,7 @@ function showTeam(row) {
     ['Defensive efficiency', fmt(row.adjusted_defensive_efficiency, 'adjusted_defensive_efficiency')],
     ['Roster', fmt(row.evanmiya_roster_rank, 'evanmiya_roster_rank')],
     ['Net rating*', fmt(row.net_rating, 'net_rating')],
+    ['Pace', fmt(row.pace, 'pace')],
     ['PPT', fmt(row.rating, 'rating')],
     ['Points per game', fmt(row.ppg, 'ppg')],
     ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
