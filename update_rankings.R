@@ -49,6 +49,88 @@ calculate_raw_efficiencies <- function(games) {
   output
 }
 
+# OFred additive opponent adjustment (not KenPom's proprietary model).
+# D1-vs-D1 games only; equal game weights; one national-average pseudo-game
+# anchors disconnected schedules. This anchor is not the preseason ranking.
+calculate_adjusted_efficiencies <- function(games, team_ids, tolerance = 0.001,
+                                            max_iterations = 1000L, prior_games = 1) {
+  stopifnot(tolerance > 0, max_iterations >= 1, prior_games > 0)
+  ids <- unique(team_ids)
+  out <- data.frame(team_id = ids, adjusted_offensive_efficiency = NA_real_,
+    adjusted_defensive_efficiency = NA_real_, adjusted_efficiency_margin = NA_real_,
+    adjusted_games = 0L)
+  diagnostics <- list(status = "no_usable_games", converged = FALSE,
+    iterations = 0L, tolerance = tolerance, max_change = NA_real_,
+    national_average = NA_real_, prior_games = prior_games)
+  finish <- function() list(ratings = out, diagnostics = diagnostics)
+  required <- c("team_id", "opponent_id", "team_stats", "opponent_stats")
+  if (!all(required %in% names(games))) {
+    diagnostics$status <- "missing_columns"
+    warning("Adjusted efficiencies unavailable: missing game columns.")
+    return(finish())
+  }
+  number <- function(x, ...) {
+    for (key in list(...)) {
+      if (!is.list(x) || is.null(x[[key]])) return(NA_real_)
+      x <- x[[key]]
+    }
+    if (length(x) != 1L) return(NA_real_)
+    suppressWarnings(as.numeric(x))
+  }
+  points <- vapply(games$team_stats, number, numeric(1), "points", "total")
+  poss <- vapply(games$team_stats, number, numeric(1), "possessions")
+  allowed <- vapply(games$opponent_stats, number, numeric(1), "points", "total")
+  opp_poss <- vapply(games$opponent_stats, number, numeric(1), "possessions")
+  valid <- games$team_id %in% ids & games$opponent_id %in% ids &
+    is.finite(points) & points >= 0 & is.finite(allowed) & allowed >= 0 &
+    is.finite(poss) & poss > 0 & is.finite(opp_poss) & opp_poss > 0
+  if (!any(valid)) return(finish())
+  a <- match(games$team_id[valid], ids)
+  b <- match(games$opponent_id[valid], ids)
+  off <- 100 * points[valid] / poss[valid]
+  def <- 100 * allowed[valid] / opp_poss[valid]
+  league <- 100 * (sum(points[valid]) + sum(allowed[valid])) /
+    (sum(poss[valid]) + sum(opp_poss[valid]))
+  groups <- split(seq_along(a), factor(a, levels = seq_along(ids)))
+  counts <- lengths(groups)
+  # Initialize with raw game-average ratings; unplayed teams start at baseline.
+  offense <- defense <- rep(league, length(ids))
+  for (i in which(counts > 0)) {
+    offense[i] <- mean(off[groups[[i]]])
+    defense[i] <- mean(def[groups[[i]]])
+  }
+  for (iteration in seq_len(max_iterations)) {
+    next_offense <- next_defense <- rep(league, length(ids))
+    for (i in which(counts > 0)) {
+      rows <- groups[[i]]
+      next_offense[i] <- (sum(off[rows] - (defense[b[rows]] - league)) +
+        prior_games * league) / (counts[i] + prior_games)
+      next_defense[i] <- (sum(def[rows] - (offense[b[rows]] - league)) +
+        prior_games * league) / (counts[i] + prior_games)
+    }
+    # Damping prevents oscillation; both sides use the previous iteration.
+    next_offense <- 0.5 * offense + 0.5 * next_offense
+    next_defense <- 0.5 * defense + 0.5 * next_defense
+    change <- max(abs(next_offense - offense), abs(next_defense - defense))
+    offense <- next_offense
+    defense <- next_defense
+    if (!is.finite(change)) break
+    if (change < tolerance) break
+  }
+  converged <- is.finite(change) && change < tolerance
+  diagnostics <- list(status = if (converged) "ready" else "not_converged",
+    converged = converged, iterations = iteration, tolerance = tolerance,
+    max_change = change, national_average = league, prior_games = prior_games)
+  out$adjusted_games <- as.integer(counts)
+  if (converged) {
+    played <- counts > 0
+    out$adjusted_offensive_efficiency[played] <- offense[played]
+    out$adjusted_defensive_efficiency[played] <- defense[played]
+    out$adjusted_efficiency_margin[played] <- offense[played] - defense[played]
+  } else warning("Opponent adjustment did not converge; adjusted statistics left blank.")
+  finish()
+}
+
 update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
             length(season) == 1L, is.finite(season), season == as.integer(season),
@@ -233,6 +315,10 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   rankings <- merge(rankings, efficiency, by = "team_id", all.x = TRUE)
   rankings$offense_eff_games[is.na(rankings$offense_eff_games)] <- 0L
   rankings$defense_eff_games[is.na(rankings$defense_eff_games)] <- 0L
+  adjusted <- calculate_adjusted_efficiencies(all_games, teams$team_id)
+  rankings <- merge(rankings, adjusted$ratings, by = "team_id", all.x = TRUE)
+  message("Opponent adjustment: ", adjusted$diagnostics$status,
+          " (", adjusted$diagnostics$iterations, " iterations).")
   # Overall rankings are independent of PPT. Use the frozen preseason snapshot.
   if (!requireNamespace("gh", quietly = TRUE) ||
       !requireNamespace("base64enc", quietly = TRUE)) {
@@ -314,6 +400,9 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   payload <- list(status = if (model_configured) "ready" else "preseason_projection",
                   overall_model_configured = model_configured,
+                  adjusted_efficiency_model = "OFred additive, D1-only, equal game weights, one baseline pseudo-game",
+                  adjusted_efficiency_diagnostics = adjusted$diagnostics,
+                  adjusted_efficiency_margin_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   offensive_efficiency_formula = "100 * total_points / total_possessions",
                   defensive_efficiency_formula = "100 * total_points_allowed / total_opponent_possessions",
                   metric = "OFred overall composite", updated_at = if (is.null(source_updated)) NULL else source_updated,
@@ -423,4 +512,5 @@ if (!is.null(rankings)) {
   print(head(rankings, 25))
   if (isTRUE(PUBLISH_ACTIVE)) upload_rankings("rankings.json", SEASON)
 }
+
 
