@@ -8,6 +8,47 @@ PUBLISH_ACTIVE <- TRUE         # TRUE explicitly updates the website rankings.js
 MODE <- "daily"                # "cached", "daily", or "rebuild"
 LOOKBACK_DAYS <- 7L
 
+
+# Raw season efficiencies: ratio of totals, not an average of game ratings.
+# Each side excludes only games missing that side's points or possessions.
+calculate_raw_efficiencies <- function(games) {
+  output <- data.frame(team_id = unique(games$team_id),
+    offensive_efficiency = NA_real_, defensive_efficiency = NA_real_,
+    offense_eff_games = 0L, defense_eff_games = 0L)
+  number <- function(x, ...) {
+    for (key in list(...)) {
+      if (!is.list(x) || is.null(x[[key]])) return(NA_real_)
+      x <- x[[key]]
+    }
+    if (length(x) != 1L) return(NA_real_)
+    suppressWarnings(as.numeric(x))
+  }
+  extract <- function(column, ...) {
+    if (!column %in% names(games)) return(rep(NA_real_, nrow(games)))
+    vapply(games[[column]], number, numeric(1), ...)
+  }
+  points <- extract("team_stats", "points", "total")
+  possessions <- extract("team_stats", "possessions")
+  allowed <- extract("opponent_stats", "points", "total")
+  opponent_possessions <- extract("opponent_stats", "possessions")
+  valid_offense <- is.finite(points) & points >= 0 &
+    is.finite(possessions) & possessions > 0
+  valid_defense <- is.finite(allowed) & allowed >= 0 &
+    is.finite(opponent_possessions) & opponent_possessions > 0
+  for (i in seq_len(nrow(output))) {
+    team <- games$team_id == output$team_id[i]
+    offense <- team & valid_offense
+    defense <- team & valid_defense
+    output$offense_eff_games[i] <- sum(offense)
+    output$defense_eff_games[i] <- sum(defense)
+    if (any(offense)) output$offensive_efficiency[i] <-
+      100 * sum(points[offense]) / sum(possessions[offense])
+    if (any(defense)) output$defensive_efficiency[i] <-
+      100 * sum(allowed[defense]) / sum(opponent_possessions[defense])
+  }
+  output
+}
+
 update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
             length(season) == 1L, is.finite(season), season == as.integer(season),
@@ -171,19 +212,27 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   usable <- with(all_games, team_id %in% teams$team_id &
                    is.finite(points) & points > 0 & is.finite(turnovers) & turnovers >= 0)
   rating_games <- all_games[usable, , drop = FALSE]
-  if (!nrow(rating_games)) {
-    return(pending("no_usable_box_scores", "Completed games exist, but none have usable D1 box scores."))
+  # Keep season points/turnovers on the same usable-game basis for PPT.
+  if (nrow(rating_games)) {
+    averages <- aggregate(cbind(points, turnovers) ~ team_id, rating_games, mean)
+    names(averages) <- c("team_id", "ppg", "turnovers_per_game")
+    averages$rating <- with(averages, ifelse(turnovers_per_game > 0,
+                                           ppg / turnovers_per_game, NA_real_))
+    counts <- aggregate(points ~ team_id, rating_games, length)
+    names(counts) <- c("team_id", "games_rated")
+  } else {
+    # Efficiency must still update when turnover data is missing.
+    averages <- data.frame(team_id = numeric(), ppg = numeric(),
+                           turnovers_per_game = numeric(), rating = numeric())
+    counts <- data.frame(team_id = numeric(), games_rated = integer())
   }
-  averages <- aggregate(cbind(points, turnovers) ~ team_id, rating_games, mean)
-  names(averages) <- c("team_id", "ppg", "turnovers_per_game")
-  averages$rating <- with(averages, ifelse(turnovers_per_game > 0,
-                                         ppg / turnovers_per_game, NA_real_))
-  if (!any(is.finite(averages$rating))) stop("No finite PPT values; exports unchanged.")
-  counts <- aggregate(points ~ team_id, rating_games, length)
-  names(counts) <- c("team_id", "games_rated")
   rankings <- merge(merge(teams, averages, by = "team_id", all.x = TRUE), counts,
                     by = "team_id", all.x = TRUE)
   rankings$games_rated[is.na(rankings$games_rated)] <- 0L
+  efficiency <- calculate_raw_efficiencies(all_games)
+  rankings <- merge(rankings, efficiency, by = "team_id", all.x = TRUE)
+  rankings$offense_eff_games[is.na(rankings$offense_eff_games)] <- 0L
+  rankings$defense_eff_games[is.na(rankings$defense_eff_games)] <- 0L
   # Overall rankings are independent of PPT. Use the frozen preseason snapshot.
   if (!requireNamespace("gh", quietly = TRUE) ||
       !requireNamespace("base64enc", quietly = TRUE)) {
@@ -227,12 +276,14 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   rankings$inseason_score <- NA_real_
   scores_path <- sprintf("data/inseason_scores_%s.csv", season)
   played <- rankings$games > 0
-  if (any(played)) {
-    if (!file.exists(scores_path)) {
-      stop("Overall in-season model not configured. No rankings published. ",
-           "PPT will NOT be used as the overall rating. Define the in-season ",
-           "model and supply ", scores_path, " with team and inseason_score (0-100).")
-    }
+  model_configured <- file.exists(scores_path)
+  rankings$planned_preseason_weight <- rankings$preseason_weight
+  if (any(played) && !model_configured) {
+    message("Game statistics updated. Overall order remains the preseason projection ",
+            "until a separate in-season overall model is configured.")
+    rankings$preseason_weight <- 1
+  }
+  if (any(played) && model_configured) {
     scores <- read.csv(scores_path, stringsAsFactors = FALSE)
     check_columns(scores, c("team", "inseason_score"), "In-season scores")
     if (anyDuplicated(team_key(scores$team)) || !is.numeric(scores$inseason_score) ||
@@ -245,7 +296,8 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
     }
   }
   rankings$overall_score <- rankings$preseason_score
-  rankings$overall_score[played] <- with(rankings[played, ],
+  blend_rows <- played & model_configured
+  rankings$overall_score[blend_rows] <- with(rankings[blend_rows, ],
     preseason_weight * preseason_score + (1 - preseason_weight) * inseason_score)
   # Unique ranks: composite score, then original source ranks resolve exact ties.
   rankings <- rankings[order(-rankings$overall_score,
@@ -260,7 +312,11 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   # pretend to have downloaded fresh data. Old caches have unknown freshness.
   source_updated <- if (mode == "cached") state$source_updated_at else
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-  payload <- list(status = "ready", metric = "OFred overall composite", updated_at = if (is.null(source_updated)) NULL else source_updated,
+  payload <- list(status = if (model_configured) "ready" else "preseason_projection",
+                  overall_model_configured = model_configured,
+                  offensive_efficiency_formula = "100 * total_points / total_possessions",
+                  defensive_efficiency_formula = "100 * total_points_allowed / total_opponent_possessions",
+                  metric = "OFred overall composite", updated_at = if (is.null(source_updated)) NULL else source_updated,
                   exported_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
                   season = season, formula = "preseason_weight * preseason_score + (1 - preseason_weight) * inseason_score",
                   ppt_formula = "ppg / turnovers_per_game",
@@ -321,7 +377,7 @@ upload_rankings <- function(path = "rankings.json", expected_season) {
   put_file <- function(file, content, sha) {
     gh::gh("PUT /repos/{owner}/{repo}/contents/{path}",
            owner = owner, repo = repo, path = file, branch = branch, sha = sha,
-           message = paste("Update PPT rankings for season", expected_season),
+           message = paste("Update OFred statistics for season", expected_season),
            content = base64enc::base64encode(charToRaw(enc2utf8(content))))
   }
   remote_json <- get_file("rankings.json")
