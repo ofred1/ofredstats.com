@@ -800,7 +800,7 @@ function render() {
         button.textContent = row.conference;
         button.setAttribute('aria-label', 'Filter by ' + row.conference);
         button.onclick = () => {
-          $('conference').value = row.conference;
+          $('conference').value = $('conference').value === row.conference ? '' : row.conference;
           $('search').value = '';
           hideTip();
           render();
