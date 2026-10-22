@@ -328,9 +328,8 @@ dialog::backdrop { background: #13223b70; }
 <h3>Pace</h3>
 <div class="formula">Estimated possessions = FGA + 0.44 × FTA − OR + TO</div>
 <p>FGA is field-goal attempts, FTA is free-throw attempts, OR is offensive rebounds, and TO is turnovers. This is a box-score estimate of possessions.</p>
-<div class="formula">Game possessions = (team estimate + opponent estimate) ÷ 2</div>
-<div class="formula">Pace = 40 × total game possessions ÷ total game minutes</div>
-<p>Pace measures estimated possessions per 40 minutes, accounting for overtime. It uses completed games with both teams’ required box-score statistics and a valid game duration. Missing data is excluded, not replaced with zero. Pace is not adjusted for opponent strength.</p>
+<div class="formula">Pace = 40 × total team estimated possessions ÷ total game minutes</div>
+<p>Pace measures estimated possessions per 40 minutes, accounting for overtime. It uses only the team’s own box-score statistics from completed games with a valid game duration. Opponent statistics are not used. Missing data is excluded, not replaced with zero. Pace is not adjusted for opponent strength.</p>
 </div>
 <div class="metricmethod">
 <h3>Preseason weight</h3>
