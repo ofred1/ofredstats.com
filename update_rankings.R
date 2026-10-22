@@ -131,7 +131,7 @@ calculate_adjusted_efficiencies <- function(games, team_ids, tolerance = 0.001,
   finish()
 }
 
-# Pace uses box-score possession estimates, averaged across both teams.
+# Pace uses only each team's own box-score possession estimate.
 calculate_pace <- function(games) {
   out <- data.frame(team_id = unique(games$team_id), pace = NA_real_, pace_games = 0L)
   number <- function(x, ...) {
@@ -156,16 +156,14 @@ calculate_pace <- function(games) {
     estimate
   }
   team_possessions <- possessions("team_stats")
-  opponent_possessions <- possessions("opponent_stats")
   minutes <- if ("game_minutes" %in% names(games))
     suppressWarnings(as.numeric(games$game_minutes)) else rep(NA_real_, nrow(games))
-  valid <- is.finite(team_possessions) & is.finite(opponent_possessions) &
+  valid <- is.finite(team_possessions) &
     is.finite(minutes) & minutes >= 40
-  game_possessions <- (team_possessions + opponent_possessions) / 2
   for (i in seq_len(nrow(out))) {
     rows <- games$team_id == out$team_id[i] & valid
     out$pace_games[i] <- sum(rows)
-    if (any(rows)) out$pace[i] <- 40 * sum(game_possessions[rows]) / sum(minutes[rows])
+    if (any(rows)) out$pace[i] <- 40 * sum(team_possessions[rows]) / sum(minutes[rows])
   }
   out
 }
@@ -443,7 +441,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
                   overall_model_configured = model_configured,
                   adjusted_efficiency_model = "OFred additive, D1-only, equal game weights, one baseline pseudo-game",
                   adjusted_efficiency_diagnostics = adjusted$diagnostics,
-                  pace_formula = "40 * sum((team_estimated_possessions + opponent_estimated_possessions) / 2) / sum(game_minutes)",
+                  pace_formula = "40 * sum(team_estimated_possessions) / sum(game_minutes)",
                   estimated_possessions_formula = "FGA + 0.44 * FTA - OR + TO",
                   net_rating_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   adjusted_efficiency_margin_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
