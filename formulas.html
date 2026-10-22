@@ -306,6 +306,16 @@ dialog::backdrop { background: #13223b70; }
   <section class="method" id="methodology">
     <h2>Formulas</h2>
 <div class="metricmethod">
+<h3>Raw offensive efficiency <span>Off Eff</span></h3>
+<div class="formula">Off Eff = 100 × total points scored ÷ total offensive possessions</div>
+<p>Points scored per 100 possessions. Higher is better. Uses totals across completed games with valid points and possession data, rather than averaging each game’s efficiency.</p>
+</div>
+<div class="metricmethod">
+<h3>Raw defensive efficiency <span>Def Eff</span></h3>
+<div class="formula">Def Eff = 100 × total points allowed ÷ total opponent possessions</div>
+<p>Points allowed per 100 opponent possessions. Lower is better. Games missing the required points or possession data are excluded from that calculation. These efficiencies are not adjusted for opponent strength or venue.</p>
+</div>
+<div class="metricmethod">
 <h3>Preseason weight</h3>
 <div class="formula">Preseason weight = max(0, (12 − games played) ÷ 12)</div>
 <p>The preseason component fades by 1/12 per completed game and reaches zero after each team’s 12th game. For blending, preseason ranks are converted to a 0–100 score: 100 × (N − rank) ÷ (N − 1).</p>
