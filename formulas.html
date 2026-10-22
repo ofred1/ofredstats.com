@@ -39,7 +39,7 @@ header { background: white; border-bottom: 1px solid #dde3ed; }
   font-weight: 600;
 }
 .navlinks a { text-decoration: none; }
-.navlinks a:first-child { color: #2864da; }
+.navlinks a[aria-current="page"] { color: #2864da; }
 main { max-width: 1320px; margin: auto; padding: 40px 32px; }
 .eyebrow {
   color: #2864da;
@@ -294,10 +294,11 @@ dialog::backdrop { background: #13223b70; }
 
 <header>
   <nav class="nav" aria-label="Main navigation">
-    <a href="#" class="brand">OFred<span>Stats.</span></a>
+    <a href="index.html" class="brand">OFred<span>Stats.</span></a>
     <div class="navlinks">
-      <a href="index.html">Team rankings</a>
-      <a href="formulas.html">Formulas</a>
+      <a href="index.html">Ofred rankings</a>
+      <a href="formulas.html" aria-current="page">Formulas</a>
+      <a href="laymaker.html">Laymaker</a>
     </div>
   </nav>
 </header>
