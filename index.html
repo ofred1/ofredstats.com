@@ -383,6 +383,24 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
 .navlinks a { color: #18243c; }
 .navlinks a[aria-current="page"] { color: #2864da; }
 @media (max-width: 650px) { .nav { flex-wrap: wrap; gap: 14px; } }
+
+/* Keep wide statistics inside a touch-scrollable table on small screens. */
+main, .panel { min-width: 0; max-width: 100%; }
+main { max-width: 1320px; }
+.tablewrap { width: 100%; max-width: 100%; }
+@media (max-width: 1150px) {
+ .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+@media (max-width: 700px) {
+ main { padding: 18px 10px; }
+ .toolbar { flex-wrap: wrap; }
+ .toolbar input[type=search] { min-width: 0; width: 100%; flex: 1 1 100%; }
+ .toolbar select { min-width: 0; max-width: 100%; flex: 1; }
+ .table-notes { min-width: 0; }
+ .table-notes .adjustment-note { flex-shrink: 1; }
+ .nav { min-width: 0; }
+ .navlinks { min-width: 0; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
