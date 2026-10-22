@@ -286,7 +286,11 @@ dialog::backdrop { background: #13223b70; }
   .teamheading { gap: 10px; }
   .dialoghead h2 { font-size: 19px; }
 }
-.navlinks a:first-child{color:#18243c}.navlinks a:last-child{color:#2864da}.method{margin-top:0}.method h2{font-size:32px}.metricmethod{margin-top:24px} main{max-width:1000px}
+.method{margin-top:0}.method h2{font-size:32px}.metricmethod{margin-top:24px} main{max-width:1000px}
+.navlinks { flex-wrap: wrap; }
+.navlinks a { color: #18243c; }
+.navlinks a[aria-current="page"] { color: #2864da; }
+@media (max-width: 650px) { .nav { flex-wrap: wrap; gap: 14px; } }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -297,8 +301,9 @@ dialog::backdrop { background: #13223b70; }
     <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
     <div class="navlinks">
       <a href="/index.html">Ofred Rankings</a>
-      <a href="/formulas.html?v=20261022b" aria-current="page">Formulas</a>
+      <a href="/formulas.html?v=20261022c" aria-current="page">Formulas</a>
       <a href="/laymaker.html">Laymaker</a>
+      <a href="/eye-test.html">Eye Test</a>
     </div>
   </nav>
 </header>
