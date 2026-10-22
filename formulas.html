@@ -306,17 +306,23 @@ dialog::backdrop { background: #13223b70; }
   <section class="method" id="methodology">
     <h2>Formulas</h2>
 <div class="metricmethod">
-<h3>Adjusted offensive efficiency <span>Off Eff</span></h3>
+<h3>Adjusted offensive efficiency <span>Off Eff*</span></h3>
 <div class="formula">Game offense = points scored per 100 possessions − (opponent adjusted defense − national average)</div>
 <p>Off Eff estimates scoring per 100 possessions against an average Division I defense. Higher is better. Each eligible game receives equal weight.</p>
 </div>
 <div class="metricmethod">
-<h3>Adjusted defensive efficiency <span>Def Eff</span></h3>
+<h3>Adjusted defensive efficiency <span>Def Eff*</span></h3>
 <div class="formula">Game defense = points allowed per 100 possessions − (opponent adjusted offense − national average)</div>
 <p>Def Eff estimates points allowed per 100 possessions against an average Division I offense. Lower is better.</p>
 <p>Both statistics use completed Division I vs. Division I games with valid points and possession data. Ratings are updated together using the previous iteration’s opponent ratings, with one national-average pseudo-game per team and 50% damping for stability. The calculation stops when the largest rating change is below 0.001; results stay blank if it does not converge. No venue adjustment is applied.</p>
 <div class="formula">Adjusted efficiency margin = Off Eff − Def Eff</div>
 <p>The national baseline uses total points divided by total possessions, multiplied by 100. The baseline anchor is separate from the preseason ranking blend. Raw efficiencies remain in the data export; the table displays adjusted efficiencies.</p>
+</div>
+<div class="metricmethod">
+<h3>Net rating <span>Net Rtg*</span></h3>
+<div class="formula">Net rating = adjusted offensive efficiency − adjusted defensive efficiency</div>
+<p>The expected point margin per 100 possessions against an average opponent. Higher is better. For example, an Off Eff of 115 and Def Eff of 95 produce a net rating of +20.</p>
+<p>Equivalently: (Off Eff − 100) + (100 − Def Eff). A defense above 100 reduces net rating; no absolute value is used. Net rating stays unavailable until both adjusted efficiencies are available.</p>
 </div>
 <div class="metricmethod">
 <h3>Preseason weight</h3>
