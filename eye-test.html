@@ -294,7 +294,7 @@ dialog::backdrop { background: #13223b70; }
 
 main { max-width: 1060px; }
 .top30 { background: #fff; border: 1px solid #dde3ed; border-radius: 14px; padding: 32px; }
-.top30 h1 { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 4px 0 16px; text-align: center; font-family: ui-rounded, "Arial Rounded MT Bold", "Nunito", "Trebuchet MS", sans-serif; font-size: clamp(42px, 7vw, 64px); font-weight: 900; letter-spacing: -2px; line-height: 1.1; color: #182d50; }
+.top30 h1 { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 4px 0 16px; text-align: center; font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif; font-size: clamp(42px, 7vw, 64px); font-weight: 900; letter-spacing: -2.5px; line-height: 1.05; color: #182d50; }
 .top30 .qualitative { margin: 8px 0 24px; font-size: 12px; color: #758096; text-align: center; }
 .editions { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 24px; }
 .edition { font: inherit; font-size: 13px; font-weight: 600; border: 1px solid #d9e1ec; border-radius: 7px; background: white; color: #526078; padding: 10px 17px; cursor: pointer; }
@@ -321,7 +321,9 @@ main { max-width: 1060px; }
  .eye-table td:first-child { width: 36px; font-size: 19px; }
  .eye-table .eye-conf { font-size: 11px; }
 }
-.top30-number { display: inline-block; color: #2864da; background: #edf3ff; padding: 7px 14px 9px; border-radius: 22px; box-shadow: 0 4px 0 #dbe7ff; }
+.top30-number { color: #2864da; }
+.eye-rank-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; padding: 0 9px; border-radius: 9px; background: #2864da; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 21px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .eye-rank-badge { min-width: 34px; height: 36px; padding: 0 6px; border-radius: 7px; font-size: 17px; } }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -399,7 +401,11 @@ function renderEyeTest() {
  rows.forEach(row => {
   const team = teamDirectory.get(row.team);
   const tr = document.createElement('tr');
-  const rank = document.createElement('td'); rank.textContent = row.rank;
+  const rank = document.createElement('td');
+  const badge = document.createElement('span');
+  badge.className = 'eye-rank-badge';
+  badge.textContent = row.rank;
+  rank.append(badge);
   const school = document.createElement('td');
   const identity = document.createElement('div'); identity.className = 'eye-team';
   const logo = document.createElement('span'); logo.className = 'eye-logo';
