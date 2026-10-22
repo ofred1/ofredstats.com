@@ -131,6 +131,45 @@ calculate_adjusted_efficiencies <- function(games, team_ids, tolerance = 0.001,
   finish()
 }
 
+# Pace uses box-score possession estimates, averaged across both teams.
+calculate_pace <- function(games) {
+  out <- data.frame(team_id = unique(games$team_id), pace = NA_real_, pace_games = 0L)
+  number <- function(x, ...) {
+    for (key in list(...)) {
+      if (!is.list(x) || is.null(x[[key]])) return(NA_real_)
+      x <- x[[key]]
+    }
+    if (length(x) != 1L) return(NA_real_)
+    suppressWarnings(as.numeric(x))
+  }
+  possessions <- function(column) {
+    if (!column %in% names(games)) return(rep(NA_real_, nrow(games)))
+    extract <- function(...) vapply(games[[column]], number, numeric(1), ...)
+    fga <- extract("fieldGoals", "attempted")
+    fta <- extract("freeThrows", "attempted")
+    orb <- extract("rebounds", "offensive")
+    turnovers <- extract("turnovers", "total")
+    valid <- is.finite(fga) & fga >= 0 & is.finite(fta) & fta >= 0 &
+      is.finite(orb) & orb >= 0 & is.finite(turnovers) & turnovers >= 0
+    estimate <- fga + 0.44 * fta - orb + turnovers
+    estimate[!valid | !is.finite(estimate) | estimate <= 0] <- NA_real_
+    estimate
+  }
+  team_possessions <- possessions("team_stats")
+  opponent_possessions <- possessions("opponent_stats")
+  minutes <- if ("game_minutes" %in% names(games))
+    suppressWarnings(as.numeric(games$game_minutes)) else rep(NA_real_, nrow(games))
+  valid <- is.finite(team_possessions) & is.finite(opponent_possessions) &
+    is.finite(minutes) & minutes >= 40
+  game_possessions <- (team_possessions + opponent_possessions) / 2
+  for (i in seq_len(nrow(out))) {
+    rows <- games$team_id == out$team_id[i] & valid
+    out$pace_games[i] <- sum(rows)
+    if (any(rows)) out$pace[i] <- 40 * sum(game_possessions[rows]) / sum(minutes[rows])
+  }
+  out
+}
+
 update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
             length(season) == 1L, is.finite(season), season == as.integer(season),
@@ -311,6 +350,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   rankings <- merge(merge(teams, averages, by = "team_id", all.x = TRUE), counts,
                     by = "team_id", all.x = TRUE)
   rankings$games_rated[is.na(rankings$games_rated)] <- 0L
+  rankings <- merge(rankings, calculate_pace(all_games), by = "team_id", all.x = TRUE)
   efficiency <- calculate_raw_efficiencies(all_games)
   rankings <- merge(rankings, efficiency, by = "team_id", all.x = TRUE)
   rankings$offense_eff_games[is.na(rankings$offense_eff_games)] <- 0L
@@ -403,6 +443,8 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
                   overall_model_configured = model_configured,
                   adjusted_efficiency_model = "OFred additive, D1-only, equal game weights, one baseline pseudo-game",
                   adjusted_efficiency_diagnostics = adjusted$diagnostics,
+                  pace_formula = "40 * sum((team_estimated_possessions + opponent_estimated_possessions) / 2) / sum(game_minutes)",
+                  estimated_possessions_formula = "FGA + 0.44 * FTA - OR + TO",
                   net_rating_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   adjusted_efficiency_margin_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   offensive_efficiency_formula = "100 * total_points / total_possessions",
