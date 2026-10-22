@@ -317,6 +317,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   rankings$defense_eff_games[is.na(rankings$defense_eff_games)] <- 0L
   adjusted <- calculate_adjusted_efficiencies(all_games, teams$team_id)
   rankings <- merge(rankings, adjusted$ratings, by = "team_id", all.x = TRUE)
+  rankings$net_rating <- rankings$adjusted_efficiency_margin
   message("Opponent adjustment: ", adjusted$diagnostics$status,
           " (", adjusted$diagnostics$iterations, " iterations).")
   # Overall rankings are independent of PPT. Use the frozen preseason snapshot.
@@ -402,6 +403,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
                   overall_model_configured = model_configured,
                   adjusted_efficiency_model = "OFred additive, D1-only, equal game weights, one baseline pseudo-game",
                   adjusted_efficiency_diagnostics = adjusted$diagnostics,
+                  net_rating_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   adjusted_efficiency_margin_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   offensive_efficiency_formula = "100 * total_points / total_possessions",
                   defensive_efficiency_formula = "100 * total_points_allowed / total_opponent_possessions",
