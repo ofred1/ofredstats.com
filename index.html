@@ -401,6 +401,18 @@ main { max-width: 1320px; }
  .nav { min-width: 0; }
  .navlinks { min-width: 0; }
 }
+
+/* Shared site navigation. */
+.brand { font-size: 28px; }
+.navlinks { font-size: 15px; gap: 26px; }
+.navlinks a { transition: color 140ms ease; }
+.navlinks a:hover, .navlinks a[aria-current="page"]:hover { color: #6b96eb; }
+.navlinks a:focus-visible { outline: 2px solid #6b96eb; outline-offset: 5px; border-radius: 2px; }
+@media (max-width: 700px) {
+ .nav { flex-wrap: wrap; gap: 16px; }
+ .brand { font-size: 26px; }
+ .navlinks { font-size: 14px; gap: 16px; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
