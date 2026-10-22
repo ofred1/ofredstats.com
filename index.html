@@ -352,6 +352,7 @@ th button[data-sort="descending"]::after { content: '↓'; }
 th[data-column="team"], td[data-column="team"] { text-align: left; padding-left: 3px; }
 th[data-column="team"] button { text-align: left; padding-left: 3px; }
 td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; margin-right: 0; text-align: left; }
+.adjustment-note { margin: 0 0 8px; color: #758096; font-size: 11px; }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -386,6 +387,7 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
       <button class="btn" id="clear">Clear filters</button>
     </div>
 
+    <p class="adjustment-note">* Adjusted for opponent strength</p>
     <div class="tablewrap">
       <table>
         <colgroup><col style="width:34px"><col style="width:206px"><col style="width:84px"><col style="width:58px"><col style="width:60px"><col style="width:54px"><col style="width:58px"><col style="width:56px"><col style="width:62px"><col style="width:62px"><col style="width:56px"><col style="width:62px"><col style="width:62px"><col style="width:56px"></colgroup>
@@ -544,9 +546,10 @@ const teamDetails = {"2":{"school":"Auburn","mascot":"Tigers"},"5":{"school":"Un
 
 const $ = id => document.getElementById(id);
 
-const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["adjusted_offensive_efficiency","Off Eff"],["adjusted_defensive_efficiency","Def Eff"],["pace","Pace"],["clutch_factor","Clutch"],["net_rating","Net Rtg"],["ofs","OFS"]];
+const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["pace","Pace"],["clutch_factor","Clutch"],["net_rating","Net Rtg*"],["ofs","OFS"]];
 
 const definitions = {
+  net_rating: ['Net rating', 'Adjusted offensive efficiency − adjusted defensive efficiency. Expected point margin per 100 possessions against an average opponent. Higher is better.'],
   adjusted_offensive_efficiency: ['Offensive efficiency', 'Points scored per 100 possessions, adjusted for opponent defensive strength. Higher is better.'],
   adjusted_defensive_efficiency: ['Defensive efficiency', 'Points allowed per 100 possessions, adjusted for opponent offensive strength. Lower is better.'],
   kenpom_preseason_rank: ['KenPom preseason rank', 'Frozen 2026–27 preseason team rank from KenPom.'],
@@ -619,7 +622,7 @@ function fmt(value, key) {
   if (value == null) return '—';
 
   if (typeof value === 'number' &&
-      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency'].includes(key)) {
+      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating'].includes(key)) {
     return value.toFixed(2);
   }
 
@@ -721,7 +724,7 @@ function render() {
       hideTip();
       direction = sortKey === key
         ? -direction
-        : (['rating', 'ppg', 'adjusted_offensive_efficiency'].includes(key) ? -1 : 1);
+        : (['rating', 'ppg', 'adjusted_offensive_efficiency', 'net_rating'].includes(key) ? -1 : 1);
       sortKey = key;
       render();
     };
@@ -799,6 +802,7 @@ function showTeam(row) {
     ['Offensive efficiency', fmt(row.adjusted_offensive_efficiency, 'adjusted_offensive_efficiency')],
     ['Defensive efficiency', fmt(row.adjusted_defensive_efficiency, 'adjusted_defensive_efficiency')],
     ['Roster', fmt(row.evanmiya_roster_rank, 'evanmiya_roster_rank')],
+    ['Net rating*', fmt(row.net_rating, 'net_rating')],
     ['PPT', fmt(row.rating, 'rating')],
     ['Points per game', fmt(row.ppg, 'ppg')],
     ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
