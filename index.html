@@ -390,7 +390,7 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
     <p class="adjustment-note">* Adjusted for opponent strength</p>
     <div class="tablewrap">
       <table>
-        <colgroup><col style="width:34px"><col style="width:206px"><col style="width:84px"><col style="width:58px"><col style="width:60px"><col style="width:54px"><col style="width:58px"><col style="width:56px"><col style="width:62px"><col style="width:62px"><col style="width:56px"><col style="width:62px"><col style="width:62px"><col style="width:56px"></colgroup>
+        <colgroup><col style="width:34px"><col style="width:206px"><col style="width:84px"><col style="width:58px"><col style="width:60px"><col style="width:62px"><col style="width:62px"><col style="width:62px"><col style="width:54px"><col style="width:58px"><col style="width:56px"><col style="width:56px"><col style="width:62px"><col style="width:56px"></colgroup>
         <caption class="visually-hidden">
           Team rankings. Select a column heading to sort or a team to see its details.
         </caption>
@@ -546,7 +546,7 @@ const teamDetails = {"2":{"school":"Auburn","mascot":"Tigers"},"5":{"school":"Un
 
 const $ = id => document.getElementById(id);
 
-const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["pace","Pace"],["clutch_factor","Clutch"],["net_rating","Net Rtg*"],["ofs","OFS"]];
+const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","Clutch"],["ofs","OFS"]];
 
 const definitions = {
   net_rating: ['Net rating', 'Adjusted offensive efficiency − adjusted defensive efficiency. Expected point margin per 100 possessions against an average opponent. Higher is better.'],
