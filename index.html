@@ -352,7 +352,9 @@ th button[data-sort="descending"]::after { content: '↓'; }
 th[data-column="team"], td[data-column="team"] { text-align: left; padding-left: 3px; }
 th[data-column="team"] button { text-align: left; padding-left: 3px; }
 td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; margin-right: 0; text-align: left; }
-.adjustment-note { margin: 0 0 8px; color: #758096; font-size: 11px; }
+.adjustment-note { margin: 0 18px 8px; color: #758096; font-size: 11px; text-align: right; }
+.adjusted-heading { display: inline-block; transform: translateX(-2px); white-space: nowrap; }
+.adjusted-mark { display: inline-block; position: relative; top: 0.2em; font-size: 1em; line-height: 1; vertical-align: baseline; }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -387,7 +389,7 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
       <button class="btn" id="clear">Clear filters</button>
     </div>
 
-    <p class="adjustment-note">* Adjusted for opponent strength</p>
+    <p class="adjustment-note"><span class="adjusted-mark">*</span> = Adjusted for opponent strength</p>
     <div class="tablewrap">
       <table>
         <colgroup><col style="width:34px"><col style="width:206px"><col style="width:84px"><col style="width:58px"><col style="width:60px"><col style="width:62px"><col style="width:62px"><col style="width:62px"><col style="width:54px"><col style="width:58px"><col style="width:56px"><col style="width:56px"><col style="width:62px"><col style="width:56px"></colgroup>
@@ -710,10 +712,20 @@ function render() {
     }
 
     const button = document.createElement('button');
-    button.textContent = label;
+    if (label.endsWith("*")) {
+      const heading = document.createElement("span");
+      heading.className = "adjusted-heading";
+      const mark = document.createElement("span");
+      mark.className = "adjusted-mark";
+      mark.textContent = "*";
+      heading.append(label.slice(0, -1), mark);
+      button.append(heading);
+    } else {
+      button.textContent = label;
+    }
     if (key === sortKey) button.setAttribute('data-sort', direction === 1 ? 'ascending' : 'descending');
 
-    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency'].includes(key)) {
+    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace'].includes(key)) {
       button.setAttribute('aria-describedby', 'column-tip');
       button.onmouseenter = () => showTip(button, key);
       button.onfocus = () => showTip(button, key);
