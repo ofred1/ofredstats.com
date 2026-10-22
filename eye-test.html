@@ -322,6 +322,16 @@ main { max-width: 1060px; }
  .eye-table .eye-conf { font-size: 11px; }
 }
 .top30-number { color: #2864da; }
+
+main, .top30 { min-width: 0; }
+.eye-table-scroll { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.eye-table-scroll:focus-visible { outline: 2px solid #2864da; outline-offset: 3px; }
+@media (max-width: 600px) {
+ main { padding: 18px 10px; }
+ .top30 { padding: 20px 10px; }
+ .eye-table { min-width: 480px; }
+ .eye-table .eye-team { white-space: nowrap; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -344,11 +354,13 @@ main { max-width: 1060px; }
   <h1 id="eye-test-title">TOP <span class="top30-number">30</span></h1>
   <p class="qualitative">Qualitative rankings from the mind of Ofred.</p>
   <div class="editions" id="editions" role="group" aria-label="Choose a rankings edition"></div>
+  <div class="eye-table-scroll" role="region" aria-label="Top 30 rankings, swipe to see all columns" tabindex="0">
   <table class="eye-table">
    <caption class="visually-hidden" id="edition-caption">Preseason Top 30</caption>
    <thead><tr><th scope="col">Rank</th><th scope="col">Team</th><th scope="col">Movement</th><th scope="col">Conference</th></tr></thead>
    <tbody id="eye-rows"></tbody>
   </table>
+  </div>
   <p class="visually-hidden" id="edition-status" aria-live="polite"></p>
  </section>
 </main>
