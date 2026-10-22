@@ -379,6 +379,10 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
 .conference-link { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .conference-link:hover { color: #2864da; }
 .conference-link:focus-visible { outline: 2px solid #2864da; outline-offset: 3px; }
+.navlinks { flex-wrap: wrap; }
+.navlinks a { color: #18243c; }
+.navlinks a[aria-current="page"] { color: #2864da; }
+@media (max-width: 650px) { .nav { flex-wrap: wrap; gap: 14px; } }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -389,8 +393,9 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
     <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
     <div class="navlinks">
       <a href="/index.html" aria-current="page">Ofred Rankings</a>
-      <a href="/formulas.html?v=20261022b">Formulas</a>
+      <a href="/formulas.html?v=20261022c">Formulas</a>
       <a href="/laymaker.html">Laymaker</a>
+      <a href="/eye-test.html">Eye Test</a>
     </div>
   </nav>
 </header>
