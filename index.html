@@ -549,7 +549,7 @@ const $ = id => document.getElementById(id);
 const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","Clutch"],["ofs","OFS"]];
 
 const definitions = {
-  pace: ['Pace', 'Estimated possessions per 40 minutes. Possessions = FGA + 0.44 × FTA − offensive rebounds + turnovers. Uses both teams’ estimates and adjusts for overtime. Not adjusted for opponent strength.'],
+  pace: ['Pace', 'Estimated possessions per 40 minutes. Possessions = FGA + 0.44 × FTA − offensive rebounds + turnovers. Uses only this team’s stats and adjusts for overtime. Not adjusted for opponent strength.'],
   net_rating: ['Net rating', 'Adjusted offensive efficiency − adjusted defensive efficiency. Expected point margin per 100 possessions against an average opponent. Higher is better.'],
   adjusted_offensive_efficiency: ['Offensive efficiency', 'Points scored per 100 possessions, adjusted for opponent defensive strength. Higher is better.'],
   adjusted_defensive_efficiency: ['Defensive efficiency', 'Points allowed per 100 possessions, adjusted for opponent offensive strength. Lower is better.'],
