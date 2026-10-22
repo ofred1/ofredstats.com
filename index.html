@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="OFred Stats men's college basketball team rankings and statistics.">
-<title>OFred Stats | Team Rankings</title>
+<title>Ofred rankings | OFred Stats</title>
 <style>
 :root {
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -39,7 +39,7 @@ header { background: white; border-bottom: 1px solid #dde3ed; }
   font-weight: 600;
 }
 .navlinks a { text-decoration: none; }
-.navlinks a:first-child { color: #2864da; }
+.navlinks a[aria-current="page"] { color: #2864da; }
 main { max-width: 1320px; margin: auto; padding: 40px 32px; }
 .eyebrow {
   color: #2864da;
@@ -355,6 +355,27 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
 .adjustment-note { margin: 0 18px 8px; color: #758096; font-size: 11px; text-align: right; }
 .adjusted-heading { display: inline-block; transform: translateX(-2px); white-space: nowrap; }
 .adjusted-mark { display: inline-block; position: relative; top: 0.2em; font-size: 1em; line-height: 1; vertical-align: baseline; }
+
+/* Center the rankings title independently of the season control. */
+.paneltitle { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; }
+.rankings-heading { grid-column: 2; text-align: center; }
+.rankings-heading .eyebrow { font-family: "Helvetica Neue", Arial, sans-serif; font-weight: 600; letter-spacing: 1.8px; }
+.paneltitle h1 { font-family: Georgia, "Times New Roman", serif; font-size: 30px; font-weight: 600; letter-spacing: -0.6px; line-height: 1.2; }
+.paneltitle .season { grid-column: 3; justify-self: end; }
+.table-notes { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 0 18px 10px; }
+.table-notes .projection-note { margin: 0; max-width: none; text-align: left; font-size: 11px; }
+.table-notes .adjustment-note { margin: 0; text-align: right; flex-shrink: 0; font-size: 11px; }
+.navlinks { flex-wrap: wrap; }
+@media (max-width: 650px) {
+  .paneltitle { grid-template-columns: 1fr; gap: 12px; }
+  .rankings-heading { grid-column: 1; }
+  .paneltitle h1 { font-size: 27px; }
+  .paneltitle .season { grid-column: 1; justify-self: center; }
+  .table-notes { flex-wrap: wrap; gap: 5px; padding: 0 12px 10px; }
+  .table-notes .projection-note { width: auto; order: 0; }
+  .table-notes .adjustment-note { text-align: left; }
+  .nav { flex-wrap: wrap; gap: 14px; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -362,10 +383,11 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
 
 <header>
   <nav class="nav" aria-label="Main navigation">
-    <a href="#" class="brand">OFred<span>Stats.</span></a>
+    <a href="index.html" class="brand">OFred<span>Stats.</span></a>
     <div class="navlinks">
-      <a href="index.html">Team rankings</a>
+      <a href="index.html" aria-current="page">Ofred rankings</a>
       <a href="formulas.html">Formulas</a>
+      <a href="laymaker.html">Laymaker</a>
     </div>
   </nav>
 </header>
@@ -373,11 +395,10 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
 <main>
   <section class="panel" id="rankings">
     <div class="paneltitle">
-      <div>
-        <div class="eyebrow">NCAA Men’s Basketball</div>
-        <h1>Team rankings</h1>
+      <div class="rankings-heading">
+        <div class="eyebrow">Division I</div>
+        <h1>OFred team rankings</h1>
       </div>
-      <p class="projection-note">Current rankings are projections. Rankings will adjust as more games are played.</p>
       <div class="season" id="season">2026-2027</div>
     </div>
 
@@ -389,7 +410,10 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
       <button class="btn" id="clear">Clear filters</button>
     </div>
 
-    <p class="adjustment-note"><span class="adjusted-mark">*</span> = Adjusted for opponent strength</p>
+    <div class="table-notes">
+      <p class="projection-note">Current rankings are projections. Rankings will adjust as more games are played.</p>
+      <p class="adjustment-note"><span class="adjusted-mark">*</span> = Adjusted for opponent strength</p>
+    </div>
     <div class="tablewrap">
       <table>
         <colgroup><col style="width:34px"><col style="width:206px"><col style="width:84px"><col style="width:58px"><col style="width:60px"><col style="width:62px"><col style="width:62px"><col style="width:62px"><col style="width:54px"><col style="width:58px"><col style="width:56px"><col style="width:56px"><col style="width:62px"><col style="width:56px"></colgroup>
