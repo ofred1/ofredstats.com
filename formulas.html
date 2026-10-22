@@ -325,6 +325,14 @@ dialog::backdrop { background: #13223b70; }
 <p>Equivalently: (Off Eff − 100) + (100 − Def Eff). A defense above 100 reduces net rating; no absolute value is used. Net rating stays unavailable until both adjusted efficiencies are available.</p>
 </div>
 <div class="metricmethod">
+<h3>Pace</h3>
+<div class="formula">Estimated possessions = FGA + 0.44 × FTA − OR + TO</div>
+<p>FGA is field-goal attempts, FTA is free-throw attempts, OR is offensive rebounds, and TO is turnovers. This is a box-score estimate of possessions.</p>
+<div class="formula">Game possessions = (team estimate + opponent estimate) ÷ 2</div>
+<div class="formula">Pace = 40 × total game possessions ÷ total game minutes</div>
+<p>Pace measures estimated possessions per 40 minutes, accounting for overtime. It uses completed games with both teams’ required box-score statistics and a valid game duration. Missing data is excluded, not replaced with zero. Pace is not adjusted for opponent strength.</p>
+</div>
+<div class="metricmethod">
 <h3>Preseason weight</h3>
 <div class="formula">Preseason weight = max(0, (12 − games played) ÷ 12)</div>
 <p>The preseason component fades by 1/12 per completed game and reaches zero after each team’s 12th game. For blending, preseason ranks are converted to a 0–100 score: 100 × (N − rank) ÷ (N − 1).</p>
