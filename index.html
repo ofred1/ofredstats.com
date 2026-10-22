@@ -360,7 +360,7 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
 .paneltitle { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; }
 .rankings-heading { grid-column: 2; text-align: center; }
 .rankings-heading .eyebrow { font-family: "Helvetica Neue", Arial, sans-serif; font-weight: 600; letter-spacing: 1.8px; }
-.paneltitle h1 { font-family: Georgia, "Times New Roman", serif; font-size: 30px; font-weight: 600; letter-spacing: -0.6px; line-height: 1.2; }
+.paneltitle h1 { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; }
 .paneltitle .season { grid-column: 3; justify-self: end; }
 .table-notes { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 0 18px 10px; }
 .table-notes .projection-note { margin: 0; max-width: none; text-align: left; font-size: 11px; }
@@ -376,6 +376,9 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
   .table-notes .adjustment-note { text-align: left; }
   .nav { flex-wrap: wrap; gap: 14px; }
 }
+.conference-link { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.conference-link:hover { color: #2864da; }
+.conference-link:focus-visible { outline: 2px solid #2864da; outline-offset: 3px; }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -383,11 +386,11 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
 
 <header>
   <nav class="nav" aria-label="Main navigation">
-    <a href="index.html" class="brand">OFred<span>Stats.</span></a>
+    <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
     <div class="navlinks">
-      <a href="index.html" aria-current="page">Ofred rankings</a>
-      <a href="formulas.html">Formulas</a>
-      <a href="laymaker.html">Laymaker</a>
+      <a href="/index.html" aria-current="page">Ofred Rankings</a>
+      <a href="/formulas.html?v=20261022b">Formulas</a>
+      <a href="/laymaker.html">Laymaker</a>
     </div>
   </nav>
 </header>
@@ -397,7 +400,7 @@ td[data-column="team"] .teamlink { justify-content: flex-start; margin-left: 0; 
     <div class="paneltitle">
       <div class="rankings-heading">
         <div class="eyebrow">Division I</div>
-        <h1>OFred team rankings</h1>
+        <h1>Team Rankings</h1>
       </div>
       <div class="season" id="season">2026-2027</div>
     </div>
@@ -789,6 +792,19 @@ function render() {
 
         button.append(makeLogo(row), name);
         button.onclick = () => showTeam(row);
+        td.append(button);
+      } else if (key === 'conference' && row.conference) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'conference-link';
+        button.textContent = row.conference;
+        button.setAttribute('aria-label', 'Filter by ' + row.conference);
+        button.onclick = () => {
+          $('conference').value = row.conference;
+          $('search').value = '';
+          hideTip();
+          render();
+        };
         td.append(button);
       } else {
         td.textContent = fmt(value(row, key), key);
