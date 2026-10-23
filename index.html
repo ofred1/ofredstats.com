@@ -496,7 +496,7 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
       <p class="see-also">See Also: <a href="/eye-test.html">Thirsty Thirty</a></p>
       <div class="rankings-heading">
         <div class="eyebrow">Division I</div>
-        <h1>Team Rankings</h1>
+        <h1 id="rankings-title">Preseason Team Rankings</h1>
       </div>
       <div class="season" id="season">2026-2027</div>
     </div>
@@ -775,6 +775,8 @@ function validate(data) {
 
 function apply(data) {
   dataset = validate(data);
+  $('rankings-title').textContent = data.rankings.some(row => Number.isFinite(row.games) && row.games > 0)
+    ? 'Team Rankings' : 'Preseason Team Rankings';
 
   if (Number.isInteger(data.season)) {
     $('season').textContent =
