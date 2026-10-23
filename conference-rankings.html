@@ -338,6 +338,18 @@ dialog::backdrop { background: #13223b70; }
  .brand { font-size: 30px; }
  .navlinks { font-size: 16px; gap: 17px; }
 }
+
+/* Identical navigation typography on every page, including active labels. */
+header .navlinks { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 19px; font-weight: 600; gap: 26px; }
+header .navlinks > a, header .navlinks > .current-page, header .eye-nav > .eye-trigger { font-family: inherit; font-size: 19px; font-weight: 600; line-height: 1.3; min-height: 44px; }
+header .navlinks .laymaker-word { font-size: inherit; font-weight: 650; }
+header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-size: 16px; font-weight: 600; line-height: 1.4; }
+@media (max-width: 700px) {
+ header .navlinks { font-size: 17px; gap: 16px; }
+ header .navlinks > a, header .navlinks > .current-page, header .eye-nav > .eye-trigger { font-size: 17px; }
+ header .eye-menu a, header .eye-menu .current-page { font-size: 16px; }
+}
+
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -355,7 +367,7 @@ dialog::backdrop { background: #13223b70; }
    <span class="current-page" aria-current="page">Conference Rankings</span>
   </div>
  </div>
- <a href="/laymaker.html"><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 16-20 6 5-16 21c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M30 33c-3-2-4-5-3-8l2-4c.7-1.4 2.8-.7 2.4.9l-.5 2.2 2-3.2.7-9c.2-2 2.8-2 2.8 0l-.2 8 1.3-8c.3-1.7 2.7-1.5 2.5.5l-.7 9 1.1-6c.4-1.7 2.6-1.1 2.3.8l-.9 8c-.5 4-3 8-6 10Z" fill="#2864da"/></svg><span>MAKER</span></span></a>
+ <a href="/laymaker.html"><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 15-19 5 5-14 20c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M28 34c-2-2-3-4-3-7l.8-3.5c.4-1.5 2.5-1.3 2.5.4v1c4-1 6-4 6.5-7.5l.2-7c.1-2 2.8-2 3-.1l.3 6.6c.4 5.6-1 10-4.2 13.8L32 34Z" fill="#2864da"/></svg><span>MAKER</span></span></a>
  </div>
 </nav>
 </header>
