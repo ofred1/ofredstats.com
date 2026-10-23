@@ -674,6 +674,7 @@ const $ = id => document.getElementById(id);
 const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","Clutch"],["ofs","OFS"]];
 
 const definitions = {
+  strength_of_schedule: ['Strength of schedule', 'Average opponent difficulty, from −1 to +1. Opponent values are frozen before each game day using blended preseason and net-rating ranks. Preseason weight stays at least 50%; non-D1 opponents count as −0.99. Higher means a tougher schedule.'],
   pace: ['Pace', 'Estimated possessions per 40 minutes. Possessions = FGA + 0.44 × FTA − offensive rebounds + turnovers. Uses only this team’s stats and adjusts for overtime. Not adjusted for opponent strength.'],
   net_rating: ['Net rating', 'Adjusted offensive efficiency − adjusted defensive efficiency. Expected point margin per 100 possessions against an average opponent. Higher is better.'],
   adjusted_offensive_efficiency: ['Offensive efficiency', 'Points scored per 100 possessions, adjusted for opponent defensive strength. Higher is better.'],
@@ -749,7 +750,7 @@ function fmt(value, key) {
   if (value == null) return '—';
 
   if (typeof value === 'number' &&
-      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace'].includes(key)) {
+      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule'].includes(key)) {
     return value.toFixed(2);
   }
 
@@ -849,7 +850,7 @@ function render() {
     }
     if (key === sortKey) button.setAttribute('data-sort', direction === 1 ? 'ascending' : 'descending');
 
-    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace'].includes(key)) {
+    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule'].includes(key)) {
       button.setAttribute('aria-describedby', 'column-tip');
       button.onmouseenter = () => showTip(button, key);
       button.onfocus = () => showTip(button, key);
@@ -861,7 +862,7 @@ function render() {
       hideTip();
       direction = sortKey === key
         ? -direction
-        : (['rating', 'ppg', 'adjusted_offensive_efficiency', 'net_rating', 'pace'].includes(key) ? -1 : 1);
+        : (['rating', 'ppg', 'adjusted_offensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule'].includes(key) ? -1 : 1);
       sortKey = key;
       render();
     };
@@ -954,6 +955,7 @@ function showTeam(row) {
     ['Roster', fmt(row.evanmiya_roster_rank, 'evanmiya_roster_rank')],
     ['Net rating*', fmt(row.net_rating, 'net_rating')],
     ['Pace', fmt(row.pace, 'pace')],
+    ['Strength of schedule', fmt(row.strength_of_schedule, 'strength_of_schedule')],
     ['PPT', fmt(row.rating, 'rating')],
     ['Points per game', fmt(row.ppg, 'ppg')],
     ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
