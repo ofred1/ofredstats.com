@@ -9,6 +9,60 @@ MODE <- "daily"                # "cached", "daily", or "rebuild"
 LOOKBACK_DAYS <- 7L
 
 
+# Count this script's request attempts without logging credentials or response data.
+.api_usage <- new.env(parent = emptyenv())
+.api_usage$run_id <- paste(format(Sys.time(), "%Y%m%dT%H%M%OS6", tz = "UTC"), Sys.getpid(), sep = "-")
+
+tracked_api_request <- function(endpoint, request) {
+  dir.create("data", showWarnings = FALSE)
+  path <- "data/api_request_log.csv"
+  entry <- data.frame(run_id = .api_usage$run_id,
+    requested_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+    endpoint = endpoint, stringsAsFactors = FALSE)
+  exists <- file.exists(path)
+  write.table(entry, path, sep = ",", row.names = FALSE,
+    col.names = !exists, append = exists, quote = TRUE)
+  force(request)
+}
+
+report_api_requests <- function() {
+  path <- "data/api_request_log.csv"
+  log <- if (file.exists(path)) read.csv(path, stringsAsFactors = FALSE) else
+    data.frame(run_id = character(), requested_at = character(), endpoint = character())
+  this_run <- log[log$run_id == .api_usage$run_id, , drop = FALSE]
+  month <- format(Sys.time(), "%Y-%m", tz = "UTC")
+  monthly <- sum(substr(log$requested_at, 1L, 7L) == month)
+  message("API request attempts this run: ", nrow(this_run))
+  if (nrow(this_run)) {
+    counts <- table(this_run$endpoint)
+    for (endpoint in names(counts)) message("  ", endpoint, ": ", counts[[endpoint]])
+  }
+  message("Logged attempts this calendar month: ", monthly,
+    ". This script's log only; earlier requests and other programs are not included.")
+  invisible(list(this_run = nrow(this_run), logged_month = monthly))
+}
+
+# Optional one-request account check. Never prints or stores your key.
+# CFBD/CBBD share their provider's API quota pool.
+check_api_allowance <- function() {
+  if (!requireNamespace("httr2", quietly = TRUE) ||
+      !requireNamespace("keyring", quietly = TRUE)) stop("Install httr2 and keyring first.")
+  response <- tracked_api_request("/info (shared quota check)",
+    httr2::request("https://api.collegefootballdata.com/info") |>
+      httr2::req_headers(Authorization = paste("Bearer", keyring::key_get("CBBD_API_KEY"))) |>
+      httr2::req_timeout(30) |>
+      httr2::req_perform())
+  account <- httr2::resp_body_json(response)
+  if (is.null(account) || !all(c("monthlyLimit", "remainingCalls") %in% names(account)))
+    stop("Account allowance was not returned. Check your account on the provider website.")
+  summary <- account[intersect(c("tierName", "monthlyLimit", "usedCalls",
+                                "remainingCalls", "resetAt", "sharedPool"), names(account))]
+  print(summary)
+  message("This account check used one additional API request.")
+  invisible(summary)
+}
+
+
 # Raw season efficiencies: ratio of totals, not an average of game ratings.
 # Each side excludes only games missing that side's points or possessions.
 calculate_raw_efficiencies <- function(games) {
@@ -354,7 +408,8 @@ calculate_clutch <- function(games, team_ids, season, mode, cache_path, save_cac
           as.Date(last_check) > as.Date(today) - 7L) next
       requests <- requests + 1L
       message("Downloading clutch play-by-play for ", day)
-      fetched <- tryCatch(cbbdr::get_plays_by_date(date = day, shooting_plays_only = FALSE),
+      fetched <- tryCatch(tracked_api_request("/plays/date",
+        cbbdr::get_plays_by_date(date = day, shooting_plays_only = FALSE)),
         error = function(e) {
           warning("Clutch play-by-play unavailable for ", day, ": ", conditionMessage(e))
           NULL
@@ -521,7 +576,8 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
     if (finish <= season_start) {
       return(pending("not_started", "The selected season is outside the download window."))
     }
-    team_stats <- cbbdr::get_team_season_stats(season = season)
+    team_stats <- tracked_api_request("/stats/team/season",
+      cbbdr::get_team_season_stats(season = season))
     # First run/rebuild downloads the full season to date. Later daily runs
     # overlap seven days and catch up from the last successful update.
     if (mode == "rebuild" || is.null(all_games)) {
@@ -536,10 +592,10 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
       from <- paste0(boundaries[i], "T00:00:00Z")
       to <- paste0(boundaries[i + 1L], "T00:00:00Z")
       message("Downloading ", boundaries[i], " through ", boundaries[i + 1L])
-      new <- cbbdr::get_game_teams(season = season,
-                                 start_date_range = from, end_date_range = to)
-      schedule <- cbbdr::get_games(season = season,
-                                  start_date_range = from, end_date_range = to)
+      new <- tracked_api_request("/games/teams", cbbdr::get_game_teams(season = season,
+                                 start_date_range = from, end_date_range = to))
+      schedule <- tracked_api_request("/games", cbbdr::get_games(season = season,
+                                  start_date_range = from, end_date_range = to))
       # Never include live games in the rating.
       if (!is.null(schedule) && nrow(schedule)) {
         check_columns(schedule, c("id", "status"), "Game schedule")
@@ -555,6 +611,12 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   }
 
   if (is.null(all_games) || !nrow(all_games)) {
+    if (mode != "cached") {
+      save_rds(if (is.null(all_games)) data.frame() else all_games, games_path)
+      save_rds(team_stats, teams_path)
+      save_rds(list(checked_through = as.character(finish - 1L),
+        source_updated_at = format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")), state_path)
+    }
     return(pending("no_completed_games", "No completed game data is available for this season."))
   }
   check_columns(all_games, c("game_id", "team_id", "team_stats"), "Saved games")
@@ -820,10 +882,15 @@ upload_rankings <- function(path = "rankings.json", expected_season) {
 }
 
 # Run once. No-data runs return NULL and do not upload anything.
-rankings <- update_rankings(SEASON, MODE, LOOKBACK_DAYS, PUBLISH_ACTIVE)
-if (!is.null(rankings)) {
-  print(head(rankings, 25))
-  if (isTRUE(PUBLISH_ACTIVE)) upload_rankings("rankings.json", SEASON)
+run_rankings_update <- function() {
+  on.exit(report_api_requests(), add = TRUE)
+  result <- update_rankings(SEASON, MODE, LOOKBACK_DAYS, PUBLISH_ACTIVE)
+  if (!is.null(result)) {
+    print(head(result, 25))
+    if (isTRUE(PUBLISH_ACTIVE)) upload_rankings("rankings.json", SEASON)
+  }
+  invisible(result)
 }
+rankings <- run_rankings_update()
 
 
