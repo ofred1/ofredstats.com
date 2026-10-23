@@ -671,9 +671,10 @@ const teamDetails = {"2":{"school":"Auburn","mascot":"Tigers"},"5":{"school":"Un
 
 const $ = id => document.getElementById(id);
 
-const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","Clutch"],["ofs","OFS"]];
+const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","CLUTCH"],["ofs","OFS"]];
 
 const definitions = {
+  clutch_factor: ['Clutch factor', 'A clutch game reaches a margin of 3 or fewer in the final 3:00 of regulation. CLUTCH = (clutch wins − clutch losses) ÷ clutch games + 0.2 per regulation clutch game + 0.4 per overtime game. No double-counted bonus for overtime. Zero if no clutch games; blank while game coverage is incomplete.'],
   strength_of_schedule: ['Strength of schedule', 'Average opponent difficulty, from −1 to +1. Opponent values are frozen before each game day using blended preseason and net-rating ranks. Preseason weight stays at least 50%; non-D1 opponents count as −0.99. Higher means a tougher schedule.'],
   pace: ['Pace', 'Estimated possessions per 40 minutes. Possessions = FGA + 0.44 × FTA − offensive rebounds + turnovers. Uses only this team’s stats and adjusts for overtime. Not adjusted for opponent strength.'],
   net_rating: ['Net rating', 'Adjusted offensive efficiency − adjusted defensive efficiency. Expected point margin per 100 possessions against an average opponent. Higher is better.'],
@@ -750,7 +751,7 @@ function fmt(value, key) {
   if (value == null) return '—';
 
   if (typeof value === 'number' &&
-      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule'].includes(key)) {
+      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) {
     return value.toFixed(2);
   }
 
@@ -850,7 +851,7 @@ function render() {
     }
     if (key === sortKey) button.setAttribute('data-sort', direction === 1 ? 'ascending' : 'descending');
 
-    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule'].includes(key)) {
+    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) {
       button.setAttribute('aria-describedby', 'column-tip');
       button.onmouseenter = () => showTip(button, key);
       button.onfocus = () => showTip(button, key);
@@ -862,7 +863,7 @@ function render() {
       hideTip();
       direction = sortKey === key
         ? -direction
-        : (['rating', 'ppg', 'adjusted_offensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule'].includes(key) ? -1 : 1);
+        : (['rating', 'ppg', 'adjusted_offensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule', 'clutch_factor'].includes(key) ? -1 : 1);
       sortKey = key;
       render();
     };
@@ -956,6 +957,9 @@ function showTeam(row) {
     ['Net rating*', fmt(row.net_rating, 'net_rating')],
     ['Pace', fmt(row.pace, 'pace')],
     ['Strength of schedule', fmt(row.strength_of_schedule, 'strength_of_schedule')],
+    ['CLUTCH', fmt(row.clutch_factor, 'clutch_factor')],
+    ['Clutch record', row.clutch_wins == null ? '—' : `${row.clutch_wins}–${row.clutch_losses}`],
+    ['Clutch games pending', row.clutch_games_pending ?? '—'],
     ['PPT', fmt(row.rating, 'rating')],
     ['Points per game', fmt(row.ppg, 'ppg')],
     ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
