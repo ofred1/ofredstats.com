@@ -386,6 +386,22 @@ main, .top30 { min-width: 0; }
  .weekly-movers > div + div { margin-top: 0; }
 }
 .eye-trigger { border: 0; padding: 0; background: transparent; font-family: inherit; }
+
+.thirsty-heading { margin-bottom: 22px; }
+.thirsty-title { grid-column: 2; position: relative; }
+.thirsty-title h1 { margin: 4px 0 0; }
+.thirsty-info { position: absolute; top: 0; right: -27px; z-index: 5; }
+.thirsty-help { display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid #9aa9bf; border-radius: 50%; padding: 0; background: transparent; color: #697b96; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+.thirsty-help:focus-visible { outline: 2px solid #2864da; outline-offset: 3px; }
+.thirsty-description { display: none; position: absolute; top: 28px; right: 0; width: min(260px, 75vw); padding: 12px 14px; background: #182d50; color: white; border-radius: 7px; box-shadow: 0 6px 20px #18243c20; font-family: Arial, sans-serif; font-size: 12px; font-weight: 400; line-height: 1.6; text-align: left; }
+.thirsty-info[data-open="true"] .thirsty-description, .thirsty-help:focus-visible + .thirsty-description { display: block; }
+@media (hover: hover) and (pointer: fine) { .thirsty-info:hover .thirsty-description { display: block; } }
+@media (max-width: 700px) {
+ .thirsty-title { grid-column: 1; grid-row: 1; justify-self: center; max-width: calc(100% - 45px); }
+ .thirsty-title h1 { font-size: clamp(30px, 7.2vw, 48px); }
+ .thirsty-heading { margin-bottom: 18px; }
+ .thirsty-info { right: -25px; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -403,7 +419,7 @@ main, .top30 { min-width: 0; }
    <a href="/conference-rankings.html">Conference Rankings</a>
   </div>
  </div>
- <a href="/laymaker.html"><span class="laymaker-word" aria-label="LAYmaker"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><path d="M2 61 12 42c1-3 3-5 5-7l9-9 4 6-9 12-7 19Z" fill="#2864da"/><path d="m25 32-4-9c-1-2-1-4 1-5s3 1 4 3l2 4 1-10c0-2 3-2 3 0v8l2-9c1-2 3-1 3 1l-1 9 3-7c1-2 3-1 2 1l-3 10c-1 5-4 8-8 7Z" fill="#2864da"/><circle cx="32" cy="12" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M22 12h20M32 2v20M25 4c8 4 7 12 14 16M39 4c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m26 25 2-7m3 8 2-6m2 7 3-6" stroke="#2864da" stroke-width="3.2" stroke-linecap="round"/></svg><span>maker</span></span></a>
+ <a href="/laymaker.html"><span class="laymaker-word" aria-label="LAYmaker"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="M2 62 15 43l11-16 4-7 6 4-5 10-9 14-8 15Z" fill="#2864da"/><path d="M28 28c-3-1-5-4-6-7l-2-4c-.6-1.7 1-3 2-2l4 5 2-1 2-10c.3-2 3-2 3 0l-1 9 2-9c.6-1.6 3-1 2.5 1l-1.5 10 2-7c.6-1.5 3-.8 2.5 1l-1.5 9 1-4c.5-1.5 2.5-1 2 1l-1 6c-1 4-4 7-8 6Z" fill="#2864da"/></svg><span>maker</span></span></a>
  </div>
 </nav>
 </header>
@@ -415,9 +431,14 @@ main, .top30 { min-width: 0; }
    <div><span class="mover-label">Biggest Riser</span><strong class="riser" id="biggest-riser">—</strong></div>
    <div><span class="mover-label">Biggest Drop</span><strong class="drop" id="biggest-drop">—</strong></div>
   </aside>
-  <h1 id="eye-test-title">THIRSTY <span class="top30-number">30</span></h1>
+  <div class="thirsty-title">
+   <h1 id="eye-test-title">THIRSTY <span class="top30-number">30</span></h1>
+   <div class="thirsty-info">
+    <button type="button" class="thirsty-help" aria-label="About Thirsty Thirty" aria-describedby="thirsty-description" aria-expanded="false">?</button>
+    <span class="thirsty-description" id="thirsty-description" role="tooltip">Qualitative rankings of the top 30 teams from the mind of Ofred.</span>
+   </div>
+  </div>
  </div>
-  <p class="qualitative">Qualitative rankings from the mind of Ofred.</p>
   <div class="editions" id="editions" role="group" aria-label="Choose a rankings edition"></div>
   <div class="eye-table-scroll" role="region" aria-label="Top 30 rankings, swipe to see all columns" tabindex="0">
   <table class="eye-table">
@@ -777,6 +798,20 @@ renderEyeTest();
   }
  });
  hide();
+})();
+</script>
+<script>
+(() => {
+ const info = document.querySelector('.thirsty-info');
+ const button = info.querySelector('button');
+ const close = () => { info.dataset.open = 'false'; button.setAttribute('aria-expanded', 'false'); };
+ button.addEventListener('click', () => {
+  const open = info.dataset.open !== 'true';
+  info.dataset.open = String(open);
+  button.setAttribute('aria-expanded', String(open));
+ });
+ document.addEventListener('pointerdown', event => { if (!info.contains(event.target)) close(); });
+ document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
 })();
 </script>
 </body>
