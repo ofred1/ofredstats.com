@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Ofred’s conference rankings.">
+<title>Conference Rankings | OFred Stats</title>
+<style>
+:root {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #18243c;
+  background: #f5f7fa;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; }
+header { background: white; border-bottom: 1px solid #dde3ed; }
+.nav {
+  max-width: 1320px;
+  padding: 21px 32px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+.brand {
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.brand span { color: #2864da; }
+.navlinks {
+  display: flex;
+  gap: 25px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.navlinks a { text-decoration: none; }
+.navlinks a[aria-current="page"] { color: #2864da; }
+main { max-width: 1320px; margin: auto; padding: 40px 32px; }
+.eyebrow {
+  color: #2864da;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+p { color: #69758b; font-size: 14px; line-height: 1.7; }
+.season {
+  border: 1px solid #d9e1ec;
+  background: white;
+  border-radius: 6px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.panel {
+  background: white;
+  border: 1px solid #dde3ed;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.paneltitle {
+  padding: 28px 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.paneltitle h1 {
+  font-size: 34px;
+  letter-spacing: -1px;
+  margin: 8px 0 0;
+  font-weight: 800;
+}
+.toolbar {
+  padding: 20px 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+input, select, button { font: inherit; }
+input[type=search], select {
+  background: #f8f9fc;
+  border: 1px solid #dce3ed;
+  border-radius: 6px;
+  padding: 11px 13px;
+  font-size: 13px;
+  color: #25344f;
+}
+input[type=search] { min-width: 170px; flex: 1; }
+button { cursor: pointer; }
+.btn {
+  background: white;
+  border: 1px solid #dce3ed;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #25344f;
+  font-size: 12px;
+}
+button:hover { background: #edf3fe; }
+button:focus-visible, a:focus-visible,
+input:focus-visible, select:focus-visible {
+  outline: 2px solid #2864da;
+  outline-offset: 3px;
+}
+.tablewrap { overflow: auto; max-height: 700px; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  white-space: nowrap;
+  text-align: left;
+}
+th {
+  position: sticky;
+  top: 0;
+  background: #f6f8fc;
+  z-index: 1;
+  border-block: 1px solid #e6eaf1;
+}
+th button {
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  color: #68768d;
+  font-weight: 700;
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid #eff2f6;
+  font-size: 12px;
+}
+tr:hover td { background: #f7faff; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.num button { text-align: right; }
+.teamlink {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-weight: 650;
+  color: #172840;
+  font-size: 13px;
+  text-align: left;
+}
+.logoslot {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.logoslot img { width: 100%; height: 100%; object-fit: contain; }
+.logoslot.large { width: 56px; height: 56px; }
+.rankcell { color: #6a7890; }
+.score { font-weight: 750; color: #2864da; background: #f7faff; }
+.count {
+  padding: 15px 24px;
+  color: #748095;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.notice {
+  font-size: 12px;
+  color: #65728a;
+  margin-top: 14px;
+  line-height: 1.6;
+}
+.notice[hidden] { display: none; }
+.method {
+  margin-top: 35px;
+  padding: 25px;
+  background: white;
+  border: 1px solid #dde3ed;
+  border-radius: 9px;
+}
+.method h2 { margin: 0 0 14px; font-size: 25px; }
+.method h3 { font-size: 16px; }
+.method h3 span {
+  font-size: 11px;
+  background: #edf3fe;
+  color: #2864da;
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-left: 8px;
+}
+.formula {
+  font-family: ui-monospace, monospace;
+  font-size: 15px;
+  background: #f2f5fb;
+  border-left: 3px solid #2864da;
+  padding: 17px;
+}
+.method p { max-width: 840px; }
+.method small { color: #748095; line-height: 1.6; display: block; }
+footer {
+  font-size: 11px;
+  color: #8993a4;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 28px 0;
+}
+dialog {
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  max-width: 550px;
+  width: calc(100% - 32px);
+  padding: 26px;
+  color: #18243c;
+}
+dialog::backdrop { background: #13223b70; }
+.dialoghead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.teamheading { display: flex; align-items: center; gap: 14px; }
+.dialoghead h2 { margin: 0; font-size: 23px; }
+.detailgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+.detailgrid div { padding: 16px; background: #f4f7fb; border-radius: 6px; }
+.detailgrid small {
+  display: block;
+  color: #758096;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.detailgrid strong { font-size: 22px; }
+#column-tip {
+  position: fixed;
+  z-index: 100;
+  width: 280px;
+  background: #172840;
+  color: white;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 28px #17284030;
+  pointer-events: none;
+}
+#column-tip strong { display: block; font-size: 12px; margin-bottom: 7px; }
+#column-tip span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #dce6f7;
+}
+.visually-hidden {
+  position: absolute;
+  clip-path: inset(100%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .nav { padding: 18px; gap: 16px; }
+  .navlinks { gap: 14px; font-size: 12px; }
+  main { padding: 28px 16px; }
+  .paneltitle { gap: 12px; }
+  .paneltitle h1 { font-size: 27px; }
+  .paneltitle, .toolbar { padding-left: 16px; padding-right: 16px; }
+  .season { font-size: 11px; padding: 9px; }
+  .count { padding-inline: 16px; }
+  .method { padding: 20px; }
+  .formula { font-size: 12px; }
+  .teamheading { gap: 10px; }
+  .dialoghead h2 { font-size: 19px; }
+}
+.method{margin-top:0}.method h2{font-size:32px}.metricmethod{margin-top:24px} main{max-width:1000px}
+.navlinks { flex-wrap: wrap; }
+.navlinks a { color: #18243c; }
+.navlinks a[aria-current="page"] { color: #2864da; }
+@media (max-width: 650px) { .nav { flex-wrap: wrap; gap: 14px; } }
+
+/* Shared site navigation. */
+.brand { font-size: 28px; }
+.navlinks { font-size: 15px; gap: 26px; }
+.navlinks a { transition: color 140ms ease; }
+.navlinks a:hover, .navlinks a[aria-current="page"]:hover { color: #6b96eb; }
+.navlinks a:focus-visible { outline: 2px solid #6b96eb; outline-offset: 5px; border-radius: 2px; }
+@media (max-width: 700px) {
+ .nav { flex-wrap: wrap; gap: 16px; }
+ .brand { font-size: 26px; }
+ .navlinks { font-size: 14px; gap: 16px; }
+}
+
+/* Shared navigation: current pages are labels, Eye Test opens a submenu. */
+.nav, .navlinks { align-items: center; }
+.navlinks > a, .navlinks > .current-page, .eye-nav > summary { display: inline-flex; align-items: center; min-height: 40px; }
+.current-page { color: #2864da; font-weight: 600; cursor: default; }
+.eye-nav { position: relative; }
+.eye-nav > summary { color: #18243c; font: inherit; font-weight: 600; cursor: pointer; list-style: none; gap: 6px; }
+.eye-nav > summary::-webkit-details-marker { display: none; }
+.eye-nav[data-active="true"] > summary { color: #2864da; }
+.eye-nav > summary:hover, .eye-nav > summary:focus-visible { color: #6b96eb; }
+.nav-chevron { font-size: 11px; }
+.eye-menu { display: none; position: absolute; left: -14px; top: 100%; z-index: 50; min-width: 220px; padding: 8px; background: white; border: 1px solid #dde3ed; border-radius: 9px; box-shadow: 0 10px 28px #18243c15; }
+.eye-nav:hover .eye-menu, .eye-nav:focus-within .eye-menu, .eye-nav[open] .eye-menu { display: grid; gap: 3px; }
+.eye-menu a, .eye-menu .current-page { display: block; padding: 11px 12px; border-radius: 5px; white-space: nowrap; font-size: 14px; text-decoration: none; }
+.eye-menu a:hover { color: #6b96eb; background: #f5f8ff; }
+.eye-menu .current-page { background: #edf3ff; }
+.laymaker-word { display: inline-flex; align-items: center; font-weight: 800; letter-spacing: -.5px; white-space: nowrap; }
+.layup-icon { width: 31px; height: 35px; margin: -6px 1px; flex: 0 0 auto; }
+@media (max-width: 700px) {
+ .navlinks { gap: 18px; }
+ .eye-menu { left: auto; right: -15px; min-width: 200px; }
+}
+
+</style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
+</head>
+<body>
+
+<header>
+  <nav class="nav" aria-label="Main navigation">
+ <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
+ <div class="navlinks">
+ <a href="/index.html">Ofred Rankings</a>
+ <details class="eye-nav" data-active="true">
+  <summary>Eye Test <span class="nav-chevron" aria-hidden="true">▾</span></summary>
+  <div class="eye-menu">
+   <a href="/eye-test.html">Thirsty Thirty</a>
+   <span class="current-page" aria-current="page">Conference Rankings</span>
+  </div>
+ </details>
+ <a href="/laymaker.html"><span class="laymaker-word" aria-label="LAYmaker"><span>LAY</span><svg class="layup-icon" viewBox="0 0 64 72" fill="none" aria-hidden="true"><path d="M8 65 26 47 31 24c.5-3 2-5 5-4 3 .6 4 3 3 6l-2 15 10-12c2-2 5-2 6 0 2 2 1 4-1 6L39 53 21 70Z" fill="#2864da"/><path d="m33 25 2-8m4 9 4-8m0 12 7-6" stroke="#2864da" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="12" r="10" fill="#ed9347" stroke="#182d50" stroke-width="1.6"/><path d="M30 12h20M40 2v20M33 5c8 3 8 11 14 14M47 5c-8 3-8 11-14 14" stroke="#182d50" stroke-width="1.2"/></svg><span>maker</span></span></a>
+ </div>
+</nav>
+</header>
+
+<main>
+  <section class="method" aria-labelledby="conference-rankings-title">
+    <h2 id="conference-rankings-title">Conference Rankings</h2>
+  </section>
+</main>
+
+</body>
+</html>
