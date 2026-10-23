@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="OFred’s personal college basketball rankings.">
-<title>Ofred’s Top 30 | OFred Stats</title>
+<title>Thirsty Thirty | OFred Stats</title>
 <style>
 :root {
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -347,6 +347,43 @@ main, .top30 { min-width: 0; }
  .brand { font-size: 26px; }
  .navlinks { font-size: 14px; gap: 16px; }
 }
+
+/* Shared navigation: current pages are labels, Eye Test opens a submenu. */
+.nav, .navlinks { align-items: center; }
+.navlinks > a, .navlinks > .current-page, .eye-nav > summary { display: inline-flex; align-items: center; min-height: 40px; }
+.current-page { color: #2864da; font-weight: 600; cursor: default; }
+.eye-nav { position: relative; }
+.eye-nav > summary { color: #18243c; font: inherit; font-weight: 600; cursor: pointer; list-style: none; gap: 6px; }
+.eye-nav > summary::-webkit-details-marker { display: none; }
+.eye-nav[data-active="true"] > summary { color: #2864da; }
+.eye-nav > summary:hover, .eye-nav > summary:focus-visible { color: #6b96eb; }
+.nav-chevron { font-size: 11px; }
+.eye-menu { display: none; position: absolute; left: -14px; top: 100%; z-index: 50; min-width: 220px; padding: 8px; background: white; border: 1px solid #dde3ed; border-radius: 9px; box-shadow: 0 10px 28px #18243c15; }
+.eye-nav:hover .eye-menu, .eye-nav:focus-within .eye-menu, .eye-nav[open] .eye-menu { display: grid; gap: 3px; }
+.eye-menu a, .eye-menu .current-page { display: block; padding: 11px 12px; border-radius: 5px; white-space: nowrap; font-size: 14px; text-decoration: none; }
+.eye-menu a:hover { color: #6b96eb; background: #f5f8ff; }
+.eye-menu .current-page { background: #edf3ff; }
+.laymaker-word { display: inline-flex; align-items: center; font-weight: 800; letter-spacing: -.5px; white-space: nowrap; }
+.layup-icon { width: 31px; height: 35px; margin: -6px 1px; flex: 0 0 auto; }
+@media (max-width: 700px) {
+ .navlinks { gap: 18px; }
+ .eye-menu { left: auto; right: -15px; min-width: 200px; }
+}
+
+
+.thirsty-heading { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 14px; align-items: center; }
+.thirsty-heading h1 { grid-column: 2; font-size: clamp(32px,5vw,54px); }
+.weekly-movers { grid-column: 1; grid-row: 1; max-width: 190px; padding: 11px 13px; border: 1px solid #e3e9f2; border-radius: 8px; background: #f8faff; }
+.weekly-movers > div + div { margin-top: 9px; }
+.mover-label { display: block; font-size: 10px; color: #758096; font-weight: 650; letter-spacing: .4px; }
+.weekly-movers strong { display: block; margin-top: 3px; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.riser { color: #168349; } .drop { color: #ca4250; }
+@media (max-width: 700px) {
+ .thirsty-heading { grid-template-columns: 1fr; gap: 10px; }
+ .thirsty-heading h1 { grid-column: 1; grid-row: 1; }
+ .weekly-movers { grid-column: 1; grid-row: 2; max-width: none; display: flex; justify-content: center; gap: 24px; padding: 9px 12px; }
+ .weekly-movers > div + div { margin-top: 0; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -354,19 +391,30 @@ main, .top30 { min-width: 0; }
 
 <header>
   <nav class="nav" aria-label="Main navigation">
-    <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
-    <div class="navlinks">
-      <a href="/index.html">Ofred Rankings</a>
-      <a href="/formulas.html?v=20261022c">Formulas</a>
-      <a href="/laymaker.html">Laymaker</a>
-      <a href="/eye-test.html" aria-current="page">Eye Test</a>
-    </div>
-  </nav>
+ <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
+ <div class="navlinks">
+ <a href="/index.html">Ofred Rankings</a>
+ <details class="eye-nav" data-active="true">
+  <summary>Eye Test <span class="nav-chevron" aria-hidden="true">▾</span></summary>
+  <div class="eye-menu">
+   <span class="current-page" aria-current="page">Thirsty Thirty</span>
+   <a href="/conference-rankings.html">Conference Rankings</a>
+  </div>
+ </details>
+ <a href="/laymaker.html"><span class="laymaker-word" aria-label="LAYmaker"><span>LAY</span><svg class="layup-icon" viewBox="0 0 64 72" fill="none" aria-hidden="true"><path d="M8 65 26 47 31 24c.5-3 2-5 5-4 3 .6 4 3 3 6l-2 15 10-12c2-2 5-2 6 0 2 2 1 4-1 6L39 53 21 70Z" fill="#2864da"/><path d="m33 25 2-8m4 9 4-8m0 12 7-6" stroke="#2864da" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="12" r="10" fill="#ed9347" stroke="#182d50" stroke-width="1.6"/><path d="M30 12h20M40 2v20M33 5c8 3 8 11 14 14M47 5c-8 3-8 11-14 14" stroke="#182d50" stroke-width="1.2"/></svg><span>maker</span></span></a>
+ </div>
+</nav>
 </header>
 
 <main>
  <section class="top30" aria-labelledby="eye-test-title">
-  <h1 id="eye-test-title">TOP <span class="top30-number">30</span></h1>
+  <div class="thirsty-heading">
+  <aside class="weekly-movers" aria-label="Weekly ranking movement">
+   <div><span class="mover-label">Biggest Riser</span><strong class="riser" id="biggest-riser">—</strong></div>
+   <div><span class="mover-label">Biggest Drop</span><strong class="drop" id="biggest-drop">—</strong></div>
+  </aside>
+  <h1 id="eye-test-title">THIRSTY <span class="top30-number">30</span></h1>
+ </div>
   <p class="qualitative">Qualitative rankings from the mind of Ofred.</p>
   <div class="editions" id="editions" role="group" aria-label="Choose a rankings edition"></div>
   <div class="eye-table-scroll" role="region" aria-label="Top 30 rankings, swipe to see all columns" tabindex="0">
@@ -625,6 +673,23 @@ function renderEyeTest() {
  const edition = eyeData.editions[position];
  const previous = position > 0 && eyeData.editions[position - 1].rankings.length
    ? eyeData.editions[position - 1] : null;
+ const movements = previous ? edition.rankings.map(row => {
+  const old = previous.rankings.find(prior => prior.team === row.team);
+  return {team: row.team, change: old ? old.rank - row.rank : null};
+ }).filter(row => row.change !== null) : [];
+ const rises = movements.filter(row => row.change > 0);
+ const drops = movements.filter(row => row.change < 0);
+ function setMover(id, rows, isRise) {
+  const box = document.getElementById(id);
+  if (!previous) { box.textContent = '—'; box.title = 'Available after the next edition'; return; }
+  if (!rows.length) { box.textContent = 'None'; box.title = ''; return; }
+  const best = Math.max(...rows.map(row => Math.abs(row.change)));
+  const leaders = rows.filter(row => Math.abs(row.change) === best);
+  box.textContent = leaders.map(row => row.team).join(' / ') + (isRise ? ' ▲ ' : ' ▼ ') + best;
+  box.title = box.textContent;
+ }
+ setMover('biggest-riser', rises, true);
+ setMover('biggest-drop', drops, false);
  const buttons = document.getElementById('editions');
  buttons.replaceChildren();
  eyeData.editions.forEach(item => {
