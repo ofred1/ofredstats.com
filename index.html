@@ -425,7 +425,7 @@ main { max-width: 1320px; }
 .eye-nav > summary:hover, .eye-nav > summary:focus-visible { color: #6b96eb; }
 .nav-chevron { font-size: 11px; }
 .eye-menu { display: none; position: absolute; left: -14px; top: 100%; z-index: 50; min-width: 220px; padding: 8px; background: white; border: 1px solid #dde3ed; border-radius: 9px; box-shadow: 0 10px 28px #18243c15; }
-.eye-nav:hover .eye-menu, .eye-nav:focus-within .eye-menu, .eye-nav[open] .eye-menu { display: grid; gap: 3px; }
+.eye-nav:hover .eye-menu, .eye-nav[open] .eye-menu { display: grid; gap: 3px; }
 .eye-menu a, .eye-menu .current-page { display: block; padding: 11px 12px; border-radius: 5px; white-space: nowrap; font-size: 14px; text-decoration: none; }
 .eye-menu a:hover { color: #6b96eb; background: #f5f8ff; }
 .eye-menu .current-page { background: #edf3ff; }
@@ -454,7 +454,7 @@ main { max-width: 1320px; }
  <div class="navlinks">
  <span class="current-page" aria-current="page">Ofred Rankings</span>
  <details class="eye-nav">
-  <summary>Eye Test <span class="nav-chevron" aria-hidden="true">▾</span></summary>
+  <summary>Eye Test</summary>
   <div class="eye-menu">
    <a href="/eye-test.html">Thirsty Thirty</a>
    <a href="/conference-rankings.html">Conference Rankings</a>
@@ -971,6 +971,36 @@ loadPublished().catch(error => {
     'Unable to load team rankings. Please try again later.';
   console.error(error);
 });
+</script>
+<script>
+(() => {
+ const menu = document.querySelector('.eye-nav');
+ if (!menu) return;
+ const trigger = menu.querySelector('summary');
+ const sync = () => trigger.setAttribute('aria-expanded', String(menu.open));
+ trigger.setAttribute('aria-controls', 'eye-test-menu');
+ menu.querySelector('.eye-menu').id = 'eye-test-menu';
+ trigger.addEventListener('click', event => {
+  event.preventDefault();
+  menu.open = true;
+  sync();
+ });
+ document.addEventListener('click', event => {
+  if (!menu.contains(event.target)) {
+   menu.open = false;
+   sync();
+   if (menu.contains(document.activeElement)) document.activeElement.blur();
+  }
+ });
+ document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+   menu.open = false;
+   sync();
+   if (menu.contains(document.activeElement)) document.activeElement.blur();
+  }
+ });
+ sync();
+})();
 </script>
 </body>
 </html>
