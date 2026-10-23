@@ -413,6 +413,36 @@ main { max-width: 1320px; }
  .brand { font-size: 26px; }
  .navlinks { font-size: 14px; gap: 16px; }
 }
+
+/* Shared navigation: current pages are labels, Eye Test opens a submenu. */
+.nav, .navlinks { align-items: center; }
+.navlinks > a, .navlinks > .current-page, .eye-nav > summary { display: inline-flex; align-items: center; min-height: 40px; }
+.current-page { color: #2864da; font-weight: 600; cursor: default; }
+.eye-nav { position: relative; }
+.eye-nav > summary { color: #18243c; font: inherit; font-weight: 600; cursor: pointer; list-style: none; gap: 6px; }
+.eye-nav > summary::-webkit-details-marker { display: none; }
+.eye-nav[data-active="true"] > summary { color: #2864da; }
+.eye-nav > summary:hover, .eye-nav > summary:focus-visible { color: #6b96eb; }
+.nav-chevron { font-size: 11px; }
+.eye-menu { display: none; position: absolute; left: -14px; top: 100%; z-index: 50; min-width: 220px; padding: 8px; background: white; border: 1px solid #dde3ed; border-radius: 9px; box-shadow: 0 10px 28px #18243c15; }
+.eye-nav:hover .eye-menu, .eye-nav:focus-within .eye-menu, .eye-nav[open] .eye-menu { display: grid; gap: 3px; }
+.eye-menu a, .eye-menu .current-page { display: block; padding: 11px 12px; border-radius: 5px; white-space: nowrap; font-size: 14px; text-decoration: none; }
+.eye-menu a:hover { color: #6b96eb; background: #f5f8ff; }
+.eye-menu .current-page { background: #edf3ff; }
+.laymaker-word { display: inline-flex; align-items: center; font-weight: 800; letter-spacing: -.5px; white-space: nowrap; }
+.layup-icon { width: 31px; height: 35px; margin: -6px 1px; flex: 0 0 auto; }
+@media (max-width: 700px) {
+ .navlinks { gap: 18px; }
+ .eye-menu { left: auto; right: -15px; min-width: 200px; }
+}
+
+.see-also { grid-column: 1; grid-row: 1; margin: 0; font-size: 12px; text-align: left; }
+.see-also a { color: #2864da; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 650px) {
+ .see-also { grid-column: 1; grid-row: 3; justify-self: center; font-size: 11px; }
+ .rankings-heading { grid-row: 1; }
+ .paneltitle .season { grid-row: 2; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -420,19 +450,25 @@ main { max-width: 1320px; }
 
 <header>
   <nav class="nav" aria-label="Main navigation">
-    <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
-    <div class="navlinks">
-      <a href="/index.html" aria-current="page">Ofred Rankings</a>
-      <a href="/formulas.html?v=20261022c">Formulas</a>
-      <a href="/laymaker.html">Laymaker</a>
-      <a href="/eye-test.html">Eye Test</a>
-    </div>
-  </nav>
+ <span class="brand">OFred<span>Stats.</span></span>
+ <div class="navlinks">
+ <span class="current-page" aria-current="page">Ofred Rankings</span>
+ <details class="eye-nav">
+  <summary>Eye Test <span class="nav-chevron" aria-hidden="true">▾</span></summary>
+  <div class="eye-menu">
+   <a href="/eye-test.html">Thirsty Thirty</a>
+   <a href="/conference-rankings.html">Conference Rankings</a>
+  </div>
+ </details>
+ <a href="/laymaker.html"><span class="laymaker-word" aria-label="LAYmaker"><span>LAY</span><svg class="layup-icon" viewBox="0 0 64 72" fill="none" aria-hidden="true"><path d="M8 65 26 47 31 24c.5-3 2-5 5-4 3 .6 4 3 3 6l-2 15 10-12c2-2 5-2 6 0 2 2 1 4-1 6L39 53 21 70Z" fill="#2864da"/><path d="m33 25 2-8m4 9 4-8m0 12 7-6" stroke="#2864da" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="12" r="10" fill="#ed9347" stroke="#182d50" stroke-width="1.6"/><path d="M30 12h20M40 2v20M33 5c8 3 8 11 14 14M47 5c-8 3-8 11-14 14" stroke="#182d50" stroke-width="1.2"/></svg><span>maker</span></span></a>
+ </div>
+</nav>
 </header>
 
 <main>
   <section class="panel" id="rankings">
     <div class="paneltitle">
+      <p class="see-also">See Also: <a href="/eye-test.html">Thirsty Thirty</a></p>
       <div class="rankings-heading">
         <div class="eyebrow">Division I</div>
         <h1>Team Rankings</h1>
