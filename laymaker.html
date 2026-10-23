@@ -306,16 +306,17 @@ dialog::backdrop { background: #13223b70; }
 
 /* Shared navigation: current pages are labels, Eye Test opens a submenu. */
 .nav, .navlinks { align-items: center; }
-.navlinks > a, .navlinks > .current-page, .eye-nav > summary { display: inline-flex; align-items: center; min-height: 40px; }
+.navlinks > a, .navlinks > .current-page, .eye-nav > .eye-trigger { display: inline-flex; align-items: center; min-height: 40px; }
 .current-page { color: #2864da; font-weight: 600; cursor: default; }
 .eye-nav { position: relative; }
-.eye-nav > summary { color: #18243c; font: inherit; font-weight: 600; cursor: pointer; list-style: none; gap: 6px; }
-.eye-nav > summary::-webkit-details-marker { display: none; }
-.eye-nav[data-active="true"] > summary { color: #2864da; }
-.eye-nav > summary:hover, .eye-nav > summary:focus-visible { color: #6b96eb; }
+.eye-nav > .eye-trigger { color: #18243c; font: inherit; font-weight: 600; cursor: pointer; list-style: none; gap: 6px; }
+.eye-nav > .eye-trigger::-webkit-details-marker { display: none; }
+.eye-nav[data-active="true"] > .eye-trigger { color: #2864da; }
+.eye-nav > .eye-trigger:hover, .eye-nav > .eye-trigger:focus-visible { color: #6b96eb; }
 .nav-chevron { font-size: 11px; }
 .eye-menu { display: none; position: absolute; left: -14px; top: 100%; z-index: 50; min-width: 220px; padding: 8px; background: white; border: 1px solid #dde3ed; border-radius: 9px; box-shadow: 0 10px 28px #18243c15; }
-.eye-nav:hover .eye-menu, .eye-nav[open] .eye-menu { display: grid; gap: 3px; }
+.eye-menu:not([hidden]) { display: grid; gap: 3px; }
+.eye-menu[hidden] { display: none !important; }
 .eye-menu a, .eye-menu .current-page { display: block; padding: 11px 12px; border-radius: 5px; white-space: nowrap; font-size: 14px; text-decoration: none; }
 .eye-menu a:hover { color: #6b96eb; background: #f5f8ff; }
 .eye-menu .current-page { background: #edf3ff; }
@@ -327,6 +328,7 @@ dialog::backdrop { background: #13223b70; }
 }
 
 .laymaker-title .layup-icon { width: 48px; height: 56px; margin: -6px 4px; }
+.eye-trigger { border: 0; padding: 0; background: transparent; font-family: inherit; }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -337,13 +339,13 @@ dialog::backdrop { background: #13223b70; }
  <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
  <div class="navlinks">
  <a href="/index.html">Ofred Rankings</a>
- <details class="eye-nav">
-  <summary>Eye Test</summary>
-  <div class="eye-menu">
+ <div class="eye-nav">
+  <button type="button" class="eye-trigger" aria-expanded="false" aria-controls="eye-test-menu">Eye Test</button>
+  <div class="eye-menu" id="eye-test-menu" hidden>
    <a href="/eye-test.html">Thirsty Thirty</a>
    <a href="/conference-rankings.html">Conference Rankings</a>
   </div>
- </details>
+ </div>
  <span class="current-page" aria-current="page"><span class="laymaker-word" aria-label="LAYmaker"><span>LAY</span><svg class="layup-icon" viewBox="0 0 64 72" fill="none" aria-hidden="true"><path d="M8 65 26 47 31 24c.5-3 2-5 5-4 3 .6 4 3 3 6l-2 15 10-12c2-2 5-2 6 0 2 2 1 4-1 6L39 53 21 70Z" fill="#2864da"/><path d="m33 25 2-8m4 9 4-8m0 12 7-6" stroke="#2864da" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="12" r="10" fill="#ed9347" stroke="#182d50" stroke-width="1.6"/><path d="M30 12h20M40 2v20M33 5c8 3 8 11 14 14M47 5c-8 3-8 11-14 14" stroke="#182d50" stroke-width="1.2"/></svg><span>maker</span></span></span>
  </div>
 </nav>
@@ -355,34 +357,36 @@ dialog::backdrop { background: #13223b70; }
   </section>
 </main>
 
-<script>
+<script data-eye-navigation="v3">
 (() => {
- const menu = document.querySelector('.eye-nav');
- if (!menu) return;
- const trigger = menu.querySelector('summary');
- const sync = () => trigger.setAttribute('aria-expanded', String(menu.open));
- trigger.setAttribute('aria-controls', 'eye-test-menu');
- menu.querySelector('.eye-menu').id = 'eye-test-menu';
- trigger.addEventListener('click', event => {
-  event.preventDefault();
-  menu.open = true;
-  sync();
+ const nav = document.querySelector('.eye-nav');
+ if (!nav) return;
+ const trigger = nav.querySelector('.eye-trigger');
+ const panel = nav.querySelector('.eye-menu');
+ let pinned = false;
+ const show = () => { panel.hidden = false; trigger.setAttribute('aria-expanded', 'true'); };
+ const hide = () => { panel.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
+ nav.addEventListener('mouseenter', show);
+ nav.addEventListener('mouseleave', () => { if (!pinned) hide(); });
+ trigger.addEventListener('click', () => { pinned = true; show(); });
+ nav.addEventListener('focusin', show);
+ nav.addEventListener('focusout', event => {
+  if (!pinned && !nav.contains(event.relatedTarget)) hide();
+ });
+ document.addEventListener('pointerdown', event => {
+  if (!nav.contains(event.target)) { pinned = false; hide(); }
  });
  document.addEventListener('click', event => {
-  if (!menu.contains(event.target)) {
-   menu.open = false;
-   sync();
-   if (menu.contains(document.activeElement)) document.activeElement.blur();
-  }
+  if (!nav.contains(event.target)) { pinned = false; hide(); }
  });
  document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
-   menu.open = false;
-   sync();
-   if (menu.contains(document.activeElement)) document.activeElement.blur();
+   pinned = false;
+   if (nav.contains(document.activeElement)) trigger.focus();
+   hide();
   }
  });
- sync();
+ hide();
 })();
 </script>
 </body>
