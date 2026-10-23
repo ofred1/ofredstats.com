@@ -168,6 +168,87 @@ calculate_pace <- function(games) {
   out
 }
 
+# Frozen pre-day opponent values; later games never change saved contributions.
+calculate_frozen_sos <- function(games, roster, saved = NULL) {
+  version <- "pregame-average-v1"
+  if (!is.null(saved) && !identical(saved$version, version))
+    stop("SOS cache has a different model version; review before publishing.")
+  required <- c("game_id", "team_id", "opponent_id", "start_date")
+  if (!all(required %in% names(games))) stop("SOS needs game IDs, opponent IDs and start dates.")
+  dates <- if (inherits(games$start_date, "POSIXt")) games$start_date else
+    as.POSIXct(as.character(games$start_date), format = "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
+  if (anyNA(dates)) stop("Could not parse SOS game start dates; exports unchanged.")
+  days <- as.Date(dates, tz = "America/New_York")
+  ids <- roster$team_id[is.finite(roster$team_id)]
+  eligible <- games$team_id %in% ids
+  ledger <- if (is.null(saved)) data.frame(game_id = numeric(), team_id = numeric(),
+    opponent_id = numeric(), snapshot_date = character(), opponent_rank = integer(),
+    contribution = numeric()) else saved$ledger
+  snapshots <- if (is.null(saved)) list() else saved$snapshots
+  key <- function(x) paste(x$game_id, x$team_id, sep = ":")
+  if (anyDuplicated(key(ledger)) || any(!is.finite(ledger$contribution) |
+      abs(ledger$contribution) > 1)) stop("Invalid frozen SOS ledger.")
+  pending <- which(eligible & !key(games) %in% key(ledger))
+  for (day in sort(unique(as.character(days[pending])))) {
+    rows <- pending[as.character(days[pending]) == day]
+    if (is.null(snapshots[[day]])) {
+      # Exclude every result on the game date; snapshots are pre-day, Eastern time.
+      prior <- games[days < as.Date(day), , drop = FALSE]
+      n <- nrow(roster)
+      net <- rep(NA_real_, n)
+      if (nrow(prior)) {
+        adjusted <- calculate_adjusted_efficiencies(prior, ids)
+        if (identical(adjusted$diagnostics$status, "not_converged"))
+          stop("Historical SOS adjustment did not converge; frozen values unchanged.")
+        net <- adjusted$ratings$adjusted_efficiency_margin[
+          match(roster$team_id, adjusted$ratings$team_id)]
+      }
+      net_rank <- rank(-net, ties.method = "average", na.last = "keep")
+      # No usable D1 efficiency data yet: fall back to the team's preseason rank.
+      net_rank[!is.finite(net_rank)] <- roster$preseason_rank[!is.finite(net_rank)]
+      counts <- vapply(roster$team_id, function(id) {
+        if (!is.finite(id)) return(0L)
+        as.integer(sum(prior$team_id == id))
+      }, integer(1))
+      weight <- pmax(0.5, 1 - counts / 12)
+      blended <- weight * roster$preseason_rank + (1 - weight) * net_rank
+      order_ids <- order(blended, roster$preseason_rank, roster$team)
+      opponent_rank <- integer(n)
+      opponent_rank[order_ids] <- seq_len(n)
+      snapshots[[day]] <- data.frame(team_id = roster$team_id, team = roster$team,
+        preseason_rank = roster$preseason_rank, net_rank = net_rank,
+        prior_games = counts, preseason_weight = weight, blended_rank = blended,
+        opponent_rank = opponent_rank,
+        contribution = 1 - 2 * (opponent_rank - 1) / (n - 1))
+      message("Saved pregame SOS snapshot for ", day)
+    }
+    snapshot <- snapshots[[day]]
+    for (i in rows) {
+      if (is.na(games$opponent_id[i])) stop("Missing SOS opponent ID.")
+      opponent <- match(games$opponent_id[i], snapshot$team_id)
+      if (is.na(opponent) && "opponent_conference" %in% names(games) &&
+          !is.na(games$opponent_conference[i]) && nzchar(trimws(games$opponent_conference[i])))
+        stop("Unmatched D1 SOS opponent: ", games$opponent_id[i])
+      ledger <- rbind(ledger, data.frame(game_id = games$game_id[i],
+        team_id = games$team_id[i], opponent_id = games$opponent_id[i],
+        snapshot_date = day,
+        opponent_rank = if (is.na(opponent)) NA_integer_ else snapshot$opponent_rank[opponent],
+        contribution = if (is.na(opponent)) -0.99 else snapshot$contribution[opponent]))
+    }
+  }
+  output <- data.frame(team_id = ids, strength_of_schedule = NA_real_, sos_games = 0L)
+  current_keys <- key(games[eligible, , drop = FALSE])
+  for (i in seq_len(nrow(output))) {
+    values <- ledger$contribution[ledger$team_id == output$team_id[i] & key(ledger) %in% current_keys]
+    output$sos_games[i] <- length(values)
+    if (length(values)) output$strength_of_schedule[i] <- mean(values)
+  }
+  list(ratings = output, state = list(version = version, ledger = ledger,
+    snapshots = snapshots, timezone = "America/New_York",
+    snapshot_rule = "Before each Eastern day; only earlier completed games"))
+}
+
+
 update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
             length(season) == 1L, is.finite(season), season == as.integer(season),
@@ -183,6 +264,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   games_path <- sprintf("data/all_games_%s.rds", season)
   teams_path <- sprintf("data/team_stats_%s.rds", season)
   state_path <- sprintf("data/update_state_%s.rds", season)
+  sos_path <- sprintf("data/frozen_sos_%s.rds", season)
 
   export_path <- sprintf("rankings_%s.json", season)
   status_path <- sprintf("season_status_%s.json", season)
@@ -396,6 +478,17 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
                    "preseason_average_rank", "preseason_score")) {
     rankings[[column]] <- base[[column]][match_id]
   }
+  # SOS has its own permanent 50% preseason floor; overall ranking decay is unchanged.
+  sos_roster <- data.frame(team = base$team, team_id = base$team_id,
+                           preseason_rank = base$rank)
+  current_ids <- team_stats$team_id[match(team_key(sos_roster$team), team_key(team_stats$team))]
+  sos_roster$team_id[!is.na(current_ids)] <- current_ids[!is.na(current_ids)]
+  if (anyDuplicated(sos_roster$team_id[is.finite(sos_roster$team_id)]))
+    stop("Duplicate team IDs in SOS roster.")
+  sos_saved <- if (file.exists(sos_path)) readRDS(sos_path) else NULL
+  if (is.null(sos_saved)) message("Initializing frozen SOS history from pre-day results.")
+  sos <- calculate_frozen_sos(all_games, sos_roster, sos_saved)
+  rankings <- merge(rankings, sos$ratings, by = "team_id", all.x = TRUE)
   # Completed season games drive the decay, including games missing PPT data.
   rankings$preseason_weight <- pmax(0, (12 - rankings$games) / 12)
   rankings$inseason_score <- NA_real_
@@ -439,6 +532,11 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   payload <- list(status = if (model_configured) "ready" else "preseason_projection",
                   overall_model_configured = model_configured,
+                  sos_formula = "mean(frozen pregame opponent contributions)",
+                  sos_opponent_value_formula = "1 - 2 * (opponent_rank - 1) / (D1_team_count - 1)",
+                  sos_preseason_weight_formula = "max(0.5, 1 - opponent_prior_games / 12)",
+                  sos_snapshot_rule = "Before each Eastern-calendar day; only earlier completed games",
+                  sos_non_d1_value = -0.99,
                   adjusted_efficiency_model = "OFred additive, D1-only, equal game weights, one baseline pseudo-game",
                   adjusted_efficiency_diagnostics = adjusted$diagnostics,
                   pace_formula = "40 * sum(team_estimated_possessions) / sum(game_minutes)",
@@ -467,6 +565,8 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
     save_rds(team_stats, teams_path)
     save_rds(list(checked_through = as.character(finish - 1L), source_updated_at = source_updated), state_path)
   }
+  # Retain this file: it preserves opponent values already locked for played games.
+  save_rds(sos$state, sos_path)
   replace_file(temp_json, export_path)
   write_json_safe(list(season = season, status = "ready", export = export_path,
                        exported_at = payload$exported_at), status_path)
