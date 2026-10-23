@@ -249,6 +249,170 @@ calculate_frozen_sos <- function(games, roster, saved = NULL) {
 }
 
 
+# Clutch qualification uses regulation's last three minutes, not final margin alone.
+classify_clutch_game <- function(plays, home_points, away_points, game_minutes = NA_real_) {
+  overtime <- if (is.finite(game_minutes) && game_minutes >= 40) game_minutes > 40 else NA
+  flag <- NA
+  if (isTRUE(overtime)) return(list(clutch = TRUE, overtime = TRUE))
+  if (is.finite(home_points) && is.finite(away_points) &&
+      abs(home_points - away_points) <= 3) flag <- TRUE
+  if (!is.data.frame(plays) || !nrow(plays) ||
+      !all(c("period", "clock", "home_score", "away_score") %in% names(plays)))
+    return(list(clutch = flag, overtime = overtime))
+  period <- suppressWarnings(as.numeric(plays$period))
+  if (any(period >= 3, na.rm = TRUE)) return(list(clutch = TRUE, overtime = TRUE))
+  # Read the period clock directly; seconds_remaining may describe the whole game.
+  clocks <- strsplit(as.character(plays$clock), ":", fixed = TRUE)
+  seconds <- vapply(clocks, function(x) {
+    if (length(x) != 2L) return(NA_real_)
+    v <- suppressWarnings(as.numeric(x))
+    if (any(!is.finite(v)) || v[1] < 0 || v[2] < 0 || v[2] >= 60) return(NA_real_)
+    60 * v[1] + v[2]
+  }, numeric(1))
+  home <- suppressWarnings(as.numeric(plays$home_score))
+  away <- suppressWarnings(as.numeric(plays$away_score))
+  valid <- is.finite(period) & period == 2 & is.finite(seconds) &
+    seconds >= 0 & seconds <= 1200 & is.finite(home) & home >= 0 &
+    is.finite(away) & away >= 0
+  # Keep API order at equal clock times (e.g. consecutive free throws).
+  rows <- which(valid)
+  rows <- rows[order(-seconds[rows], rows)]
+  inside <- rows[seconds[rows] <= 180]
+  before <- rows[seconds[rows] > 180]
+  if (length(inside) && any(abs(home[inside] - away[inside]) <= 3)) flag <- TRUE
+  # The last state above 3:00 carries forward until the next recorded play.
+  if (length(before) && length(inside)) {
+    boundary <- tail(before, 1L)
+    if (abs(home[boundary] - away[boundary]) <= 3) flag <- TRUE
+  }
+  ends <- rows[seconds[rows] == 0]
+  end_matches <- length(ends) > 0 && is.finite(home_points) && is.finite(away_points) &&
+    home[tail(ends, 1L)] == home_points && away[tail(ends, 1L)] == away_points
+  # A final regulation score matching the box score establishes no overtime.
+  if (is.na(overtime) && end_matches) overtime <- FALSE
+  # Never call a game non-clutch without coverage spanning the full window.
+  window_rows <- which(is.finite(period) & period == 2 &
+    is.finite(seconds) & seconds <= 180 & seconds >= 0)
+  window_valid <- length(window_rows) > 0 && all(valid[window_rows])
+  covered <- length(before) > 0 || any(seconds[rows] == 180)
+  if (is.na(flag) && covered && window_valid && end_matches && identical(overtime, FALSE))
+    flag <- FALSE
+  list(clutch = flag, overtime = overtime)
+}
+
+calculate_clutch <- function(games, team_ids, season, mode, cache_path, save_cache) {
+  number <- function(x, ...) {
+    for (key in list(...)) {
+      if (!is.list(x) || is.null(x[[key]])) return(NA_real_)
+      x <- x[[key]]
+    }
+    if (length(x) != 1L) return(NA_real_)
+    suppressWarnings(as.numeric(x))
+  }
+  version <- "clutch-final-three-v1"
+  cache <- if (file.exists(cache_path)) readRDS(cache_path) else
+    list(version = version, games = list(), date_checks = list())
+  if (!identical(cache$version, version)) stop("Clutch cache version mismatch.")
+  relevant <- games[games$team_id %in% team_ids, , drop = FALSE]
+  metadata <- relevant[!duplicated(relevant$game_id), , drop = FALSE]
+  if (!all(c("is_home", "opponent_stats", "start_date") %in% names(metadata)))
+    stop("Clutch needs home/away identity, opponent box scores and game dates.")
+  metadata$own_points <- vapply(metadata$team_stats, number, numeric(1), "points", "total")
+  metadata$other_points <- vapply(metadata$opponent_stats, number, numeric(1), "points", "total")
+  metadata$home_points <- ifelse(metadata$is_home, metadata$own_points, metadata$other_points)
+  metadata$away_points <- ifelse(metadata$is_home, metadata$other_points, metadata$own_points)
+  metadata$minutes <- if ("game_minutes" %in% names(metadata))
+    as.numeric(metadata$game_minutes) else rep(NA_real_, nrow(metadata))
+  metadata$utc_date <- substr(as.character(metadata$start_date), 1L, 10L)
+  ids <- as.character(metadata$game_id)
+  complete <- function(x) !is.null(x) && !is.na(x$clutch) &&
+    (!isTRUE(x$clutch) || !is.na(x$overtime))
+  for (i in seq_len(nrow(metadata))) {
+    old <- cache$games[[ids[i]]]
+    # Re-evaluate if a provider correction changes the final score or duration.
+    signature <- paste(metadata$home_points[i], metadata$away_points[i], metadata$minutes[i])
+    if (!is.null(old) && !identical(old$signature, signature)) old <- NULL
+    if (!complete(old)) {
+      result <- classify_clutch_game(if (is.null(old)) NULL else old$plays, metadata$home_points[i],
+        metadata$away_points[i], metadata$minutes[i])
+      result$signature <- signature
+      cache$games[[ids[i]]] <- result
+    }
+  }
+  missing <- which(!vapply(ids, function(id) complete(cache$games[[id]]), logical(1)))
+  today <- as.character(as.Date(Sys.time(), tz = "UTC"))
+  if (mode != "cached" && length(missing)) {
+    requests <- 0L
+    # Prioritize recent dates; cap catch-up work to protect the API allowance.
+    for (day in sort(unique(metadata$utc_date[missing]), decreasing = TRUE)) {
+      if (requests >= 14L) { message("Clutch download cap reached; catch-up continues next run."); break }
+      # A missing day's data is retried at most once per calendar day.
+      last_check <- cache$date_checks[[day]]
+      if (identical(last_check, today)) next
+      # Old missing dates retry weekly, rather than consuming requests every day.
+      if (!is.null(last_check) && as.Date(day) < as.Date(today) - 7L &&
+          as.Date(last_check) > as.Date(today) - 7L) next
+      requests <- requests + 1L
+      message("Downloading clutch play-by-play for ", day)
+      fetched <- tryCatch(cbbdr::get_plays_by_date(date = day, shooting_plays_only = FALSE),
+        error = function(e) {
+          warning("Clutch play-by-play unavailable for ", day, ": ", conditionMessage(e))
+          NULL
+        })
+      cache$date_checks[[day]] <- today
+      for (i in which(metadata$utc_date == day)) {
+        if (complete(cache$games[[ids[i]]])) next
+        plays <- if (is.data.frame(fetched) && "game_id" %in% names(fetched))
+          fetched[fetched$game_id == metadata$game_id[i] & !is.na(fetched$game_id), , drop = FALSE] else NULL
+        # Retain only fields needed for classification and offline checks.
+        if (is.data.frame(plays)) plays <- plays[, intersect(names(plays),
+          c("id", "game_id", "period", "clock", "home_score", "away_score")), drop = FALSE]
+        result <- classify_clutch_game(plays, metadata$home_points[i],
+          metadata$away_points[i], metadata$minutes[i])
+        result$signature <- cache$games[[ids[i]]]$signature
+        result$plays <- plays
+        cache$games[[ids[i]]] <- result
+      }
+      save_cache(cache, cache_path)
+    }
+  }
+  save_cache(cache, cache_path)
+  out <- data.frame(team_id = unique(team_ids), clutch_factor = NA_real_,
+    clutch_games = 0L, clutch_wins = 0L, clutch_losses = 0L,
+    clutch_overtime_games = 0L, clutch_bonus = 0,
+    clutch_games_checked = 0L, clutch_games_pending = 0L)
+  for (i in seq_len(nrow(out))) {
+    rows <- relevant[relevant$team_id == out$team_id[i], , drop = FALSE]
+    if (!nrow(rows)) next
+    own <- vapply(rows$team_stats, number, numeric(1), "points", "total")
+    other <- vapply(rows$opponent_stats, number, numeric(1), "points", "total")
+    usable <- is.finite(own) & is.finite(other) & own != other
+    checked <- vapply(as.character(rows$game_id), function(id) complete(cache$games[[id]]), logical(1)) & usable
+    out$clutch_games_checked[i] <- sum(checked)
+    out$clutch_games_pending[i] <- sum(!checked)
+    flags <- vapply(as.character(rows$game_id), function(id) isTRUE(cache$games[[id]]$clutch), logical(1)) & checked
+    n <- sum(flags)
+    ot <- sum(vapply(as.character(rows$game_id[flags]), function(id)
+      isTRUE(cache$games[[id]]$overtime), logical(1)))
+    wins <- sum(own[flags] > other[flags])
+    losses <- n - wins
+    bonus <- 0.2 * (n - ot) + 0.4 * ot
+    out$clutch_games[i] <- n
+    out$clutch_wins[i] <- wins
+    out$clutch_losses[i] <- losses
+    out$clutch_overtime_games[i] <- ot
+    out$clutch_bonus[i] <- bonus
+    # Avoid publishing a biased average when some games remain unclassified.
+    if (!out$clutch_games_pending[i]) out$clutch_factor[i] <-
+      if (n) (wins - losses) / n + bonus else 0
+  }
+  pending <- sum(out$clutch_games_pending)
+  if (pending) warning("CLUTCH remains blank for teams with unclassified games (",
+                       pending, " team-game records). Other statistics still update.")
+  out
+}
+
+
 update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
             length(season) == 1L, is.finite(season), season == as.integer(season),
@@ -265,6 +429,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   teams_path <- sprintf("data/team_stats_%s.rds", season)
   state_path <- sprintf("data/update_state_%s.rds", season)
   sos_path <- sprintf("data/frozen_sos_%s.rds", season)
+  clutch_path <- sprintf("data/clutch_%s.rds", season)
 
   export_path <- sprintf("rankings_%s.json", season)
   status_path <- sprintf("season_status_%s.json", season)
@@ -431,6 +596,8 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
                     by = "team_id", all.x = TRUE)
   rankings$games_rated[is.na(rankings$games_rated)] <- 0L
   rankings <- merge(rankings, calculate_pace(all_games), by = "team_id", all.x = TRUE)
+  clutch <- calculate_clutch(all_games, teams$team_id, season, mode, clutch_path, save_rds)
+  rankings <- merge(rankings, clutch, by = "team_id", all.x = TRUE)
   efficiency <- calculate_raw_efficiencies(all_games)
   rankings <- merge(rankings, efficiency, by = "team_id", all.x = TRUE)
   rankings$offense_eff_games[is.na(rankings$offense_eff_games)] <- 0L
@@ -532,6 +699,10 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   payload <- list(status = if (model_configured) "ready" else "preseason_projection",
                   overall_model_configured = model_configured,
+                  clutch_formula = "(clutch_wins - clutch_losses) / clutch_games + 0.2 * regulation_clutch_games + 0.4 * overtime_clutch_games",
+                  clutch_definition = "Margin <= 3 at any point with 3:00 or less in regulation second half; overtime qualifies",
+                  clutch_no_qualifying_games = 0,
+                  clutch_incomplete_coverage = "Unavailable until all completed team games are classified",
                   sos_formula = "mean(frozen pregame opponent contributions)",
                   sos_opponent_value_formula = "1 - 2 * (opponent_rank - 1) / (D1_team_count - 1)",
                   sos_preseason_weight_formula = "max(0.5, 1 - opponent_prior_games / 12)",
