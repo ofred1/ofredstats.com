@@ -468,6 +468,17 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
  header .eye-menu a, header .eye-menu .current-page { font-size: 14px; }
 }
 
+
+.detail-value { display: inline-flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.detailgrid .detail-stat-rank { font-size: 11px; font-weight: 600; line-height: 1; color: #687e9d; white-space: nowrap; }
+
+
+.toolbar { align-items: flex-end; }
+.filter-conference { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.conference-reference { margin: 0; font-size: 10px; line-height: 1.3; text-align: left; }
+.conference-reference a { color: #2864da; text-decoration: underline; text-underline-offset: 2px; }
+.filter-conference select { width: 100%; }
+@media (max-width: 700px) { .filter-conference { flex: 1; } }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -503,9 +514,12 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
 
     <div class="toolbar">
       <input type="search" id="search" placeholder="Search a team…" aria-label="Search teams">
+      <div class="filter-conference">
+        <p class="conference-reference">See <a href="/conference-rankings.html">Conference Rankings</a></p>
       <select id="conference" aria-label="Filter conference">
         <option value="">All conferences</option>
       </select>
+      </div>
       <button class="btn" id="clear">Clear filters</button>
     </div>
 
@@ -674,10 +688,10 @@ const $ = id => document.getElementById(id);
 const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","CLUTCH"],["ofs","OFS"]];
 
 const definitions = {
-  clutch_factor: ['Clutch factor', 'A clutch game reaches a margin of 3 or fewer in the final 3:00 of regulation. CLUTCH = (clutch wins − clutch losses) ÷ clutch games + 0.2 per regulation clutch game + 0.4 per overtime game. No double-counted bonus for overtime. Zero if no clutch games; blank while game coverage is incomplete.'],
-  strength_of_schedule: ['Strength of schedule', 'Average opponent difficulty, from −1 to +1. Opponent values are frozen before each game day using blended preseason and net-rating ranks. Preseason weight stays at least 50%; non-D1 opponents count as −0.99. Higher means a tougher schedule.'],
-  pace: ['Pace', 'Estimated possessions per 40 minutes. Possessions = FGA + 0.44 × FTA − offensive rebounds + turnovers. Uses only this team’s stats and adjusts for overtime. Not adjusted for opponent strength.'],
-  net_rating: ['Net rating', 'Adjusted offensive efficiency − adjusted defensive efficiency. Expected point margin per 100 possessions against an average opponent. Higher is better.'],
+  clutch_factor: ['Clutch factor', 'Measures projected ability to win close games. Higher number is better.'],
+  strength_of_schedule: ['Strength of schedule', 'Measures opponent difficulty, from -1 to 1. Higher is better.'],
+  pace: ['Pace', 'Estimated possessions per 40 minutes. Not adjusted for opponent strength.'],
+  net_rating: ['Net rating', 'Expected point margin per 100 possessions against an average opponent. Higher is better.'],
   adjusted_offensive_efficiency: ['Offensive efficiency', 'Points scored per 100 possessions, adjusted for opponent defensive strength. Higher is better.'],
   adjusted_defensive_efficiency: ['Defensive efficiency', 'Points allowed per 100 possessions, adjusted for opponent offensive strength. Lower is better.'],
   kenpom_preseason_rank: ['KenPom preseason rank', 'Frozen 2026–27 preseason team rank from KenPom.'],
@@ -749,12 +763,9 @@ function value(row, key) {
 
 function fmt(value, key) {
   if (value == null) return '—';
-
   if (typeof value === 'number' &&
-      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) {
-    return value.toFixed(2);
-  }
-
+      ['ppg', 'rating', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency',
+       'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) return value.toFixed(2);
   return String(value);
 }
 
@@ -939,47 +950,59 @@ function render() {
     `${rows.length} of ${dataset.rankings.length} teams`;
 }
 
+// Rank each statistic against the full Division I dataset, never a filtered table.
+let activeDetailTeam = null;
+function divisionStatRank(row, key, lowerIsBetter = false) {
+  const rows = typeof dataset !== 'undefined' && dataset ? dataset.rankings
+    : (typeof detailRankings !== 'undefined' ? detailRankings : []);
+  const stat = row[key];
+  if (!Number.isFinite(stat)) return null;
+  const eligible = rows.filter(team => Number.isFinite(team[key]));
+  if (!eligible.length) return null;
+  return 1 + eligible.filter(team => lowerIsBetter ? team[key] < stat : team[key] > stat).length;
+}
 function showTeam(row) {
+  activeDetailTeam = row.team;
   $('detaillogo').replaceChildren(makeLogo(row, true));
   const details = teamDetails[teamLogoIds[row.team]];
-  $('detailname').textContent = details
-    ? `${details.school} ${details.mascot}`
-    : row.team;
-  $('detailconf').textContent =
-    (row.conference || 'Conference unavailable') +
+  $('detailname').textContent = details ? `${details.school} ${details.mascot}` : row.team;
+  $('detailconf').textContent = (row.conference || 'Conference unavailable') +
     ' · ' + value(row, 'record') + ' record';
-
   $('detailstats').replaceChildren();
-
   const stats = [
-    ['Overall rank', fmt(row.rank, 'rank')],
-    ['Offensive efficiency', fmt(row.adjusted_offensive_efficiency, 'adjusted_offensive_efficiency')],
-    ['Defensive efficiency', fmt(row.adjusted_defensive_efficiency, 'adjusted_defensive_efficiency')],
-    ['Roster', fmt(row.evanmiya_roster_rank, 'evanmiya_roster_rank')],
-    ['Net rating*', fmt(row.net_rating, 'net_rating')],
-    ['Pace', fmt(row.pace, 'pace')],
-    ['Strength of schedule', fmt(row.strength_of_schedule, 'strength_of_schedule')],
-    ['CLUTCH', fmt(row.clutch_factor, 'clutch_factor')],
-    ['Clutch record', row.clutch_wins == null ? '—' : `${row.clutch_wins}–${row.clutch_losses}`],
-    ['Clutch games pending', row.clutch_games_pending ?? '—'],
-    ['PPT', fmt(row.rating, 'rating')],
-    ['Points per game', fmt(row.ppg, 'ppg')],
-    ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
+    ['Division I Rank', 'rank', false],
+    ['Offensive efficiency', 'adjusted_offensive_efficiency', false],
+    ['Defensive efficiency', 'adjusted_defensive_efficiency', true],
+    ['Roster', 'evanmiya_roster_rank', true],
+    ['Pace', 'pace', false],
+    ['Strength of schedule', 'strength_of_schedule', false],
+    ['CLUTCH', 'clutch_factor', false],
+    ['PPT', 'rating', false],
+    ['Points per game', 'ppg', false]
   ];
-
-  for (const [label, stat] of stats) {
-    const div = document.createElement('div');
-    const small = document.createElement('small');
-    const strong = document.createElement('strong');
-
-    small.textContent = label;
-    strong.textContent = stat;
-
-    div.append(small, strong);
-    $('detailstats').append(div);
+  for (const [label, key, lowerIsBetter] of stats) {
+    const card = document.createElement('div');
+    const name = document.createElement('small');
+    name.textContent = label;
+    const values = document.createElement('span');
+    values.className = 'detail-value';
+    const stat = document.createElement('strong');
+    stat.textContent = fmt(row[key], key);
+    values.append(stat);
+    if (key !== 'rank') {
+      const position = divisionStatRank(row, key, lowerIsBetter);
+      if (position !== null) {
+        const rank = document.createElement('span');
+        rank.className = 'detail-stat-rank';
+        rank.textContent = '#' + position;
+        rank.setAttribute('aria-label', 'Division I rank ' + position);
+        values.append(rank);
+      }
+    }
+    card.append(name, values);
+    $('detailstats').append(card);
   }
-
-  $('detail').showModal();
+  if (!$('detail').open) $('detail').showModal();
 }
 
 $('close').onclick = () => $('detail').close();
