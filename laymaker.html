@@ -351,6 +351,12 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
  header .eye-menu a, header .eye-menu .current-page { font-size: 14px; }
 }
 
+
+header .navlinks { gap: 24px; flex-wrap: wrap; }
+header .navlinks > a, header .navlinks > .current-page { gap: .28em; white-space: nowrap; }
+.thirty-blue { color: #2864da; }
+header .navlinks a:hover .thirty-blue { color: #6b96eb; }
+@media (max-width: 700px) { header .navlinks { gap: 8px 18px; } }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -361,13 +367,8 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
  <a href="/index.html" class="brand">OFred<span>Stats.</span></a>
  <div class="navlinks">
  <a href="/index.html">Team Rankings</a>
- <div class="eye-nav">
-  <button type="button" class="eye-trigger" aria-expanded="false" aria-controls="eye-test-menu">Eye Test</button>
-  <div class="eye-menu" id="eye-test-menu" hidden>
-   <a href="/eye-test.html">Thirsty Thirty</a>
-   <a href="/conference-rankings.html">Conference Rankings</a>
-  </div>
- </div>
+ <a href="/eye-test.html">Thirsty <span class="thirty-blue">Thirty</span></a>
+ <a href="/conference-rankings.html">Conference Rankings</a>
  <span class="current-page" aria-current="page"><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 15-19 5 5-14 20c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M28 34c-2-2-3-4-3-7l.8-3.5c.4-1.5 2.5-1.3 2.5.4v1c4-1 6-4 6.5-7.5l.2-7c.1-2 2.8-2 3-.1l.3 6.6c.4 5.6-1 10-4.2 13.8L32 34Z" fill="#2864da"/></svg><span>MAKER</span></span></span>
  </div>
 </nav>
@@ -379,38 +380,5 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
   </section>
 </main>
 
-<script data-eye-navigation="v4">
-(() => {
- const nav = document.querySelector('.eye-nav');
- if (!nav) return;
- const trigger = nav.querySelector('.eye-trigger');
- const panel = nav.querySelector('.eye-menu');
- let pinned = false;
- const show = () => { panel.hidden = false; trigger.setAttribute('aria-expanded', 'true'); };
- const hide = () => { panel.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
- const canHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
- nav.addEventListener('mouseenter', () => { if (canHover()) show(); });
- nav.addEventListener('mouseleave', () => { if (!pinned) hide(); });
- trigger.addEventListener('click', () => { pinned = true; show(); });
- nav.addEventListener('focusin', () => { if (canHover()) show(); });
- nav.addEventListener('focusout', event => {
-  if (!pinned && !nav.contains(event.relatedTarget)) hide();
- });
- document.addEventListener('pointerdown', event => {
-  if (!nav.contains(event.target)) { pinned = false; hide(); }
- });
- document.addEventListener('click', event => {
-  if (!nav.contains(event.target)) { pinned = false; hide(); }
- });
- document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') {
-   pinned = false;
-   if (nav.contains(document.activeElement)) trigger.focus();
-   hide();
-  }
- });
- hide();
-})();
-</script>
 </body>
 </html>
