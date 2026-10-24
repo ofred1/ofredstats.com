@@ -459,6 +459,19 @@ header .nav { position: relative; }
  header .navlinks > .current-page { background: #edf3ff; }
 }
 
+
+/* Subtle separators between desktop navigation links only. */
+@media (min-width: 701px) {
+ header .navlinks > a, header .navlinks > .current-page { position: relative; }
+ header .navlinks > a + a::before,
+ header .navlinks > a + .current-page::before,
+ header .navlinks > .current-page + a::before {
+  content: ""; position: absolute; left: -12px; top: 50%;
+  transform: translateY(-50%); width: 1px; height: 20px;
+  background: rgba(24, 45, 80, 0.18); pointer-events: none;
+ }
+}
+
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
