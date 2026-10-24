@@ -426,6 +426,16 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
 
 .thirsty-heading { margin-bottom: 8px; }
 .weekly-update-note { margin: 0 0 20px; text-align: center; font-size: 11px; line-height: 1.5; color: #758096; }
+
+.detail-value { display: inline-flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.detailgrid .detail-stat-rank { font-size: 11px; font-weight: 600; line-height: 1; color: #687e9d; white-space: nowrap; }
+
+
+@media (max-width: 700px) {
+ .thirsty-title { max-width: calc(100% - 48px); }
+ .thirsty-title h1 { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: baseline; justify-content: center; gap: 10px; white-space: nowrap; font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif; font-size: clamp(32px, 8.6vw, 54px); font-weight: 900; letter-spacing: -1.8px; line-height: 1.05; }
+ .thirsty-title .top30-number { flex: 0 0 auto; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -631,61 +641,72 @@ function value(row, key) {
 
 function fmt(value, key) {
   if (value == null) return '—';
-
   if (typeof value === 'number' &&
-      ['ppg', 'turnovers_per_game', 'rating', 'preseason_average_rank', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace'].includes(key)) {
-    return value.toFixed(2);
-  }
-
+      ['ppg', 'rating', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency',
+       'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) return value.toFixed(2);
   return String(value);
 }
 
+// Rank each statistic against the full Division I dataset, never a filtered table.
+let activeDetailTeam = null;
+function divisionStatRank(row, key, lowerIsBetter = false) {
+  const rows = typeof dataset !== 'undefined' && dataset ? dataset.rankings
+    : (typeof detailRankings !== 'undefined' ? detailRankings : []);
+  const stat = row[key];
+  if (!Number.isFinite(stat)) return null;
+  const eligible = rows.filter(team => Number.isFinite(team[key]));
+  if (!eligible.length) return null;
+  return 1 + eligible.filter(team => lowerIsBetter ? team[key] < stat : team[key] > stat).length;
+}
 function showTeam(row) {
+  activeDetailTeam = row.team;
   $('detaillogo').replaceChildren(makeLogo(row, true));
   const details = teamDetails[teamLogoIds[row.team]];
-  $('detailname').textContent = details
-    ? `${details.school} ${details.mascot}`
-    : row.team;
-  $('detailconf').textContent =
-    (row.conference || 'Conference unavailable') +
+  $('detailname').textContent = details ? `${details.school} ${details.mascot}` : row.team;
+  $('detailconf').textContent = (row.conference || 'Conference unavailable') +
     ' · ' + value(row, 'record') + ' record';
-
   $('detailstats').replaceChildren();
-
   const stats = [
-    ['Overall rank', fmt(row.rank, 'rank')],
-    ['Offensive efficiency', fmt(row.adjusted_offensive_efficiency, 'adjusted_offensive_efficiency')],
-    ['Defensive efficiency', fmt(row.adjusted_defensive_efficiency, 'adjusted_defensive_efficiency')],
-    ['Roster', fmt(row.evanmiya_roster_rank, 'evanmiya_roster_rank')],
-    ['Net rating*', fmt(row.net_rating, 'net_rating')],
-    ['Pace', fmt(row.pace, 'pace')],
-    ['PPT', fmt(row.rating, 'rating')],
-    ['Points per game', fmt(row.ppg, 'ppg')],
-    ['Turnovers per game', fmt(row.turnovers_per_game, 'turnovers_per_game')]
+    ['Division I Rank', 'rank', false],
+    ['Offensive efficiency', 'adjusted_offensive_efficiency', false],
+    ['Defensive efficiency', 'adjusted_defensive_efficiency', true],
+    ['Roster', 'evanmiya_roster_rank', true],
+    ['Pace', 'pace', false],
+    ['Strength of schedule', 'strength_of_schedule', false],
+    ['CLUTCH', 'clutch_factor', false],
+    ['PPT', 'rating', false],
+    ['Points per game', 'ppg', false]
   ];
-
-  for (const [label, stat] of stats) {
-    const div = document.createElement('div');
-    const small = document.createElement('small');
-    const strong = document.createElement('strong');
-
-    small.textContent = label;
-    strong.textContent = stat;
-
-    div.append(small, strong);
-    $('detailstats').append(div);
+  for (const [label, key, lowerIsBetter] of stats) {
+    const card = document.createElement('div');
+    const name = document.createElement('small');
+    name.textContent = label;
+    const values = document.createElement('span');
+    values.className = 'detail-value';
+    const stat = document.createElement('strong');
+    stat.textContent = fmt(row[key], key);
+    values.append(stat);
+    if (key !== 'rank') {
+      const position = divisionStatRank(row, key, lowerIsBetter);
+      if (position !== null) {
+        const rank = document.createElement('span');
+        rank.className = 'detail-stat-rank';
+        rank.textContent = '#' + position;
+        rank.setAttribute('aria-label', 'Division I rank ' + position);
+        values.append(rank);
+      }
+    }
+    card.append(name, values);
+    $('detailstats').append(card);
   }
-
-  $('detail').showModal();
+  if (!$('detail').open) $('detail').showModal();
 }
-
 
 $('close').onclick = () => $('detail').close();
 let detailRankings = JSON.parse($('team-detail-data').textContent).rankings;
 async function openEyeTeam(team) {
  const initial = detailRankings.find(row => row.team === team);
  if (initial) showTeam(initial);
- // Reuse the latest main-table data when reachable; embedded data works offline.
  try {
   const response = await fetch('index.html', {cache: 'no-cache'});
   if (response.ok) {
@@ -695,11 +716,7 @@ async function openEyeTeam(team) {
   }
  } catch (_) {}
  const row = detailRankings.find(row => row.team === team);
- if (row && $('detail').open && $('detailname').textContent === (teamDetails[teamLogoIds[team]] ? `${teamDetails[teamLogoIds[team]].school} ${teamDetails[teamLogoIds[team]].mascot}` : team)) {
-  const wasOpen = $('detail').open;
-  if (wasOpen) $('detail').close();
-  showTeam(row);
- }
+ if (row && $('detail').open && activeDetailTeam === team) showTeam(row);
 }
 
 const eyeData = JSON.parse(document.getElementById('eye-test-data').textContent);
