@@ -561,6 +561,21 @@ main.lay-board{max-width:1160px}
 .must-row .pick-info-button{color:#c1d3ef;border-color:#7793b7}
 .selection-chip .pick-info-button{border:1px solid #7793b7;color:#c1d3ef;font-size:11px;width:18px;height:18px;flex-basis:18px;margin:0;padding:0}
 @media(hover:hover) and (pointer:fine){.pick-info-button:hover{color:#2864da;background:#e8f0ff}}
+
+/* Keep single-pick information immediately beside its matchup. */
+.inline-pick-info{padding-right:14px;cursor:pointer}
+.inline-pick-info .pick-button{flex:0 1 auto;width:auto;padding-right:5px;min-width:0}
+.inline-pick-info .pick-info-button{margin:0 8px 0 0}
+.inline-pick-info>.pick-check{margin-left:auto;flex-shrink:0}
+.inline-pick-info:has(.pick-button[aria-pressed="true"]){background:#edf3ff}
+.inline-pick-info:has(.pick-button[aria-pressed="true"])>.pick-check{background:#2864da;border-color:#2864da;color:white}
+.hot-pick-only .pick-choice{justify-content:flex-start;padding-right:12px}
+.hot-pick-only .hot-pick-text{flex:0 1 auto;padding-right:5px}
+.must-single{padding:16px 20px;width:100%;min-width:0}
+.must-match{font-size:14px;font-weight:650;line-height:2}
+.must-match .pick-info-button{display:inline-grid;vertical-align:middle;margin-left:7px}
+.must-single .market-sub{margin-top:5px}
+@media(max-width:480px){.must-single{padding:13px}.must-match{font-size:12px}.inline-pick-info{padding-right:10px}}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -632,302 +647,27 @@ market:"Moneyline", selection:"home"|"away", ocs, start_time:"ISO timestamp with
 result:"pending"|"win"|"loss"|"push"|"void", sportsbook, note}.
 Use hot_take_id/daily_pick_id/must_pick_ids/ofred_pick_ids to feature the same pick without duplicating it.
 Parlay: {id,title,pick_ids:[],result:"pending"|"win"|"loss"|"push"|"void"}.
-Keep previous picks and parlays in history to preserve records. No fabricated sample bets are published. -->
+Keep previous picks and parlays in history to preserve records.\nMust-picks use must_picks, an independent array; OCS is optional and they are never selectable. -->
 <script type="application/json" id="laymaker-data">
 {
-  "demo": true,
-  "date": "2026-11-05",
-  "picks": [
-    {
-      "id": "duke-unc",
-      "date": "2026-11-05",
-      "game_id": "demo-duke-unc",
-      "home": {
-        "name": "UNC",
-        "full_name": "University of North Carolina Tar Heels"
-      },
-      "away": {
-        "name": "Duke",
-        "full_name": "Duke University Blue Devils"
-      },
-      "market": "Moneyline",
-      "selection": "away",
-      "ocs": 92,
-      "start_time": "2026-11-05T19:00:00-05:00",
-      "result": "pending"
-    },
-    {
-      "id": "kansas-pfw",
-      "date": "2026-11-05",
-      "game_id": "demo-kansas-pfw",
-      "home": {
-        "name": "Kansas",
-        "full_name": "University of Kansas Jayhawks"
-      },
-      "away": {
-        "name": "Purdue Fort Wayne",
-        "full_name": "Purdue University Fort Wayne Mastodons"
-      },
-      "market": "Moneyline",
-      "selection": "home",
-      "ocs": 91,
-      "start_time": "2026-11-05T19:00:00-05:00",
-      "result": "pending"
-    },
-    {
-      "id": "ttu-fsu",
-      "date": "2026-11-05",
-      "game_id": "demo-ttu-fsu",
-      "home": {
-        "name": "Florida State",
-        "full_name": "Florida State University Seminoles"
-      },
-      "away": {
-        "name": "Texas Tech",
-        "full_name": "Texas Tech University Red Raiders"
-      },
-      "market": "Moneyline",
-      "selection": "away",
-      "ocs": 84,
-      "start_time": "2026-11-05T20:00:00-05:00",
-      "result": "pending"
-    },
-    {
-      "id": "maryland-ksu",
-      "date": "2026-11-05",
-      "game_id": "demo-maryland-ksu",
-      "home": {
-        "name": "Maryland",
-        "full_name": "University of Maryland Terrapins"
-      },
-      "away": {
-        "name": "Kansas State",
-        "full_name": "Kansas State University Wildcats"
-      },
-      "market": "Moneyline",
-      "selection": "home",
-      "ocs": 82,
-      "start_time": "2026-11-05T18:00:00-05:00",
-      "result": "pending"
-    },
-    {
-      "id": "uva-vt",
-      "date": "2026-11-05",
-      "game_id": "demo-uva-vt",
-      "home": {
-        "name": "Virginia",
-        "full_name": "University of Virginia Cavaliers"
-      },
-      "away": {
-        "name": "Virginia Tech",
-        "full_name": "Virginia Tech Hokies"
-      },
-      "market": "Moneyline",
-      "selection": "home",
-      "ocs": 93,
-      "start_time": "2026-11-05T20:00:00-05:00",
-      "result": "pending"
-    },
-    {
-      "id": "houston-baylor",
-      "date": "2026-11-05",
-      "game_id": "demo-houston-baylor",
-      "home": {
-        "name": "Baylor",
-        "full_name": "Baylor University Bears"
-      },
-      "away": {
-        "name": "Houston",
-        "full_name": "University of Houston Cougars"
-      },
-      "market": "Moneyline",
-      "selection": "away",
-      "ocs": 88,
-      "start_time": "2026-11-05T21:00:00-05:00",
-      "result": "pending"
-    },
-    {
-      "id": "villanova-georgetown",
-      "date": "2026-11-05",
-      "game_id": "demo-villanova-georgetown",
-      "home": {
-        "name": "Villanova",
-        "full_name": "Villanova University Wildcats"
-      },
-      "away": {
-        "name": "Georgetown",
-        "full_name": "Georgetown University Hoyas"
-      },
-      "market": "Moneyline",
-      "selection": "home",
-      "ocs": 79,
-      "start_time": "2026-11-05T19:00:00-05:00",
-      "result": "pending"
-    },
-    {
-      "id": "gonzaga-smc",
-      "date": "2026-11-05",
-      "game_id": "sample-gonzaga-smc",
-      "home": {
-        "name": "Saint Mary's",
-        "full_name": "Saint Mary's College Gaels"
-      },
-      "away": {
-        "name": "Gonzaga",
-        "full_name": "Gonzaga University Bulldogs"
-      },
-      "market": "Moneyline",
-      "selection": "away",
-      "ocs": 86,
-      "start_time": "2026-11-05T21:30:00-05:00",
-      "result": "pending",
-      "sportsbook": "Sportsbook TBD"
-    }
-  ],
-  "hot_take": {
-    "id": "arkansas-purdue",
-    "date": "2026-11-05",
-    "game_id": "demo-arkansas-purdue",
-    "home": {
-      "name": "Purdue",
-      "full_name": "Purdue University Boilermakers"
-    },
-    "away": {
-      "name": "Arkansas",
-      "full_name": "University of Arkansas Razorbacks"
-    },
-    "market": "Moneyline",
-    "selection": "away",
-    "ocs": null,
-    "start_time": "2026-11-05T21:00:00-05:00",
-    "result": "pending"
-  },
+  "date": "2026-11-02",
+  "picks": [],
+  "hot_take": null,
   "hot_take_id": null,
-  "daily_pick_id": "uva-vt",
-  "must_pick_ids": [
-    "gonzaga-smc"
-  ],
-  "ofred_pick_ids": [
-    "houston-baylor",
-    "villanova-georgetown"
-  ],
-  "suggested_parlays": [
-    {
-      "id": "demo-suggested-two",
-      "title": "Suggested 2-Leg Parlay",
-      "pick_ids": [
-        "uva-vt",
-        "duke-unc"
-      ],
-      "result": "pending"
-    },
-    {
-      "id": "demo-suggested-three",
-      "title": "Suggested 3-Leg Parlay",
-      "pick_ids": [
-        "kansas-pfw",
-        "houston-baylor",
-        "ttu-fsu"
-      ],
-      "result": "pending"
-    },
-    {
-      "id": "demo-suggested-four",
-      "title": "Suggested 4-Leg Parlay",
-      "pick_ids": [
-        "duke-unc",
-        "maryland-ksu",
-        "villanova-georgetown",
-        "uva-vt"
-      ],
-      "result": "pending"
-    }
-  ],
-  "ofred_parlays": [
-    {
-      "id": "demo-three",
-      "title": "OFred's 3-Leg Parlay",
-      "pick_ids": [
-        "duke-unc",
-        "kansas-pfw",
-        "uva-vt"
-      ],
-      "result": "pending"
-    },
-    {
-      "id": "demo-four",
-      "title": "OFred's 4-Leg Parlay",
-      "pick_ids": [
-        "ttu-fsu",
-        "maryland-ksu",
-        "houston-baylor",
-        "villanova-georgetown"
-      ],
-      "result": "pending"
-    }
-  ],
+  "daily_pick_id": null,
+  "must_picks": [],
+  "must_pick_ids": [],
+  "ofred_pick_ids": [],
+  "suggested_parlays": [],
+  "ofred_parlays": [],
   "history": {
     "picks": [],
     "suggested_parlays": [],
     "ofred_picks": [],
-    "ofred_parlays": []
-  },
-  "demo_records": {
-    "locks": {
-      "wins": 18,
-      "losses": 3
-    },
-    "likely": {
-      "wins": 24,
-      "losses": 9
-    },
-    "hot": {
-      "wins": 4,
-      "losses": 6
-    },
-    "daily": {
-      "wins": 12,
-      "losses": 4
-    },
-    "ofred": {
-      "wins": 15,
-      "losses": 7
-    },
-    "suggested": {
-      "wins": 10,
-      "losses": 17
-    }
-  },
-  "demo_daily_streak": {
-    "type": "win",
-    "count": 4
-  },
-  "demo_outcomes": [
-    {
-      "legs": 2,
-      "wins": 6,
-      "losses": 4,
-      "pushes": 0
-    },
-    {
-      "legs": 3,
-      "wins": 3,
-      "losses": 6,
-      "pushes": 1
-    },
-    {
-      "legs": 4,
-      "wins": 1,
-      "losses": 5,
-      "pushes": 0
-    },
-    {
-      "legs": 5,
-      "wins": 0,
-      "losses": 2,
-      "pushes": 0
-    }
-  ]
+    "ofred_parlays": [],
+    "hot_takes": [],
+    "daily_picks": []
+  }
 }
 </script>
 
@@ -1034,21 +774,22 @@ const LaymakerModel = (() => {
   if(!p.start_time||!Number.isFinite(Date.parse(p.start_time)))return 'Game time: TBA';
   return 'Game time: '+new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short',timeZone:'America/New_York'}).format(new Date(p.start_time));
  }
- function description(p){
+ function description(p,includeOcs=true){
   return (p.home.full_name||p.home.name)+' (home) vs '+(p.away.full_name||p.away.name)+' (away)\n'+
    (moneyline(p)?'Moneyline · Pick to win: ':'Selection · ')+(p[p.selection].full_name||p[p.selection].name)+
-   (moneyline(p)?'':' · '+(p.market||''))+'\n'+gameTime(p)+(Number.isFinite(p.ocs)?'\nOCS: '+pct(p.ocs):'')+
+   (moneyline(p)?'':' · '+(p.market||''))+'\n'+gameTime(p)+(includeOcs&&Number.isFinite(p.ocs)?'\nOCS: '+pct(p.ocs):'')+
    (p.sportsbook?'\nSportsbook: '+p.sportsbook:'')+(p.note?'\n'+p.note:'')+
    (LaymakerModel.settled(p.result)?'\nResult: '+p.result:'');
  }
 
- function pickInfo(p){
-  return '<button type="button" class="info-button pick-info-button" data-pick-info="'+esc(p.id)+'" data-description="'+esc(description(p))+'" aria-label="'+esc('Information about '+LaymakerModel.shortLabel(p))+'">i</button>';
+ function pickInfo(p,includeOcs=true){
+  return '<button type="button" class="info-button pick-info-button" data-pick-info="'+esc(p.id)+'" data-description="'+esc(description(p,includeOcs))+'" aria-label="'+esc('Information about '+LaymakerModel.shortLabel(p))+'">i</button>';
  }
+
  function pickButton(p,featured=false){
   const active=selected.has(p.id),done=LaymakerModel.settled(p.result);
   const sub=[!moneyline(p)?p.market:null,featured?p.sportsbook:null,done?p.result.toUpperCase():null].filter(Boolean).join(' · ');
-  return '<div class="pick-choice"><button type="button" class="pick-button" data-pick="'+esc(p.id)+'" aria-pressed="'+active+'" aria-label="'+esc(LaymakerModel.shortLabel(p)+', '+pct(p.ocs)+' OCS'+(done?', '+p.result:'') )+'"'+(done?' disabled':'')+'><span class="pick-text">'+matchMarkup(p)+(sub?'<span class="market-sub">'+esc(sub)+'</span>':'')+'</span><span class="pick-check" aria-hidden="true">✓</span></button>'+pickInfo(p)+'</div>';
+  return '<div class="pick-choice inline-pick-info" data-row-pick="'+esc(p.id)+'"><button type="button" class="pick-button" data-pick="'+esc(p.id)+'" aria-pressed="'+active+'" aria-label="'+esc(LaymakerModel.shortLabel(p)+', '+pct(p.ocs)+' OCS'+(done?', '+p.result:'') )+'"'+(done?' disabled':'')+'><span class="pick-text">'+matchMarkup(p)+(sub?'<span class="market-sub">'+esc(sub)+'</span>':'')+'</span></button>'+pickInfo(p)+'<span class="pick-check" aria-hidden="true">✓</span></div>';
  }
  function empty(title,subtitle=''){
   return '<div class="bet-empty"><span class="empty-mark"></span><strong>'+esc(title)+'</strong>'+(subtitle?'<p>'+esc(subtitle)+'</p>':'')+'</div>';
@@ -1059,8 +800,7 @@ const LaymakerModel = (() => {
   return '<table class="bet-table"><thead><tr><th scope="col">PICK · HOME vs AWAY</th><th scope="col">OCS</th></tr></thead><tbody>'+items.map(p=>'<tr class="'+(selected.has(p.id)?'is-selected':'')+'"><td>'+pickButton(p)+'</td><td class="ocs-cell">'+pct(p.ocs)+'</td></tr>').join('')+'</tbody></table>';
  }
  function recordMarkup(items,key){
-  const demo=data.demo&&key&&data.demo_records?.[key];
-  const r=demo?{pushes:0,voids:0,...demo}:LaymakerModel.record(items),n=r.wins+r.losses+r.pushes+r.voids;
+  const r=LaymakerModel.record(items),n=r.wins+r.losses+r.pushes+r.voids;
   return n?'<span title="'+'Wins – losses'+(r.pushes?' · '+r.pushes+' pushes':'')+(r.voids?' · '+r.voids+' void':'')+'"><span class="record-w">'+r.wins+'W</span> – <span class="record-l">'+r.losses+'L</span>'+(r.pushes?' · '+r.pushes+'P':'')+'</span>':'<span title="No settled results yet">— W–L</span>';
  }
  function parlayCards(items,emptyTitle){
@@ -1084,9 +824,9 @@ const LaymakerModel = (() => {
    (ofredParlays.length?'<div class="subsection-label">PARLAYS</div>'+parlayCards(ofredParlays,''):''):
    empty('No personal bets posted.');
   $('suggested-list').innerHTML=parlayCards(suggested,'Suggested parlays coming soon.');
-  const must=(data.must_pick_ids||[]).map(id=>current.get(id)).filter(Boolean).sort(byOcs);
+  const must=LaymakerModel.unique([...(data.must_picks||[]),...(data.must_pick_ids||[]).map(id=>current.get(id))].filter(p=>p&&p.home&&p.away&&['home','away'].includes(p.selection)));
   $('must-banner').hidden=!must.length;
-  $('must-picks').innerHTML=must.map(p=>'<div class="must-row">'+pickButton(p,true)+'<div class="must-ocs"><small>OCS</small>'+pct(p.ocs)+'</div></div>').join('');
+  $('must-picks').innerHTML=must.map(p=>'<div class="must-row"><div class="must-single"><div class="must-match">'+matchMarkup(p)+pickInfo(p,false)+'</div><span class="market-sub">'+esc([p.market||'Moneyline',p.sportsbook].filter(Boolean).join(' · '))+'</span></div></div>').join('');
   renderBuilder();
  }
  const allPicks=[...lookup.values()];
@@ -1106,7 +846,7 @@ const LaymakerModel = (() => {
   for(const p of settled){if(p.result!==type)break;count++;}
   return {type,count};
  }
- const streak=data.demo?data.demo_daily_streak:dailyStreak(dailyHistory);
+ const streak=dailyStreak(dailyHistory);
  if(streak?.count){
   $('daily-streak').hidden=false;
   $('daily-streak').textContent=streak.count+'-'+(streak.type==='win'?'win':'loss')+' streak';
@@ -1147,7 +887,11 @@ const LaymakerModel = (() => {
    $('pick-info-dialog').showModal();hideTip();return;
   }
   const target=event.target.closest('[data-pick],[data-remove],[data-parlay]');
-  if(!target)return;
+  if(!target){
+   const row=event.target.closest('[data-row-pick]');
+   if(row)togglePick(row.dataset.rowPick);
+   return;
+  }
   if(target.dataset.pick){togglePick(target.dataset.pick);return;}
   if(target.dataset.remove){selected.delete(target.dataset.remove);render();return;}
   const p=[...suggested,...ofredParlays].find(p=>p.id===target.dataset.parlay);
@@ -1173,8 +917,7 @@ const LaymakerModel = (() => {
    if(!groups.has(n))groups.set(n,[]);
    groups.get(n).push({...p,result:LaymakerModel.resolveResult(p,lookup)});
   });
-  const demoRows=data.demo&&Array.isArray(data.demo_outcomes)?data.demo_outcomes:null;
-  const rows=demoRows?demoRows.map(r=>'<tr><td>'+r.legs+' legs</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+(r.pushes||0)+'</td></tr>'):[...groups].sort((a,b)=>a[0]-b[0]).map(([n,items])=>{
+  const rows=[...groups].sort((a,b)=>a[0]-b[0]).map(([n,items])=>{
    const r=LaymakerModel.record(items);
    return '<tr><td>'+n+' legs</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+r.pushes+'</td></tr>';
   });
