@@ -531,6 +531,27 @@ main.lay-board{padding:24px 12px 45px}
 .demo-notice strong{font-weight:800;letter-spacing:.5px;margin-right:7px}
 .hot-pick-only th:last-child{width:auto;text-align:left}
 .hot-pick-only .pick-button{cursor:help}
+
+/* Tighter board with paired team logos. */
+main.lay-board{max-width:1160px}
+.board-grid{grid-template-columns:minmax(0,1.8fr) minmax(300px,1fr);gap:18px}
+.top-board-note{margin:-10px 0 24px;max-width:920px}
+.match-team{display:inline-flex;align-items:center;gap:5px;vertical-align:middle;line-height:1.5}
+.team-logo{width:20px;height:20px;object-fit:contain;flex:0 0 20px}
+.match-team.chosen{padding:3px 5px}
+.versus{padding-inline:5px}
+.pick-button{padding:13px 14px}
+.bet-panel-head{padding:16px}
+.parlay-legs{list-style:none;padding-left:0;gap:9px}
+.parlay-legs .team-logo{width:16px;height:16px;flex-basis:16px}
+.parlay-legs .market-sub{display:inline;margin-left:7px;font-size:10px}
+.daily-results{display:grid;justify-items:end;gap:5px}
+.daily-streak{font-size:10px;color:#147b50;font-weight:750}
+.builder-overlap-note{grid-column:1/-1;margin:0;border-top:1px solid #ffffff20;padding-top:10px;color:#c1cfe3;font-size:11px;line-height:1.5;max-width:1050px}
+.demo-record-caption{font-size:11px;color:#667c9c}
+@media(max-width:1000px){.board-grid{grid-template-columns:minmax(0,1.65fr) minmax(285px,1fr);gap:15px}}
+@media(max-width:760px){.board-grid{grid-template-columns:1fr}.top-board-note{margin:0 0 22px}}
+@media(max-width:480px){.team-logo{width:18px;height:18px;flex-basis:18px}.builder-overlap-note{font-size:10px;padding-top:8px}.builder-inner{gap:10px}.bet-panel-head .section-actions{gap:6px}.bet-panel-head h2{font-size:17px}}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -558,6 +579,7 @@ main.lay-board{padding:24px 12px 45px}
   <h1 id="laymaker-title" class="laymaker-title"><span class="par-prefix">(par)</span><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 15-19 5 5-14 20c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M28 34c-2-2-3-4-3-7l.8-3.5c.4-1.5 2.5-1.3 2.5.4v1c4-1 6-4 6.5-7.5l.2-7c.1-2 2.8-2 3-.1l.3 6.6c.4 5.6-1 10-4.2 13.8L32 34Z" fill="#2864da"/></svg><span>MAKER</span></span></h1>
   <div class="board-date"><time id="board-date"></time></div>
  </div>
+ <p class="board-footnote top-board-note">OCS = OFred Confidence Score. Picks are opinions, not guaranteed outcomes. Selecting picks builds a parlay preview; no bets are placed here.</p>
  <div class="demo-notice" id="demo-notice" hidden><strong>DEMO</strong> Sample bets and game times for testing. Not real picks or scheduled matchups.</div>
  <section id="must-banner" class="must-banner" aria-label="Must-picks" hidden>
   <div class="must-banner-label"><strong>MUST-PICKS</strong><small>Odds worth a look.</small></div><div class="must-picks" id="must-picks"></div>
@@ -573,13 +595,13 @@ main.lay-board{padding:24px 12px 45px}
     <div id="likely-list"></div>
    </section>
    <section class="bet-panel" aria-labelledby="suggested-title">
-    <div class="bet-panel-head"><h2 id="suggested-title">Suggested Parlays</h2><button class="small-button" id="outcomes-button" type="button">Outcomes ↗</button></div>
+    <div class="bet-panel-head"><h2 id="suggested-title">Suggested Parlays</h2><div class="section-actions"><span class="record" id="suggested-record" aria-label="Suggested parlay record"></span><button class="small-button" id="outcomes-button" type="button">Outcomes ↗</button></div></div>
     <div id="suggested-list"></div>
    </section>
   </div>
   <aside class="side-board" aria-label="Featured picks">
-   <section class="bet-panel hot-panel" aria-labelledby="hot-title"><div class="bet-panel-head"><h2 id="hot-title">Hot Take</h2><span class="section-mini">ONE TO WATCH</span></div><div id="hot-list"></div></section>
-   <section class="bet-panel daily-panel" aria-labelledby="daily-title"><div class="bet-panel-head"><h2 id="daily-title">Daily Pick</h2><span class="section-mini">TODAY'S PICK</span></div><div id="daily-list"></div></section>
+   <section class="bet-panel hot-panel" aria-labelledby="hot-title"><div class="bet-panel-head"><h2 id="hot-title">Hot Take</h2><span class="record" id="hot-record" aria-label="Hot Take record"></span></div><div id="hot-list"></div></section>
+   <section class="bet-panel daily-panel" aria-labelledby="daily-title"><div class="bet-panel-head"><h2 id="daily-title">Daily Pick</h2><div class="daily-results"><span class="record" id="daily-record" aria-label="Daily Pick record"></span><span class="daily-streak" id="daily-streak" hidden></span></div></div><div id="daily-list"></div></section>
    <section class="bet-panel ofred-panel" aria-labelledby="ofred-title">
     <div class="bet-panel-head"><h2 id="ofred-title">OFred's Picks</h2><div class="section-actions"><span class="record" id="ofred-record" aria-label="OFred's picks record"></span><button type="button" class="info-button" id="ofred-info" aria-label="About OFred's picks" data-description="These are the bets that I am actually betting on.">?</button></div></div>
     <div id="ofred-list"></div>
@@ -590,7 +612,7 @@ main.lay-board{padding:24px 12px 45px}
 </main>
 <section class="builder" id="parlay-builder" aria-labelledby="builder-title" hidden>
  <div class="builder-inner"><div class="builder-picks"><div class="builder-topline"><h2 id="builder-title">Your Parlay</h2><span id="builder-count" class="builder-count"></span><button type="button" id="clear-parlay" class="builder-clear">Clear all</button></div><div id="builder-selections" class="builder-selections"></div></div>
- <div class="builder-score" aria-live="polite"><small>TOTAL OCS</small><strong id="total-ocs"></strong><span>Multiplied OCS assumes independent outcomes.</span></div></div>
+ <div class="builder-score" aria-live="polite"><small>TOTAL OCS</small><strong id="total-ocs"></strong><span>Multiplied OCS assumes independent outcomes.</span></div><p class="builder-overlap-note">Avoid overlapping parlays that rely on the same team to win. One loss can sink multiple tickets; that concentrates your risk rather than spreading it.</p></div>
 </section>
 <dialog class="board-dialog" id="outcomes-dialog" aria-labelledby="outcomes-title"><div class="dialoghead"><h2 id="outcomes-title">Parlay Outcomes</h2><button type="button" class="dialog-close" aria-label="Close outcomes">×</button></div><p style="font-size:12px;margin-bottom:0">Suggested parlays · all settled dates</p><div id="outcomes-content"></div></dialog>
 <dialog class="board-dialog" id="pick-info-dialog" aria-labelledby="pick-info-title"><div class="dialoghead"><h2 id="pick-info-title">Pick Details</h2><button type="button" class="dialog-close" aria-label="Close details">×</button></div><p id="pick-info-text" style="white-space:pre-line"></p></dialog>
@@ -613,15 +635,15 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "date": "2026-11-05",
       "game_id": "demo-duke-unc",
       "home": {
-        "name": "Duke",
-        "full_name": "Duke University Blue Devils"
-      },
-      "away": {
         "name": "UNC",
         "full_name": "University of North Carolina Tar Heels"
       },
+      "away": {
+        "name": "Duke",
+        "full_name": "Duke University Blue Devils"
+      },
       "market": "Moneyline",
-      "selection": "home",
+      "selection": "away",
       "ocs": 92,
       "start_time": "2026-11-05T19:00:00-05:00",
       "result": "pending",
@@ -651,15 +673,15 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "date": "2026-11-05",
       "game_id": "demo-ttu-fsu",
       "home": {
-        "name": "Texas Tech",
-        "full_name": "Texas Tech University Red Raiders"
-      },
-      "away": {
         "name": "Florida State",
         "full_name": "Florida State University Seminoles"
       },
+      "away": {
+        "name": "Texas Tech",
+        "full_name": "Texas Tech University Red Raiders"
+      },
       "market": "Moneyline",
-      "selection": "home",
+      "selection": "away",
       "ocs": 84,
       "start_time": "2026-11-05T20:00:00-05:00",
       "result": "pending",
@@ -708,15 +730,15 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "date": "2026-11-05",
       "game_id": "demo-houston-baylor",
       "home": {
-        "name": "Houston",
-        "full_name": "University of Houston Cougars"
-      },
-      "away": {
         "name": "Baylor",
         "full_name": "Baylor University Bears"
       },
+      "away": {
+        "name": "Houston",
+        "full_name": "University of Houston Cougars"
+      },
       "market": "Moneyline",
-      "selection": "home",
+      "selection": "away",
       "ocs": 88,
       "start_time": "2026-11-05T21:00:00-05:00",
       "result": "pending",
@@ -747,15 +769,15 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
     "date": "2026-11-05",
     "game_id": "demo-arkansas-purdue",
     "home": {
-      "name": "Arkansas",
-      "full_name": "University of Arkansas Razorbacks"
-    },
-    "away": {
       "name": "Purdue",
       "full_name": "Purdue University Boilermakers"
     },
+    "away": {
+      "name": "Arkansas",
+      "full_name": "University of Arkansas Razorbacks"
+    },
     "market": "Moneyline",
-    "selection": "home",
+    "selection": "away",
     "ocs": null,
     "start_time": "2026-11-05T21:00:00-05:00",
     "result": "pending",
@@ -768,7 +790,38 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
     "houston-baylor",
     "villanova-georgetown"
   ],
-  "suggested_parlays": [],
+  "suggested_parlays": [
+    {
+      "id": "demo-suggested-two",
+      "title": "The Two-Leg Link",
+      "pick_ids": [
+        "uva-vt",
+        "duke-unc"
+      ],
+      "result": "pending"
+    },
+    {
+      "id": "demo-suggested-three",
+      "title": "Three-Team Ticket",
+      "pick_ids": [
+        "kansas-pfw",
+        "houston-baylor",
+        "ttu-fsu"
+      ],
+      "result": "pending"
+    },
+    {
+      "id": "demo-suggested-four",
+      "title": "Four-Leg Flyer",
+      "pick_ids": [
+        "duke-unc",
+        "maryland-ksu",
+        "villanova-georgetown",
+        "uva-vt"
+      ],
+      "result": "pending"
+    }
+  ],
   "ofred_parlays": [
     {
       "id": "demo-three",
@@ -797,7 +850,63 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
     "suggested_parlays": [],
     "ofred_picks": [],
     "ofred_parlays": []
-  }
+  },
+  "demo_records": {
+    "locks": {
+      "wins": 18,
+      "losses": 3
+    },
+    "likely": {
+      "wins": 24,
+      "losses": 9
+    },
+    "hot": {
+      "wins": 4,
+      "losses": 6
+    },
+    "daily": {
+      "wins": 12,
+      "losses": 4
+    },
+    "ofred": {
+      "wins": 15,
+      "losses": 7
+    },
+    "suggested": {
+      "wins": 10,
+      "losses": 17
+    }
+  },
+  "demo_daily_streak": {
+    "type": "win",
+    "count": 4
+  },
+  "demo_outcomes": [
+    {
+      "legs": 2,
+      "wins": 6,
+      "losses": 4,
+      "pushes": 0
+    },
+    {
+      "legs": 3,
+      "wins": 3,
+      "losses": 6,
+      "pushes": 1
+    },
+    {
+      "legs": 4,
+      "wins": 1,
+      "losses": 5,
+      "pushes": 0
+    },
+    {
+      "legs": 5,
+      "wins": 0,
+      "losses": 2,
+      "pushes": 0
+    }
+  ]
 }
 </script>
 
@@ -888,12 +997,18 @@ const LaymakerModel = (() => {
  const lookup=new Map(LaymakerModel.unique([...(history.picks||[]),...(data.picks||[])].filter(LaymakerModel.validPick)).map(p=>[p.id,p]));
  const current=new Map(picks.map(p=>[p.id,p]));
  const selected=new Set();
+ const teamLogoIds={"West Florida":"2697","Arkansas":"8","Purdue":"2509","Illinois":"356","Wisconsin":"275","High Point":"2272","VMI":"2678","UNC Greensboro":"2430","Alabama":"333","UCLA":"26","NC State":"152","Houston":"248","South Alabama":"6","Northwestern":"77","Vanderbilt":"238","Gonzaga":"2250","Wofford":"2747","Liberty":"2335","North Carolina":"153","Miami (OH)":"193","Chattanooga":"236","Samford":"2535","Yale":"43","Denver":"2172","UAB":"5","UMBC":"2378","George Mason":"2244","St. Thomas-Minnesota":"2900","Queens University":"2511","Florida Gulf Coast":"526","North Dakota":"155","Oklahoma":"201","Clemson":"228","Purdue Fort Wayne":"2870","McNeese":"2377","Bradley":"71","BYU":"252","Florida":"57","Xavier":"2752","Auburn":"2","Ole Miss":"145","Texas A&M":"245","Iowa":"2294","Georgia":"61","Temple":"218","Nebraska":"158","Utah State":"328","Washington":"264","Wichita State":"2724","Stephen F. Austin":"2617","Santa Clara":"2541","Princeton":"163","Northern Iowa":"2460","Arizona":"12","Richmond":"257","Nevada":"2440","Iowa State":"66","Akron":"2006","Colorado":"38","South Florida":"58","Villanova":"222","Western Kentucky":"98","Bellarmine":"91","UNC Wilmington":"350","Toledo":"2649","Western Carolina":"2717","Duquesne":"2184","Oakland":"2473","Baylor":"239","St. John's":"2599","Texas":"251","New Mexico":"167","Mercer":"2382","Montana State":"147","Tulsa":"202","West Georgia":"2698","Northern Colorado":"2458","Indiana":"84","Elon":"2210","East Tennessee State":"2193","Texas Tech":"2641","Georgia Southern":"290","SMU":"2567","South Carolina":"2579","VCU":"2670","California":"25","LSU":"99","North Dakota State":"2449","Kentucky":"96","Fairfield":"2217","Ohio State":"194","Penn State":"213","Florida State":"52","New Mexico State":"166","Duke":"150","Lipscomb":"288","Austin Peay":"2046","San José State":"23","Sacramento State":"16","Syracuse":"183","Northern Kentucky":"94","Winthrop":"2737","UConn":"41","Loyola Maryland":"2352","Vermont":"261","Kansas":"2305","Colgate":"2142","Idaho":"70","Davidson":"2166","Virginia Tech":"259","Central Arkansas":"2110","Buffalo":"2084","Michigan":"130","Mercyhurst":"2385","Saint Louis":"139","Rutgers":"164","Milwaukee":"270","Weber State":"2692","Cal State Fullerton":"2239","UT Rio Grande Valley":"292","Miami":"2390","Merrimack":"2771","Wright State":"2750","Virginia":"258","South Dakota":"233","Stanford":"24","Ohio":"195","Mississippi State":"344","Murray State":"93","William & Mary":"2729","Cornell":"172","Georgetown":"46","Wake Forest":"154","Marshall":"276","Oklahoma State":"197","Bowling Green":"189","Illinois State":"2287","Saint Mary's":"2608","Drake":"2181","Providence":"2507","Belmont":"2057","Butler":"2086","Quinnipiac":"2514","Green Bay":"2739","Charleston":"232","American University":"44","App State":"2026","Omaha":"2437","Portland State":"2502","IU Indianapolis":"85","TCU":"2628","UC San Diego":"28","Kennesaw State":"338","Northern Arizona":"2464","Hofstra":"2275","Siena":"2561","Old Dominion":"295","Wyoming":"2751","Incarnate Word":"2916","UCF":"2116","Louisville":"97","San Francisco":"2539","The Citadel":"2643","Jacksonville":"294","Holy Cross":"107","Coastal Carolina":"324","Marquette":"269","Idaho State":"304","Lafayette":"322","Eastern Kentucky":"2198","Dayton":"2168","Sam Houston":"2534","Jacksonville State":"55","Northeastern":"111","Cincinnati":"2132","South Dakota State":"2571","West Virginia":"277","Pennsylvania":"219","Manhattan":"2363","Michigan State":"127","UNLV":"2439","Boise State":"68","Furman":"231","South Carolina Upstate":"2908","Chicago State":"2130","North Florida":"2454","USC":"30","Georgia State":"2247","Minnesota":"135","Central Connecticut":"2115","Campbell":"2097","Iona":"314","Utah Tech":"3101","Detroit Mercy":"2174","Troy":"2653","Tennessee":"2633","Creighton":"156","Boston College":"103","St. Bonaventure":"179","Norfolk State":"2450","Tulane":"2655","Valparaiso":"2674","Towson":"119","Navy":"2426","Kent State":"2309","Middle Tennessee":"2393","Loyola Marymount":"2351","Missouri State":"2623","Morehead State":"2413","Southeast Missouri State":"2546","Tennessee State":"2634","Boston University":"104","Prairie View A&M":"2504","Hampton":"2261","George Washington":"45","Saint Joseph's":"2603","Notre Dame":"87","Monmouth":"2405","Harvard":"108","Sacred Heart":"2529","Rice":"242","James Madison":"256","Youngstown State":"2754","Dartmouth":"159","UTSA":"2636","Utah":"254","UMass Lowell":"2349","Arizona State":"9","Marist":"2368","Radford":"2515","Colorado State":"36","North Texas":"249","California Baptist":"2856","Stony Brook":"2619","Southern":"2582","Seton Hall":"2550","Florida Atlantic":"2226","Ball State":"2050","San Diego State":"21","Seattle U":"2547","Cal State Northridge":"2463","Western Michigan":"2711","New Hampshire":"160","UIC":"82","Louisiana":"309","UC Irvine":"300","Morgan State":"2415","Washington State":"265","Florida International":"2229","Saint Peter's":"2612","Kansas State":"2306","Nicholls":"2447","NJIT":"2885","Pittsburgh":"221","East Carolina":"151","UC Riverside":"27","UTEP":"2638","Eastern Washington":"331","Charlotte":"2429","Missouri":"142","Southern Indiana":"88","Grand Canyon":"2253","Charleston Southern":"2127","UNC Asheville":"2427","SIU Edwardsville":"2565","UC Santa Barbara":"2540","Lehigh":"2329","Southern Illinois":"79","UC Davis":"302","UL Monroe":"2433","Cleveland State":"325","Alabama A&M":"2010","Fairleigh Dickinson":"161","Robert Morris":"2523","Army":"349","New Haven":"2441","Oregon":"2483","Texas State":"326","Long Beach State":"299","Fordham":"2230","Stetson":"56","Massachusetts":"113","Howard":"47","Northwestern State":"2466","Rider":"2520","Long Island University":"112358","UAlbany":"399","La Salle":"2325","DePaul":"305","Columbia":"171","Hawai'i":"62","North Alabama":"2453","San Diego":"301","Fresno State":"278","Oregon State":"204","Arkansas State":"2032","North Carolina Central":"2428","Delaware":"48","Southern Miss":"2572","Wagner":"2681","Arkansas-Pine Bluff":"2029","East Texas A&M":"2837","Lindenwood":"2815","Little Rock":"2031","Pacific":"279","St. Francis (PA)":"2598","Utah Valley":"3084","North Carolina A&T":"2448","Eastern Michigan":"2199","Binghamton":"2066","Drexel":"2182","Houston Christian":"2277","Central Michigan":"2117","Maine":"311","Georgia Tech":"59","Lamar":"2320","Texas Southern":"2640","Maryland":"120","Louisiana Tech":"2348","Longwood":"2344","Cal Poly":"13","Rhode Island":"227","Pepperdine":"2492","Montana":"149","Brown":"225","Tennessee Tech":"2635","Bucknell":"2083","Portland":"2501","Alabama State":"2011","Southern Utah":"253","Memphis":"235","SE Louisiana":"2545","Oral Roberts":"198","Western Illinois":"2710","Bethune-Cookman":"2065","Texas A&M-Corpus Christi":"357","Niagara":"315","Cal State Bakersfield":"2934","Presbyterian":"2506","Le Moyne":"2330","Kansas City":"140","Indiana State":"282","Loyola Chicago":"2350","Stonehill":"284","Eastern Illinois":"2197","Tarleton State":"2627","Gardner-Webb":"2241","New Orleans":"2443","Alcorn State":"2016","Canisius":"2099","Evansville":"339","Jackson State":"2296","Bryant":"2803","UT Martin":"2630","Abilene Christian":"2000","UT Arlington":"250","Grambling":"2755","Florida A&M":"50","Northern Illinois":"2459","Delaware State":"2169","South Carolina State":"2569","Mississippi Valley State":"2400","Mount St. Mary's":"116","Maryland Eastern Shore":"2379","Coppin State":"2154","Air Force":"2005","UNC":"153"};
+ const byOcs=(a,b)=>(b.ocs??-1)-(a.ocs??-1);
  const validParlay=p=>p&&typeof p.id==='string'&&Array.isArray(p.pick_ids)&&p.pick_ids.length>1&&new Set(p.pick_ids).size===p.pick_ids.length&&p.pick_ids.every(id=>lookup.has(id));
  const suggested=(data.suggested_parlays||[]).filter(validParlay).filter(p=>p.pick_ids.every(id=>current.has(id)));
  const ofredParlays=(data.ofred_parlays||[]).filter(validParlay).filter(p=>p.pick_ids.every(id=>current.has(id)));
  const moneyline=p=>!p.market||p.market.toLowerCase()==='moneyline';
  function matchMarkup(p) {
-  const team=side=>'<span class="match-team'+(p.selection===side?' chosen':'')+'">'+esc(p[side].name)+'</span>';
+  const team=side=>{
+   const t=p[side],id=teamLogoIds[t.name];
+   const logo=id?'<img class="team-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/'+encodeURIComponent(id)+'.png" alt="" loading="lazy" decoding="async">':'';
+   return '<span class="match-team'+(p.selection===side?' chosen':'')+'">'+logo+'<span>'+esc(t.name)+'</span></span>';
+  };
   return team('home')+'<span class="versus">vs</span>'+team('away');
  }
  function gameTime(p){
@@ -916,18 +1031,20 @@ const LaymakerModel = (() => {
   return '<div class="bet-empty"><span class="empty-mark"></span><strong>'+esc(title)+'</strong>'+(subtitle?'<p>'+esc(subtitle)+'</p>':'')+'</div>';
  }
  function table(items,emptyTitle){
+  items=[...items].sort(byOcs);
   if(!items.length)return empty(emptyTitle,'Check back for the next board.');
   return '<table class="bet-table"><thead><tr><th scope="col">PICK · HOME vs AWAY</th><th scope="col">OCS</th></tr></thead><tbody>'+items.map(p=>'<tr class="'+(selected.has(p.id)?'is-selected':'')+'"><td>'+pickButton(p)+'</td><td class="ocs-cell">'+pct(p.ocs)+'</td></tr>').join('')+'</tbody></table>';
  }
- function recordMarkup(items){
-  const r=LaymakerModel.record(items),n=r.wins+r.losses+r.pushes+r.voids;
-  return n?'<span title="Wins – losses'+(r.pushes?' · '+r.pushes+' pushes':'')+(r.voids?' · '+r.voids+' void':'')+'"><span class="record-w">'+r.wins+'W</span> – <span class="record-l">'+r.losses+'L</span>'+(r.pushes?' · '+r.pushes+'P':'')+'</span>':'<span title="No settled results yet">— W–L</span>';
+ function recordMarkup(items,key){
+  const demo=data.demo&&key&&data.demo_records?.[key];
+  const r=demo?{pushes:0,voids:0,...demo}:LaymakerModel.record(items),n=r.wins+r.losses+r.pushes+r.voids;
+  return n?'<span title="'+(demo?'Demo record · ':'')+'Wins – losses'+(r.pushes?' · '+r.pushes+' pushes':'')+(r.voids?' · '+r.voids+' void':'')+'"><span class="record-w">'+r.wins+'W</span> – <span class="record-l">'+r.losses+'L</span>'+(r.pushes?' · '+r.pushes+'P':'')+'</span>':'<span title="No settled results yet">— W–L</span>';
  }
  function parlayCards(items,emptyTitle){
   if(!items.length)return empty(emptyTitle);
-  return items.map(p=>{
+  return [...items].sort((a,b)=>LaymakerModel.combined(b.pick_ids.map(id=>current.get(id)))-LaymakerModel.combined(a.pick_ids.map(id=>current.get(id)))).map(p=>{
    const legs=p.pick_ids.map(id=>current.get(id)),active=p.pick_ids.every(id=>selected.has(id)),done=LaymakerModel.settled(LaymakerModel.resolveResult(p,lookup));
-   return '<article class="parlay-card"><div class="parlay-card-head"><h3>'+esc(p.title||legs.length+'-leg parlay')+'</h3><span class="parlay-status">'+legs.length+' LEGS</span></div><ul class="parlay-legs">'+legs.map(l=>'<li>'+esc(LaymakerModel.shortLabel(l))+'</li>').join('')+'</ul><div class="parlay-card-foot"><span class="parlay-ocs">OCS '+pct(LaymakerModel.combined(legs))+'</span>'+(done?'<span class="parlay-status">'+esc(LaymakerModel.resolveResult(p,lookup))+'</span>':'<button class="small-button" type="button" data-parlay="'+esc(p.id)+'" aria-pressed="'+active+'">'+(active?'Remove picks':'Add picks +')+'</button>')+'</div></article>';
+   return '<article class="parlay-card"><div class="parlay-card-head"><h3>'+esc(p.title||legs.length+'-leg parlay')+'</h3><span class="parlay-status">'+legs.length+' LEGS</span></div><ul class="parlay-legs">'+[...legs].sort(byOcs).map(l=>'<li>'+matchMarkup(l)+'<span class="market-sub">'+esc(l.market||'Moneyline')+'</span></li>').join('')+'</ul><div class="parlay-card-foot"><span class="parlay-ocs">OCS '+pct(LaymakerModel.combined(legs))+'</span>'+(done?'<span class="parlay-status">'+esc(LaymakerModel.resolveResult(p,lookup))+'</span>':'<button class="small-button" type="button" data-parlay="'+esc(p.id)+'" aria-pressed="'+active+'">'+(active?'Remove picks':'Add picks +')+'</button>')+'</div></article>';
   }).join('');
  }
  function render(){
@@ -944,17 +1061,34 @@ const LaymakerModel = (() => {
    (ofredParlays.length?'<div class="subsection-label">PARLAYS</div>'+parlayCards(ofredParlays,''):''):
    empty('No personal bets posted.');
   $('suggested-list').innerHTML=parlayCards(suggested,'Suggested parlays coming soon.');
-  const must=(data.must_pick_ids||[]).map(id=>current.get(id)).filter(Boolean);
+  const must=(data.must_pick_ids||[]).map(id=>current.get(id)).filter(Boolean).sort(byOcs);
   $('must-banner').hidden=!must.length;
   $('must-picks').innerHTML=must.map(p=>'<div class="must-row">'+pickButton(p,true)+'<div class="must-ocs"><small>OCS</small>'+pct(p.ocs)+'</div></div>').join('');
   renderBuilder();
  }
  const allPicks=[...lookup.values()];
- $('locks-record').innerHTML=recordMarkup(allPicks.filter(p=>p.ocs>=90));
- $('likely-record').innerHTML=recordMarkup(allPicks.filter(p=>p.ocs<90));
+ $('locks-record').innerHTML=recordMarkup(allPicks.filter(p=>p.ocs>=90),'locks');
+ $('likely-record').innerHTML=recordMarkup(allPicks.filter(p=>p.ocs<90),'likely');
  const ownHistory=[...(history.ofred_picks||[]),...(data.ofred_pick_ids||[]).map(id=>lookup.get(id))];
  const allOwnParlays=LaymakerModel.unique([...(history.ofred_parlays||[]),...ofredParlays].filter(validParlay)).map(p=>({...p,id:'parlay:'+p.id,result:LaymakerModel.resolveResult(p,lookup)}));
- $('ofred-record').innerHTML=recordMarkup([...ownHistory,...allOwnParlays]);
+ $('ofred-record').innerHTML=recordMarkup([...ownHistory,...allOwnParlays],'ofred');
+ 
+ $('hot-record').innerHTML=recordMarkup(history.hot_takes||[],'hot');
+ const dailyHistory=history.daily_picks||[];
+ $('daily-record').innerHTML=recordMarkup(dailyHistory,'daily');
+ function dailyStreak(items){
+  const settled=[...items].filter(p=>['win','loss'].includes(p.result)).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  if(!settled.length)return null;
+  const type=settled[0].result;let count=0;
+  for(const p of settled){if(p.result!==type)break;count++;}
+  return {type,count};
+ }
+ const streak=data.demo?data.demo_daily_streak:dailyStreak(dailyHistory);
+ if(streak?.count){
+  $('daily-streak').hidden=false;
+  $('daily-streak').textContent=(data.demo?'Demo · ':'')+streak.count+'-'+(streak.type==='win'?'win':'loss')+' streak';
+  $('daily-streak').style.color=streak.type==='win'?'#147b50':'#b7424d';
+ }
  function renderBuilder(){
   const legs=[...selected].map(id=>current.get(id)).filter(Boolean);
   $('parlay-builder').hidden=!legs.length;
@@ -1006,6 +1140,8 @@ const LaymakerModel = (() => {
  });
  $('clear-parlay').addEventListener('click',()=>{selected.clear();render();});
  const historicalParlays=LaymakerModel.unique([...(history.suggested_parlays||[]),...suggested].filter(validParlay));
+ 
+ $('suggested-record').innerHTML=recordMarkup(historicalParlays.map(p=>({...p,result:LaymakerModel.resolveResult(p,lookup)})),'suggested');
  function openOutcomes(){
   const groups=new Map();
   historicalParlays.forEach(p=>{
@@ -1014,11 +1150,12 @@ const LaymakerModel = (() => {
    if(!groups.has(n))groups.set(n,[]);
    groups.get(n).push({...p,result:LaymakerModel.resolveResult(p,lookup)});
   });
-  const rows=[...groups].sort((a,b)=>a[0]-b[0]).map(([n,items])=>{
+  const demoRows=data.demo&&Array.isArray(data.demo_outcomes)?data.demo_outcomes:null;
+  const rows=demoRows?demoRows.map(r=>'<tr><td>'+r.legs+' legs</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+(r.pushes||0)+'</td></tr>'):[...groups].sort((a,b)=>a[0]-b[0]).map(([n,items])=>{
    const r=LaymakerModel.record(items);
    return '<tr><td>'+n+' legs</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+r.pushes+'</td></tr>';
   });
-  $('outcomes-content').innerHTML=rows.length?'<table class="outcome-table"><thead><tr><th scope="col">Parlay</th><th scope="col">Wins</th><th scope="col">Losses</th><th scope="col">Pushes</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>':empty('No settled parlays yet.');
+  $('outcomes-content').innerHTML=(demoRows?'<p class="demo-record-caption">Demo records · sample outcomes for layout testing.</p>':'')+(rows.length?'<table class="outcome-table"><thead><tr><th scope="col">Parlay</th><th scope="col">Wins</th><th scope="col">Losses</th><th scope="col">Pushes</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>':empty('No settled parlays yet.'));
   $('outcomes-dialog').showModal();
  }
  $('outcomes-button').addEventListener('click',openOutcomes);
