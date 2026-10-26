@@ -552,6 +552,15 @@ main.lay-board{max-width:1160px}
 @media(max-width:1000px){.board-grid{grid-template-columns:minmax(0,1.65fr) minmax(285px,1fr);gap:15px}}
 @media(max-width:760px){.board-grid{grid-template-columns:1fr}.top-board-note{margin:0 0 22px}}
 @media(max-width:480px){.team-logo{width:18px;height:18px;flex-basis:18px}.builder-overlap-note{font-size:10px;padding-top:8px}.builder-inner{gap:10px}.bet-panel-head .section-actions{gap:6px}.bet-panel-head h2{font-size:17px}}
+
+.pick-choice{display:flex;align-items:center;min-width:0;flex:1}
+.pick-choice .pick-button{flex:1;min-width:0}
+.pick-info-button{flex:0 0 21px;width:21px;height:21px;margin:0 12px 0 0;font-family:Georgia,serif;font-style:italic;font-size:12px}
+.hot-pick-text{flex:1;min-width:0;padding:14px 12px;font-size:12px;font-weight:650;line-height:1.9}
+.parlay-legs li .pick-info-button{display:inline-grid;vertical-align:middle;margin-left:7px}
+.must-row .pick-info-button{color:#c1d3ef;border-color:#7793b7}
+.selection-chip .pick-info-button{border:1px solid #7793b7;color:#c1d3ef;font-size:11px;width:18px;height:18px;flex-basis:18px;margin:0;padding:0}
+@media(hover:hover) and (pointer:fine){.pick-info-button:hover{color:#2864da;background:#e8f0ff}}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -580,7 +589,6 @@ main.lay-board{max-width:1160px}
   <div class="board-date"><time id="board-date"></time></div>
  </div>
  <p class="board-footnote top-board-note">OCS = OFred Confidence Score. Picks are opinions, not guaranteed outcomes. Selecting picks builds a parlay preview; no bets are placed here.</p>
- <div class="demo-notice" id="demo-notice" hidden><strong>DEMO</strong> Sample bets and game times for testing. Not real picks or scheduled matchups.</div>
  <section id="must-banner" class="must-banner" aria-label="Must-picks" hidden>
   <div class="must-banner-label"><strong>MUST-PICKS</strong><small>Odds worth a look.</small></div><div class="must-picks" id="must-picks"></div>
  </section>
@@ -646,8 +654,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "selection": "away",
       "ocs": 92,
       "start_time": "2026-11-05T19:00:00-05:00",
-      "result": "pending",
-      "note": "Demo matchup and time — not a real scheduled game."
+      "result": "pending"
     },
     {
       "id": "kansas-pfw",
@@ -665,8 +672,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "selection": "home",
       "ocs": 91,
       "start_time": "2026-11-05T19:00:00-05:00",
-      "result": "pending",
-      "note": "Demo matchup and time — not a real scheduled game."
+      "result": "pending"
     },
     {
       "id": "ttu-fsu",
@@ -684,8 +690,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "selection": "away",
       "ocs": 84,
       "start_time": "2026-11-05T20:00:00-05:00",
-      "result": "pending",
-      "note": "Demo matchup and time — not a real scheduled game."
+      "result": "pending"
     },
     {
       "id": "maryland-ksu",
@@ -703,8 +708,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "selection": "home",
       "ocs": 82,
       "start_time": "2026-11-05T18:00:00-05:00",
-      "result": "pending",
-      "note": "Demo matchup and time — not a real scheduled game."
+      "result": "pending"
     },
     {
       "id": "uva-vt",
@@ -722,8 +726,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "selection": "home",
       "ocs": 93,
       "start_time": "2026-11-05T20:00:00-05:00",
-      "result": "pending",
-      "note": "Demo matchup and time — not a real scheduled game."
+      "result": "pending"
     },
     {
       "id": "houston-baylor",
@@ -741,8 +744,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "selection": "away",
       "ocs": 88,
       "start_time": "2026-11-05T21:00:00-05:00",
-      "result": "pending",
-      "note": "Demo matchup and time — not a real scheduled game."
+      "result": "pending"
     },
     {
       "id": "villanova-georgetown",
@@ -760,8 +762,26 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
       "selection": "home",
       "ocs": 79,
       "start_time": "2026-11-05T19:00:00-05:00",
+      "result": "pending"
+    },
+    {
+      "id": "gonzaga-smc",
+      "date": "2026-11-05",
+      "game_id": "sample-gonzaga-smc",
+      "home": {
+        "name": "Saint Mary's",
+        "full_name": "Saint Mary's College Gaels"
+      },
+      "away": {
+        "name": "Gonzaga",
+        "full_name": "Gonzaga University Bulldogs"
+      },
+      "market": "Moneyline",
+      "selection": "away",
+      "ocs": 86,
+      "start_time": "2026-11-05T21:30:00-05:00",
       "result": "pending",
-      "note": "Demo matchup and time — not a real scheduled game."
+      "sportsbook": "Sportsbook TBD"
     }
   ],
   "hot_take": {
@@ -780,12 +800,13 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
     "selection": "away",
     "ocs": null,
     "start_time": "2026-11-05T21:00:00-05:00",
-    "result": "pending",
-    "note": "Demo matchup and time — not a real scheduled game."
+    "result": "pending"
   },
   "hot_take_id": null,
   "daily_pick_id": "uva-vt",
-  "must_pick_ids": [],
+  "must_pick_ids": [
+    "gonzaga-smc"
+  ],
   "ofred_pick_ids": [
     "houston-baylor",
     "villanova-georgetown"
@@ -793,7 +814,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
   "suggested_parlays": [
     {
       "id": "demo-suggested-two",
-      "title": "The Two-Leg Link",
+      "title": "Suggested 2-Leg Parlay",
       "pick_ids": [
         "uva-vt",
         "duke-unc"
@@ -802,7 +823,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
     },
     {
       "id": "demo-suggested-three",
-      "title": "Three-Team Ticket",
+      "title": "Suggested 3-Leg Parlay",
       "pick_ids": [
         "kansas-pfw",
         "houston-baylor",
@@ -812,7 +833,7 @@ Keep previous picks and parlays in history to preserve records. No fabricated sa
     },
     {
       "id": "demo-suggested-four",
-      "title": "Four-Leg Flyer",
+      "title": "Suggested 4-Leg Parlay",
       "pick_ids": [
         "duke-unc",
         "maryland-ksu",
@@ -990,8 +1011,6 @@ const LaymakerModel = (() => {
  const dateObject=new Date(boardDate+'T12:00:00Z');
  $('board-date').dateTime=boardDate;
  $('board-date').textContent=new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(dateObject);
- $('demo-notice').hidden=!data.demo;
- if(data.demo)$('ofred-info').dataset.description="These sample bets are for layout testing only. On the live board, this section shows the bets I am actually betting on.";
  const history=data.history||{};
  const picks=LaymakerModel.unique((data.picks||[]).filter(LaymakerModel.validPick)).filter(p=>(p.date||boardDate)===boardDate);
  const lookup=new Map(LaymakerModel.unique([...(history.picks||[]),...(data.picks||[])].filter(LaymakerModel.validPick)).map(p=>[p.id,p]));
@@ -1022,10 +1041,14 @@ const LaymakerModel = (() => {
    (p.sportsbook?'\nSportsbook: '+p.sportsbook:'')+(p.note?'\n'+p.note:'')+
    (LaymakerModel.settled(p.result)?'\nResult: '+p.result:'');
  }
+
+ function pickInfo(p){
+  return '<button type="button" class="info-button pick-info-button" data-pick-info="'+esc(p.id)+'" data-description="'+esc(description(p))+'" aria-label="'+esc('Information about '+LaymakerModel.shortLabel(p))+'">i</button>';
+ }
  function pickButton(p,featured=false){
   const active=selected.has(p.id),done=LaymakerModel.settled(p.result);
   const sub=[!moneyline(p)?p.market:null,featured?p.sportsbook:null,done?p.result.toUpperCase():null].filter(Boolean).join(' · ');
-  return '<button type="button" class="pick-button" data-pick="'+esc(p.id)+'" aria-pressed="'+active+'" aria-label="'+esc(LaymakerModel.shortLabel(p)+', '+pct(p.ocs)+' OCS'+(done?', '+p.result:'') )+'"'+(done?' disabled':'')+' data-description="'+esc(description(p))+'"><span class="pick-text">'+matchMarkup(p)+(sub?'<span class="market-sub">'+esc(sub)+'</span>':'')+'</span><span class="pick-check" aria-hidden="true">✓</span></button>';
+  return '<div class="pick-choice"><button type="button" class="pick-button" data-pick="'+esc(p.id)+'" aria-pressed="'+active+'" aria-label="'+esc(LaymakerModel.shortLabel(p)+', '+pct(p.ocs)+' OCS'+(done?', '+p.result:'') )+'"'+(done?' disabled':'')+'><span class="pick-text">'+matchMarkup(p)+(sub?'<span class="market-sub">'+esc(sub)+'</span>':'')+'</span><span class="pick-check" aria-hidden="true">✓</span></button>'+pickInfo(p)+'</div>';
  }
  function empty(title,subtitle=''){
   return '<div class="bet-empty"><span class="empty-mark"></span><strong>'+esc(title)+'</strong>'+(subtitle?'<p>'+esc(subtitle)+'</p>':'')+'</div>';
@@ -1038,13 +1061,13 @@ const LaymakerModel = (() => {
  function recordMarkup(items,key){
   const demo=data.demo&&key&&data.demo_records?.[key];
   const r=demo?{pushes:0,voids:0,...demo}:LaymakerModel.record(items),n=r.wins+r.losses+r.pushes+r.voids;
-  return n?'<span title="'+(demo?'Demo record · ':'')+'Wins – losses'+(r.pushes?' · '+r.pushes+' pushes':'')+(r.voids?' · '+r.voids+' void':'')+'"><span class="record-w">'+r.wins+'W</span> – <span class="record-l">'+r.losses+'L</span>'+(r.pushes?' · '+r.pushes+'P':'')+'</span>':'<span title="No settled results yet">— W–L</span>';
+  return n?'<span title="'+'Wins – losses'+(r.pushes?' · '+r.pushes+' pushes':'')+(r.voids?' · '+r.voids+' void':'')+'"><span class="record-w">'+r.wins+'W</span> – <span class="record-l">'+r.losses+'L</span>'+(r.pushes?' · '+r.pushes+'P':'')+'</span>':'<span title="No settled results yet">— W–L</span>';
  }
  function parlayCards(items,emptyTitle){
   if(!items.length)return empty(emptyTitle);
   return [...items].sort((a,b)=>LaymakerModel.combined(b.pick_ids.map(id=>current.get(id)))-LaymakerModel.combined(a.pick_ids.map(id=>current.get(id)))).map(p=>{
    const legs=p.pick_ids.map(id=>current.get(id)),active=p.pick_ids.every(id=>selected.has(id)),done=LaymakerModel.settled(LaymakerModel.resolveResult(p,lookup));
-   return '<article class="parlay-card"><div class="parlay-card-head"><h3>'+esc(p.title||legs.length+'-leg parlay')+'</h3><span class="parlay-status">'+legs.length+' LEGS</span></div><ul class="parlay-legs">'+[...legs].sort(byOcs).map(l=>'<li>'+matchMarkup(l)+'<span class="market-sub">'+esc(l.market||'Moneyline')+'</span></li>').join('')+'</ul><div class="parlay-card-foot"><span class="parlay-ocs">OCS '+pct(LaymakerModel.combined(legs))+'</span>'+(done?'<span class="parlay-status">'+esc(LaymakerModel.resolveResult(p,lookup))+'</span>':'<button class="small-button" type="button" data-parlay="'+esc(p.id)+'" aria-pressed="'+active+'">'+(active?'Remove picks':'Add picks +')+'</button>')+'</div></article>';
+   return '<article class="parlay-card"><div class="parlay-card-head"><h3>'+esc(suggested.some(s=>s.id===p.id)?'Suggested '+legs.length+'-Leg Parlay':p.title||legs.length+'-leg parlay')+'</h3><span class="parlay-status">'+legs.length+' LEGS</span></div><ul class="parlay-legs">'+[...legs].sort(byOcs).map(l=>'<li>'+matchMarkup(l)+'<span class="market-sub">'+esc(l.market||'Moneyline')+'</span>'+pickInfo(l)+'</li>').join('')+'</ul><div class="parlay-card-foot"><span class="parlay-ocs">OCS '+pct(LaymakerModel.combined(legs))+'</span>'+(done?'<span class="parlay-status">'+esc(LaymakerModel.resolveResult(p,lookup))+'</span>':'<button class="small-button" type="button" data-parlay="'+esc(p.id)+'" aria-pressed="'+active+'">'+(active?'Remove picks':'Add picks +')+'</button>')+'</div></article>';
   }).join('');
  }
  function render(){
@@ -1052,7 +1075,7 @@ const LaymakerModel = (() => {
   $('likely-list').innerHTML=table(picks.filter(p=>p.ocs<90),'No likely picks posted yet.');
   const hot=data.hot_take||current.get(data.hot_take_id),daily=current.get(data.daily_pick_id);
   $('hot-list').innerHTML=hot?
-   '<table class="bet-table hot-pick-only"><thead><tr><th scope="col">PICK · HOME vs AWAY</th></tr></thead><tbody><tr><td><button type="button" class="pick-button" data-hot-info="true" data-description="'+esc(description(hot))+'" aria-label="'+esc(LaymakerModel.shortLabel(hot))+' details"><span class="pick-text">'+matchMarkup(hot)+'</span></button></td></tr></tbody></table>':
+   '<table class="bet-table hot-pick-only"><thead><tr><th scope="col">PICK · HOME vs AWAY</th></tr></thead><tbody><tr><td><div class="pick-choice"><span class="hot-pick-text">'+matchMarkup(hot)+'</span>'+pickInfo(hot)+'</div></td></tr></tbody></table>':
    empty('Hot Take coming soon.');
   $('daily-list').innerHTML=table(daily?[daily]:[],'No Daily Pick posted.');
   const own=(data.ofred_pick_ids||[]).map(id=>current.get(id)).filter(Boolean);
@@ -1086,7 +1109,7 @@ const LaymakerModel = (() => {
  const streak=data.demo?data.demo_daily_streak:dailyStreak(dailyHistory);
  if(streak?.count){
   $('daily-streak').hidden=false;
-  $('daily-streak').textContent=(data.demo?'Demo · ':'')+streak.count+'-'+(streak.type==='win'?'win':'loss')+' streak';
+  $('daily-streak').textContent=streak.count+'-'+(streak.type==='win'?'win':'loss')+' streak';
   $('daily-streak').style.color=streak.type==='win'?'#147b50':'#b7424d';
  }
  function renderBuilder(){
@@ -1094,7 +1117,7 @@ const LaymakerModel = (() => {
   $('parlay-builder').hidden=!legs.length;
   $('builder-count').textContent=legs.length+' '+(legs.length===1?'selection':'selections');
   $('total-ocs').textContent=legs.length?pct(LaymakerModel.combined(legs)):'';
-  $('builder-selections').innerHTML=legs.map(p=>'<span class="selection-chip">'+esc(LaymakerModel.shortLabel(p))+'<button type="button" data-remove="'+esc(p.id)+'" aria-label="Remove '+esc(LaymakerModel.shortLabel(p))+'">×</button></span>').join('');
+  $('builder-selections').innerHTML=legs.map(p=>'<span class="selection-chip">'+esc(LaymakerModel.shortLabel(p))+pickInfo(p)+'<button type="button" data-remove="'+esc(p.id)+'" aria-label="Remove '+esc(LaymakerModel.shortLabel(p))+'">×</button></span>').join('');
   requestAnimationFrame(()=>{
    const height=legs.length?$('parlay-builder').getBoundingClientRect().height:0;
    document.body.style.paddingBottom=height?height+16+'px':'';
@@ -1117,10 +1140,10 @@ const LaymakerModel = (() => {
   hideTip();render();
  }
  document.addEventListener('click',event=>{
-  const hotButton=event.target.closest('[data-hot-info]');
-  if(hotButton){
-   $('pick-info-title').textContent='Hot Take';
-   $('pick-info-text').textContent=hotButton.dataset.description;
+  const infoButton=event.target.closest('[data-pick-info]');
+  if(infoButton){
+   $('pick-info-title').textContent='Pick Details';
+   $('pick-info-text').textContent=infoButton.dataset.description;
    $('pick-info-dialog').showModal();hideTip();return;
   }
   const target=event.target.closest('[data-pick],[data-remove],[data-parlay]');
@@ -1155,7 +1178,7 @@ const LaymakerModel = (() => {
    const r=LaymakerModel.record(items);
    return '<tr><td>'+n+' legs</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+r.pushes+'</td></tr>';
   });
-  $('outcomes-content').innerHTML=(demoRows?'<p class="demo-record-caption">Demo records · sample outcomes for layout testing.</p>':'')+(rows.length?'<table class="outcome-table"><thead><tr><th scope="col">Parlay</th><th scope="col">Wins</th><th scope="col">Losses</th><th scope="col">Pushes</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>':empty('No settled parlays yet.'));
+  $('outcomes-content').innerHTML=(rows.length?'<table class="outcome-table"><thead><tr><th scope="col">Parlay</th><th scope="col">Wins</th><th scope="col">Losses</th><th scope="col">Pushes</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>':empty('No settled parlays yet.'));
   $('outcomes-dialog').showModal();
  }
  $('outcomes-button').addEventListener('click',openOutcomes);
