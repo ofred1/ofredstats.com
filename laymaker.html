@@ -643,9 +643,9 @@ main.lay-board{max-width:1160px}
 <div id="board-message" role="status" hidden></div>
 <!-- Daily content lives here. Picks/history use unique IDs. OCS is 0–100.
 Pick: {id, date:"YYYY-MM-DD", game_id, home:{name,full_name}, away:{name,full_name},
-market:"Moneyline", selection:"home"|"away", ocs, start_time:"ISO timestamp with timezone",
+market:"Moneyline"|"Spread", selection:"home"|"away", line:-4.5, ocs, start_time:"ISO timestamp with timezone",
 result:"pending"|"win"|"loss"|"push"|"void", sportsbook, note}.
-Use hot_take_id/daily_pick_id/must_pick_ids/ofred_pick_ids to feature the same pick without duplicating it.
+For spreads, line is the selected team’s signed handicap: -4.5, +4.5, or 0.\nDisplay order is away, then home; selection always identifies the correct side.\nUse hot_take_id/daily_pick_id/must_pick_ids/ofred_pick_ids to feature the same pick without duplicating it.
 Parlay: {id,title,pick_ids:[],result:"pending"|"win"|"loss"|"push"|"void"}.
 Keep previous picks and parlays in history to preserve records.\nMust-picks use must_picks, an independent array; OCS is optional and they are never selectable. -->
 <script type="application/json" id="laymaker-data">
@@ -707,14 +707,17 @@ Keep previous picks and parlays in history to preserve records.\nMust-picks use 
 'use strict';
 const LaymakerModel = (() => {
  const settled = result => ['win','loss','push','void'].includes(result);
+ const isSpread = p => String(p?.market||'').toLowerCase()==='spread';
+ const lineLabel = line => (line>0?'+':'')+String(line);
+ const marketLabel = p => isSpread(p)?'Spread '+lineLabel(p.line):(p.market||'Moneyline');
  const validPick = p => p && typeof p.id==='string' && p.id.length>0 &&
   p.home && typeof p.home.name==='string' && p.away && typeof p.away.name==='string' &&
-  ['home','away'].includes(p.selection) && Number.isFinite(p.ocs) && p.ocs>=0 && p.ocs<=100;
+  ['home','away'].includes(p.selection) && Number.isFinite(p.ocs) && p.ocs>=0 && p.ocs<=100 && (!isSpread(p)||Number.isFinite(p.line));
  const unique = items => [...new Map(items.filter(Boolean).map(p=>[p.id,p])).values()];
  const combined = picks => picks.length ? picks.reduce((n,p)=>n*(p.ocs/100),1)*100 : null;
  const gameKey = p => String(p.game_id || [p.home.name,p.away.name,p.start_time||p.date].join('|'));
  const selectedName = p => p[p.selection].name;
- const shortLabel = p => selectedName(p)+' '+(p.market||'Moneyline');
+ const shortLabel = p => selectedName(p)+' '+(isSpread(p)?lineLabel(p.line):(p.market||'Moneyline'));
  function record(items) {
   return unique(items).reduce((r,p)=>{if(p.result==='win')r.wins++;if(p.result==='loss')r.losses++;if(p.result==='push')r.pushes++;if(p.result==='void')r.voids++;return r;},{wins:0,losses:0,pushes:0,voids:0});
  }
@@ -737,7 +740,7 @@ const LaymakerModel = (() => {
   }
   return null;
  }
- return {validPick,unique,combined,gameKey,record,resolveResult,canAdd,shortLabel,settled};
+ return {validPick,unique,combined,gameKey,record,resolveResult,canAdd,shortLabel,settled,isSpread,lineLabel,marketLabel};
 })();
 
 // Board interactions.
@@ -766,18 +769,18 @@ const LaymakerModel = (() => {
   const team=side=>{
    const t=p[side],id=teamLogoIds[t.name];
    const logo=id?'<img class="team-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/'+encodeURIComponent(id)+'.png" alt="" loading="lazy" decoding="async">':'';
-   return '<span class="match-team'+(p.selection===side?' chosen':'')+'">'+logo+'<span>'+esc(t.name)+'</span></span>';
+   return '<span class="match-team'+(p.selection===side?' chosen':'')+'">'+logo+'<span>'+esc(t.name)+(p.selection===side&&LaymakerModel.isSpread(p)?' <span class="spread-line">'+esc(LaymakerModel.lineLabel(p.line))+'</span>':'')+'</span></span>';
   };
-  return team('home')+'<span class="versus">vs</span>'+team('away');
+  return team('away')+'<span class="versus">vs</span>'+team('home');
  }
  function gameTime(p){
   if(!p.start_time||!Number.isFinite(Date.parse(p.start_time)))return 'Game time: TBA';
   return 'Game time: '+new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short',timeZone:'America/New_York'}).format(new Date(p.start_time));
  }
  function description(p,includeOcs=true){
-  return (p.home.full_name||p.home.name)+' (home) vs '+(p.away.full_name||p.away.name)+' (away)\n'+
-   (moneyline(p)?'Moneyline · Pick to win: ':'Selection · ')+(p[p.selection].full_name||p[p.selection].name)+
-   (moneyline(p)?'':' · '+(p.market||''))+'\n'+gameTime(p)+(includeOcs&&Number.isFinite(p.ocs)?'\nOCS: '+pct(p.ocs):'')+
+  return (p.away.full_name||p.away.name)+' (away) vs '+(p.home.full_name||p.home.name)+' (home)\n'+
+   (moneyline(p)?'Moneyline · Pick to win: ':LaymakerModel.isSpread(p)?'Point spread · Pick to cover: ':'Selection · ')+(p[p.selection].full_name||p[p.selection].name)+
+   (LaymakerModel.isSpread(p)?' '+LaymakerModel.lineLabel(p.line):moneyline(p)?'':' · '+(p.market||''))+'\n'+gameTime(p)+(includeOcs&&Number.isFinite(p.ocs)?'\nOCS: '+pct(p.ocs):'')+
    (p.sportsbook?'\nSportsbook: '+p.sportsbook:'')+(p.note?'\n'+p.note:'')+
    (LaymakerModel.settled(p.result)?'\nResult: '+p.result:'');
  }
@@ -788,7 +791,7 @@ const LaymakerModel = (() => {
 
  function pickButton(p,featured=false){
   const active=selected.has(p.id),done=LaymakerModel.settled(p.result);
-  const sub=[!moneyline(p)?p.market:null,featured?p.sportsbook:null,done?p.result.toUpperCase():null].filter(Boolean).join(' · ');
+  const sub=[!moneyline(p)?'Point spread':null,featured?p.sportsbook:null,done?p.result.toUpperCase():null].filter(Boolean).join(' · ');
   return '<div class="pick-choice inline-pick-info" data-row-pick="'+esc(p.id)+'"><button type="button" class="pick-button" data-pick="'+esc(p.id)+'" aria-pressed="'+active+'" aria-label="'+esc(LaymakerModel.shortLabel(p)+', '+pct(p.ocs)+' OCS'+(done?', '+p.result:'') )+'"'+(done?' disabled':'')+'><span class="pick-text">'+matchMarkup(p)+(sub?'<span class="market-sub">'+esc(sub)+'</span>':'')+'</span></button>'+pickInfo(p)+'<span class="pick-check" aria-hidden="true">✓</span></div>';
  }
  function empty(title,subtitle=''){
@@ -797,7 +800,7 @@ const LaymakerModel = (() => {
  function table(items,emptyTitle){
   items=[...items].sort(byOcs);
   if(!items.length)return empty(emptyTitle,'Check back for the next board.');
-  return '<table class="bet-table"><thead><tr><th scope="col">PICK · HOME vs AWAY</th><th scope="col">OCS</th></tr></thead><tbody>'+items.map(p=>'<tr class="'+(selected.has(p.id)?'is-selected':'')+'"><td>'+pickButton(p)+'</td><td class="ocs-cell">'+pct(p.ocs)+'</td></tr>').join('')+'</tbody></table>';
+  return '<table class="bet-table"><thead><tr><th scope="col">PICK · AWAY vs HOME</th><th scope="col">OCS</th></tr></thead><tbody>'+items.map(p=>'<tr class="'+(selected.has(p.id)?'is-selected':'')+'"><td>'+pickButton(p)+'</td><td class="ocs-cell">'+pct(p.ocs)+'</td></tr>').join('')+'</tbody></table>';
  }
  function recordMarkup(items,key){
   const r=LaymakerModel.record(items),n=r.wins+r.losses+r.pushes+r.voids;
@@ -807,7 +810,7 @@ const LaymakerModel = (() => {
   if(!items.length)return empty(emptyTitle);
   return [...items].sort((a,b)=>LaymakerModel.combined(b.pick_ids.map(id=>current.get(id)))-LaymakerModel.combined(a.pick_ids.map(id=>current.get(id)))).map(p=>{
    const legs=p.pick_ids.map(id=>current.get(id)),active=p.pick_ids.every(id=>selected.has(id)),done=LaymakerModel.settled(LaymakerModel.resolveResult(p,lookup));
-   return '<article class="parlay-card"><div class="parlay-card-head"><h3>'+esc(suggested.some(s=>s.id===p.id)?'Suggested '+legs.length+'-Leg Parlay':p.title||legs.length+'-leg parlay')+'</h3><span class="parlay-status">'+legs.length+' LEGS</span></div><ul class="parlay-legs">'+[...legs].sort(byOcs).map(l=>'<li>'+matchMarkup(l)+'<span class="market-sub">'+esc(l.market||'Moneyline')+'</span>'+pickInfo(l)+'</li>').join('')+'</ul><div class="parlay-card-foot"><span class="parlay-ocs">OCS '+pct(LaymakerModel.combined(legs))+'</span>'+(done?'<span class="parlay-status">'+esc(LaymakerModel.resolveResult(p,lookup))+'</span>':'<button class="small-button" type="button" data-parlay="'+esc(p.id)+'" aria-pressed="'+active+'">'+(active?'Remove picks':'Add picks +')+'</button>')+'</div></article>';
+   return '<article class="parlay-card"><div class="parlay-card-head"><h3>'+esc(suggested.some(s=>s.id===p.id)?'Suggested '+legs.length+'-Leg Parlay':p.title||legs.length+'-leg parlay')+'</h3><span class="parlay-status">'+legs.length+' LEGS</span></div><ul class="parlay-legs">'+[...legs].sort(byOcs).map(l=>'<li>'+matchMarkup(l)+'<span class="market-sub">'+esc(LaymakerModel.marketLabel(l))+'</span>'+pickInfo(l)+'</li>').join('')+'</ul><div class="parlay-card-foot"><span class="parlay-ocs">OCS '+pct(LaymakerModel.combined(legs))+'</span>'+(done?'<span class="parlay-status">'+esc(LaymakerModel.resolveResult(p,lookup))+'</span>':'<button class="small-button" type="button" data-parlay="'+esc(p.id)+'" aria-pressed="'+active+'">'+(active?'Remove picks':'Add picks +')+'</button>')+'</div></article>';
   }).join('');
  }
  function render(){
@@ -815,7 +818,7 @@ const LaymakerModel = (() => {
   $('likely-list').innerHTML=table(picks.filter(p=>p.ocs<90),'No likely picks posted yet.');
   const hot=data.hot_take||current.get(data.hot_take_id),daily=current.get(data.daily_pick_id);
   $('hot-list').innerHTML=hot?
-   '<table class="bet-table hot-pick-only"><thead><tr><th scope="col">PICK · HOME vs AWAY</th></tr></thead><tbody><tr><td><div class="pick-choice"><span class="hot-pick-text">'+matchMarkup(hot)+'</span>'+pickInfo(hot)+'</div></td></tr></tbody></table>':
+   '<table class="bet-table hot-pick-only"><thead><tr><th scope="col">PICK · AWAY vs HOME</th></tr></thead><tbody><tr><td><div class="pick-choice"><span class="hot-pick-text">'+matchMarkup(hot)+'</span>'+pickInfo(hot)+'</div></td></tr></tbody></table>':
    empty('Hot Take coming soon.');
   $('daily-list').innerHTML=table(daily?[daily]:[],'No Daily Pick posted.');
   const own=(data.ofred_pick_ids||[]).map(id=>current.get(id)).filter(Boolean);
@@ -826,7 +829,7 @@ const LaymakerModel = (() => {
   $('suggested-list').innerHTML=parlayCards(suggested,'Suggested parlays coming soon.');
   const must=LaymakerModel.unique([...(data.must_picks||[]),...(data.must_pick_ids||[]).map(id=>current.get(id))].filter(p=>p&&p.home&&p.away&&['home','away'].includes(p.selection)));
   $('must-banner').hidden=!must.length;
-  $('must-picks').innerHTML=must.map(p=>'<div class="must-row"><div class="must-single"><div class="must-match">'+matchMarkup(p)+pickInfo(p,false)+'</div><span class="market-sub">'+esc([p.market||'Moneyline',p.sportsbook].filter(Boolean).join(' · '))+'</span></div></div>').join('');
+  $('must-picks').innerHTML=must.map(p=>'<div class="must-row"><div class="must-single"><div class="must-match">'+matchMarkup(p)+pickInfo(p,false)+'</div><span class="market-sub">'+esc([LaymakerModel.marketLabel(p),p.sportsbook].filter(Boolean).join(' · '))+'</span></div></div>').join('');
   renderBuilder();
  }
  const allPicks=[...lookup.values()];
