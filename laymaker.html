@@ -737,7 +737,7 @@ Keep previous picks and parlays in history to preserve records.\nMust-picks use 
       "name": "Memphis",
       "full_name": "University of Memphis Tigers"
     },
-    "market": "Moneyline",
+    "market": "Spread",
     "selection": "away",
     "ocs": null,
     "start_time": "2026-11-02T19:00:00-05:00",
@@ -746,7 +746,8 @@ Keep previous picks and parlays in history to preserve records.\nMust-picks use 
     "note": "Neutral site · Sanford Pentagon, Sioux Falls, SD. Iowa State is the designated home team.",
     "venue": "Sanford Pentagon",
     "city": "Sioux Falls, SD",
-    "schedule_source": "https://cyclones.com/sports/mens-basketball/schedule"
+    "schedule_source": "https://cyclones.com/sports/mens-basketball/schedule",
+    "line": 13.5
   },
   "hot_take_id": null,
   "daily_pick_id": "20261102-byu-ohio-state",
@@ -987,6 +988,25 @@ const LaymakerModel = (() => {
   $('board-message').textContent=text;$('board-message').hidden=false;
   clearTimeout(messageTimer);messageTimer=setTimeout(()=>$('board-message').hidden=true,4200);
  }
+
+ function updateSelectionUI(){
+  // Keep matchup rows and image elements mounted; only change selection state.
+  document.querySelectorAll('button[data-pick]').forEach(button=>{
+   const active=selected.has(button.dataset.pick);
+   button.setAttribute('aria-pressed',String(active));
+   const row=button.closest('tr');
+   if(row)row.classList.toggle('is-selected',active);
+  });
+  document.querySelectorAll('button[data-parlay]').forEach(button=>{
+   const parlay=[...suggested,...ofredParlays].find(p=>p.id===button.dataset.parlay);
+   if(!parlay)return;
+   const active=parlay.pick_ids.every(id=>selected.has(id));
+   button.setAttribute('aria-pressed',String(active));
+   button.textContent=active?'Remove picks':'Add picks +';
+  });
+  renderBuilder();
+ }
+
  function togglePick(id){
   const p=current.get(id);if(!p||LaymakerModel.settled(p.result))return;
   if(selected.has(id))selected.delete(id);
@@ -995,7 +1015,7 @@ const LaymakerModel = (() => {
    if(error){message(error);return;}
    selected.add(id);
   }
-  hideTip();render();
+  hideTip();updateSelectionUI();
  }
  document.addEventListener('click',event=>{
   const infoButton=event.target.closest('[data-pick-info]');
@@ -1011,7 +1031,7 @@ const LaymakerModel = (() => {
    return;
   }
   if(target.dataset.pick){togglePick(target.dataset.pick);return;}
-  if(target.dataset.remove){selected.delete(target.dataset.remove);render();return;}
+  if(target.dataset.remove){selected.delete(target.dataset.remove);updateSelectionUI();return;}
   const p=[...suggested,...ofredParlays].find(p=>p.id===target.dataset.parlay);
   if(!p)return;
   if(p.pick_ids.every(id=>selected.has(id)))p.pick_ids.forEach(id=>selected.delete(id));
@@ -1021,9 +1041,9 @@ const LaymakerModel = (() => {
    if(error){message(error);return;}
    additions.forEach(p=>selected.add(p.id));
   }
-  render();
+  updateSelectionUI();
  });
- $('clear-parlay').addEventListener('click',()=>{selected.clear();render();});
+ $('clear-parlay').addEventListener('click',()=>{selected.clear();updateSelectionUI();});
  const historicalParlays=LaymakerModel.unique([...(history.suggested_parlays||[]),...suggested].filter(validParlay));
  
  $('suggested-record').innerHTML=recordMarkup(historicalParlays.map(p=>({...p,result:LaymakerModel.resolveResult(p,lookup)})),'suggested');
