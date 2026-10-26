@@ -355,7 +355,6 @@ header .eye-menu a, header .eye-menu .current-page { font-family: inherit; font-
 header .navlinks { gap: 24px; flex-wrap: wrap; }
 header .navlinks > a, header .navlinks > .current-page { gap: .28em; white-space: nowrap; }
 
-header .navlinks a:hover 
 @media (max-width: 700px) { header .navlinks { gap: 8px 18px; } }
 
 /* Compact mobile header; full desktop navigation stays visible. */
@@ -387,6 +386,146 @@ header .nav { position: relative; }
  }
 }
 
+
+/* LAYmaker daily board. */
+[hidden]{display:none!important}
+main.lay-board{max-width:1320px;padding:34px 32px 65px}
+.board-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:26px}
+.board-heading h1{display:flex;align-items:center;gap:9px;margin:0;font-size:44px;letter-spacing:-1.8px;line-height:1.1}
+.par-prefix{font-size:.55em;font-weight:650;letter-spacing:-1px;color:#69758b}
+.board-date{display:grid;gap:5px;text-align:right}
+.board-date small{font-size:10px;font-weight:750;letter-spacing:1.4px;color:#69758b}
+.board-date time{font-size:17px;font-weight:750}
+.board-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(300px,1fr);gap:22px;align-items:start}
+.main-board,.side-board{display:grid;gap:22px;min-width:0}
+.bet-panel{background:white;border:1px solid #dce3ed;border-radius:10px;overflow:hidden;box-shadow:0 3px 12px #18243c04}
+.bet-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 19px;border-bottom:1px solid #e6ebf2}
+.bet-panel h2{margin:0;font-size:20px;font-weight:850;letter-spacing:-.6px}
+.bet-panel.locks{border-top:3px solid #2864da}
+.bet-panel.likely{border-top:3px solid #172840}
+.section-kicker{font-size:10px;letter-spacing:1.3px;color:#69758b;font-weight:700;margin-top:5px}
+.section-actions{display:flex;align-items:center;gap:9px}
+.record{font-size:12px;font-weight:750;color:#61718a;white-space:nowrap;font-variant-numeric:tabular-nums}
+.record .record-w{color:#147b50}
+.record .record-l{color:#b7424d}
+.bet-table{width:100%;border-collapse:collapse;white-space:normal;table-layout:fixed}
+.bet-table th{position:static;padding:9px 19px;background:#f8fafd;color:#78849a;font-size:10px;letter-spacing:1px;text-align:left;border:0}
+.bet-table th:last-child{width:84px;text-align:center}
+.bet-table td{padding:0;border-bottom:1px solid #e9edf4;font-size:13px}
+.bet-table tr:last-child td{border-bottom:0}
+.pick-button{width:100%;border:0;border-radius:0;background:transparent;color:#18243c;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;min-height:65px}
+.pick-text{min-width:0;line-height:1.9;font-weight:650}
+.match-team{display:inline;padding:3px 0}
+.match-team.chosen{background:#e4f5eb;color:#106d43;border:1px solid #afdcc2;padding:3px 7px;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.versus{color:#8791a3;font-size:11px;padding:0 6px;font-weight:500}
+.market-sub{display:block;line-height:1.5;color:#6c7890;font-size:11px;font-weight:500;margin-top:5px}
+.pick-check{flex:0 0 20px;width:20px;height:20px;border:1px solid #ccd7e6;border-radius:5px;background:white;display:grid;place-items:center;color:transparent;font-size:12px}
+.pick-button[aria-pressed="true"]{background:#edf3ff}
+.pick-button[aria-pressed="true"] .pick-check{background:#2864da;border-color:#2864da;color:white}
+.bet-table .ocs-cell{width:84px;text-align:center;border-left:1px solid #e9edf4;font-size:17px;font-weight:800;letter-spacing:-.5px;color:#2864da;font-variant-numeric:tabular-nums}
+.bet-table tr.is-selected td{background:#edf3ff}
+.bet-empty{padding:27px 19px 29px;text-align:center}
+.bet-empty strong{display:block;font-size:13px;font-weight:650;color:#61718a}
+.bet-empty p{font-size:12px;margin:7px 0 0;color:#8a94a5;line-height:1.5}
+.empty-mark{display:block;width:28px;height:3px;background:#dbe5f5;border-radius:3px;margin:0 auto 13px}
+.side-board .bet-panel-head{padding:16px}
+.side-board .bet-panel h2{font-size:17px}
+.side-board .pick-button{padding:14px 12px;font-size:12px}
+.side-board .bet-table th{padding-inline:12px}
+.side-board .bet-table th:last-child{width:70px}
+.side-board .ocs-cell{width:70px;font-size:16px}
+.hot-panel .bet-panel-head{background:#fff8f2}
+.daily-panel .bet-panel-head{background:#eef4ff}
+.section-mini{font-size:10px;color:#8b715b;letter-spacing:1px;font-weight:700}
+.subsection-label{font-size:10px;font-weight:800;letter-spacing:1.1px;padding:13px 16px 9px;background:#f8fafd;color:#6a7890;border-bottom:1px solid #e9edf4}
+.info-button{width:22px;height:22px;border:1px solid #aebbd0;background:transparent;border-radius:50%;font-size:12px;font-weight:700;color:#697b98;padding:0;display:grid;place-items:center}
+.small-button{background:#f2f6fd;border:1px solid #d8e2f1;padding:7px 10px;font-size:11px;font-weight:700;color:#2864da;border-radius:5px}
+.must-banner{background:#132744;color:white;border:1px solid #214875;border-left:4px solid #65d7a1;border-radius:10px;display:grid;grid-template-columns:135px minmax(0,1fr);align-items:stretch;margin-bottom:24px;overflow:hidden}
+.must-banner-label{padding:18px 19px;display:grid;align-content:center;gap:6px;border-right:1px solid #ffffff20}
+.must-banner-label strong{font-size:16px;font-weight:850;letter-spacing:.2px}
+.must-banner-label small{font-size:10px;color:#b7c9e2}
+.must-picks{min-width:0}
+.must-row{display:flex;align-items:center;border-bottom:1px solid #ffffff18}
+.must-row:last-child{border-bottom:0}
+.must-row .pick-button{color:white}
+.must-row .market-sub,.must-row .versus{color:#adc0db}
+.must-row .pick-button[aria-pressed="true"]{background:#26466e}
+.must-ocs{padding:12px 20px;text-align:center;font-weight:800;font-size:20px;border-left:1px solid #ffffff20}
+.must-ocs small{display:block;font-size:9px;color:#adc0db;margin-bottom:5px;letter-spacing:1px}
+.parlay-card{padding:17px 19px;border-bottom:1px solid #e9edf4}
+.parlay-card:last-child{border-bottom:0}
+.parlay-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.parlay-card h3{font-size:13px;margin:0;line-height:1.5}
+.parlay-legs{display:grid;gap:7px;margin:0 0 13px;padding-left:17px;color:#61718a;font-size:12px;line-height:1.6}
+.parlay-card-foot{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.parlay-ocs{font-size:12px;font-weight:750;color:#2864da}
+.parlay-status{font-size:10px;letter-spacing:.5px;font-weight:750;color:#6a7890}
+.board-footnote{font-size:11px;line-height:1.6;color:#7b879a;margin:20px 0 0}
+.builder{position:fixed;bottom:0;left:0;right:0;z-index:80;background:#13233d;color:white;box-shadow:0 -6px 30px #10213b20;border-top:3px solid #2864da;padding:15px 24px calc(15px + env(safe-area-inset-bottom))}
+.builder-inner{max-width:1256px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+.builder-topline{display:flex;align-items:center;gap:13px;margin-bottom:10px}
+.builder h2{font-size:14px;margin:0;font-weight:750}
+.builder-count{font-size:10px;color:#adc3e4}
+.builder-clear{font:inherit;font-size:11px;border:0;padding:0;background:none;color:#adc3e4;text-decoration:underline;cursor:pointer}
+.builder-selections{display:flex;gap:7px;overflow:auto;max-height:80px;padding-bottom:3px}
+.selection-chip{border:1px solid #405471;background:#203554;border-radius:5px;padding:8px 10px;color:#e6edf9;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:10px}
+.selection-chip button{border:0;background:none;color:#bfceE3;padding:0 2px;font-size:17px;line-height:1}
+.builder-score{border-left:1px solid #ffffff25;padding-left:23px;text-align:right;min-width:155px}
+.builder-score small{font-size:10px;letter-spacing:1px;color:#b1c2dc}
+.builder-score strong{display:block;font-size:31px;color:#7be0af;font-variant-numeric:tabular-nums;line-height:1.2;margin:3px 0}
+.builder-score span{display:block;font-size:9px;color:#a5b6d0;max-width:175px;line-height:1.4}
+.board-tooltip{position:fixed;z-index:120;max-width:320px;padding:12px 14px;border:1px solid #30476a;border-radius:7px;background:#142641;color:#e7effb;font-size:12px;line-height:1.7;box-shadow:0 8px 28px #14264125;pointer-events:none;white-space:pre-line}
+.board-dialog{max-width:540px;padding:24px}
+.board-dialog h2{font-size:21px}
+.dialog-close{border:0;background:#f1f5fc;border-radius:5px;padding:7px 10px;color:#5b6b85;font-size:16px}
+.outcome-table{white-space:normal;margin-top:20px}
+.outcome-table th{position:static;padding:11px 12px;font-size:11px}
+.outcome-table td{padding:13px 12px}
+.outcome-table th:not(:first-child),.outcome-table td:not(:first-child){text-align:center}
+#board-message{position:fixed;bottom:165px;left:50%;transform:translateX(-50%);z-index:130;padding:12px 17px;border:1px solid #dbe3ee;border-radius:7px;background:white;color:#18243c;box-shadow:0 4px 24px #10213b25;font-size:12px;max-width:calc(100% - 30px)}
+@media(hover:hover) and (pointer:fine){
+.pick-button:hover{background:#f3f7ff}
+.must-row .pick-button:hover{background:#203d62}
+.pick-button[aria-pressed="true"]:hover{background:#e2ecff}
+}
+@media(max-width:1000px){
+.board-grid{grid-template-columns:minmax(0,1.5fr) minmax(285px,1fr);gap:16px}
+main.lay-board{padding:28px 20px 50px}
+}
+@media(max-width:760px){
+.board-grid{grid-template-columns:1fr}
+.side-board{grid-template-columns:1fr 1fr;gap:14px}
+.ofred-panel{grid-column:1/-1}
+.board-heading h1{font-size:37px}
+}
+@media(max-width:480px){
+main.lay-board{padding:24px 12px 45px}
+.board-heading{gap:12px;align-items:center;margin-bottom:22px}
+.board-heading h1{font-size:30px;gap:5px;letter-spacing:-1.2px}
+.board-date time{font-size:12px;line-height:1.5}
+.board-date small{font-size:8px;letter-spacing:1px}
+.side-board{grid-template-columns:1fr}
+.ofred-panel{grid-column:auto}
+.bet-panel-head{padding:16px}
+.bet-panel h2{font-size:18px}
+.must-banner{grid-template-columns:1fr}
+.must-banner-label{padding:12px 15px;display:flex;justify-content:space-between;align-items:center;border-right:0;border-bottom:1px solid #ffffff20}
+.must-banner-label strong{font-size:13px}
+.must-ocs{padding-inline:12px}
+.pick-button{padding:14px 12px;font-size:12px}
+.bet-table th{padding-inline:12px}
+.builder{padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+.builder-inner{gap:10px}
+.builder-score{min-width:112px;padding-left:12px}
+.builder-score strong{font-size:25px}
+.builder-score span{max-width:125px;font-size:8px}
+.builder h2{font-size:12px}
+.builder-topline{gap:8px;flex-wrap:wrap}
+.builder-count{font-size:9px}
+.parlay-card{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -408,11 +547,70 @@ header .nav { position: relative; }
 </nav>
 </header>
 
-<main>
-  <section class="method" aria-labelledby="laymaker-title">
-    <h2 id="laymaker-title" class="laymaker-title"><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 15-19 5 5-14 20c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M28 34c-2-2-3-4-3-7l.8-3.5c.4-1.5 2.5-1.3 2.5.4v1c4-1 6-4 6.5-7.5l.2-7c.1-2 2.8-2 3-.1l.3 6.6c.4 5.6-1 10-4.2 13.8L32 34Z" fill="#2864da"/></svg><span>MAKER</span></span></h2>
-  </section>
+
+<main class="lay-board">
+ <div class="board-heading">
+  <h1 id="laymaker-title" class="laymaker-title"><span class="par-prefix">(par)</span><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 15-19 5 5-14 20c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M28 34c-2-2-3-4-3-7l.8-3.5c.4-1.5 2.5-1.3 2.5.4v1c4-1 6-4 6.5-7.5l.2-7c.1-2 2.8-2 3-.1l.3 6.6c.4 5.6-1 10-4.2 13.8L32 34Z" fill="#2864da"/></svg><span>MAKER</span></span></h1>
+  <div class="board-date"><small>DAILY BOARD</small><time id="board-date"></time></div>
+ </div>
+ <section id="must-banner" class="must-banner" aria-label="Must-picks" hidden>
+  <div class="must-banner-label"><strong>MUST-PICKS</strong><small>Odds worth a look.</small></div><div class="must-picks" id="must-picks"></div>
+ </section>
+ <div class="board-grid">
+  <div class="main-board">
+   <section class="bet-panel locks" aria-labelledby="locks-title">
+    <div class="bet-panel-head"><div><h2 id="locks-title">LOCKS</h2><div class="section-kicker">90%+ OCS</div></div><span class="record" id="locks-record" aria-label="Locks record"></span></div>
+    <div id="locks-list"></div>
+   </section>
+   <section class="bet-panel likely" aria-labelledby="likely-title">
+    <div class="bet-panel-head"><h2 id="likely-title">LIKELY</h2><span class="record" id="likely-record" aria-label="Likely record"></span></div>
+    <div id="likely-list"></div>
+   </section>
+   <section class="bet-panel" aria-labelledby="suggested-title">
+    <div class="bet-panel-head"><h2 id="suggested-title">Suggested Parlays</h2><button class="small-button" id="outcomes-button" type="button">Outcomes ↗</button></div>
+    <div id="suggested-list"></div>
+   </section>
+  </div>
+  <aside class="side-board" aria-label="Featured picks">
+   <section class="bet-panel hot-panel" aria-labelledby="hot-title"><div class="bet-panel-head"><h2 id="hot-title">Hot Take</h2><span class="section-mini">ONE TO WATCH</span></div><div id="hot-list"></div></section>
+   <section class="bet-panel daily-panel" aria-labelledby="daily-title"><div class="bet-panel-head"><h2 id="daily-title">Daily Pick</h2><span class="section-mini">TODAY'S PICK</span></div><div id="daily-list"></div></section>
+   <section class="bet-panel ofred-panel" aria-labelledby="ofred-title">
+    <div class="bet-panel-head"><h2 id="ofred-title">OFred's Picks</h2><div class="section-actions"><span class="record" id="ofred-record" aria-label="OFred's picks record"></span><button type="button" class="info-button" id="ofred-info" aria-label="About OFred's picks" data-description="These are the bets that I am actually betting on.">?</button></div></div>
+    <div id="ofred-list"></div>
+   </section>
+  </aside>
+ </div>
+ <p class="board-footnote">OCS = OFred Confidence Score. Picks are opinions, not guaranteed outcomes. Selecting picks builds a parlay preview; no bets are placed here.</p>
 </main>
+<section class="builder" id="parlay-builder" aria-labelledby="builder-title" hidden>
+ <div class="builder-inner"><div class="builder-picks"><div class="builder-topline"><h2 id="builder-title">Your Parlay</h2><span id="builder-count" class="builder-count"></span><button type="button" id="clear-parlay" class="builder-clear">Clear all</button></div><div id="builder-selections" class="builder-selections"></div></div>
+ <div class="builder-score" aria-live="polite"><small>TOTAL OCS</small><strong id="total-ocs"></strong><span>Multiplied OCS assumes independent outcomes.</span></div></div>
+</section>
+<dialog class="board-dialog" id="outcomes-dialog" aria-labelledby="outcomes-title"><div class="dialoghead"><h2 id="outcomes-title">Parlay Outcomes</h2><button type="button" class="dialog-close" aria-label="Close outcomes">×</button></div><p style="font-size:12px;margin-bottom:0">Suggested parlays · all settled dates</p><div id="outcomes-content"></div></dialog>
+<dialog class="board-dialog" id="pick-info-dialog" aria-labelledby="pick-info-title"><div class="dialoghead"><h2 id="pick-info-title">Pick Details</h2><button type="button" class="dialog-close" aria-label="Close details">×</button></div><p id="pick-info-text" style="white-space:pre-line"></p></dialog>
+<div id="board-tooltip" class="board-tooltip" role="tooltip" hidden></div>
+<div id="board-message" role="status" hidden></div>
+<!-- Daily content lives here. Picks/history use unique IDs. OCS is 0–100.
+Pick: {id, date:"YYYY-MM-DD", game_id, home:{name,full_name}, away:{name,full_name},
+market:"Moneyline", selection:"home"|"away", ocs, start_time:"ISO timestamp with timezone",
+result:"pending"|"win"|"loss"|"push"|"void", sportsbook, note}.
+Use hot_take_id/daily_pick_id/must_pick_ids/ofred_pick_ids to feature the same pick without duplicating it.
+Parlay: {id,title,pick_ids:[],result:"pending"|"win"|"loss"|"push"|"void"}.
+Keep previous picks and parlays in history to preserve records. No fabricated sample bets are published. -->
+<script type="application/json" id="laymaker-data">
+{
+ "date":null,
+ "picks":[],
+ "hot_take_id":null,
+ "daily_pick_id":null,
+ "must_pick_ids":[],
+ "ofred_pick_ids":[],
+ "suggested_parlays":[],
+ "ofred_parlays":[],
+ "history":{"picks":[],"suggested_parlays":[],"ofred_picks":[],"ofred_parlays":[]}
+}
+</script>
+
 
 <script data-mobile-navigation="v1">
 (() => {
@@ -443,6 +641,225 @@ header .nav { position: relative; }
  mobile.addEventListener('change', close);
  close();
 })();
+</script>
+<script>
+
+'use strict';
+const LaymakerModel = (() => {
+ const settled = result => ['win','loss','push','void'].includes(result);
+ const validPick = p => p && typeof p.id==='string' && p.id.length>0 &&
+  p.home && typeof p.home.name==='string' && p.away && typeof p.away.name==='string' &&
+  ['home','away'].includes(p.selection) && Number.isFinite(p.ocs) && p.ocs>=0 && p.ocs<=100;
+ const unique = items => [...new Map(items.filter(Boolean).map(p=>[p.id,p])).values()];
+ const combined = picks => picks.length ? picks.reduce((n,p)=>n*(p.ocs/100),1)*100 : null;
+ const gameKey = p => String(p.game_id || [p.home.name,p.away.name,p.start_time||p.date].join('|'));
+ const selectedName = p => p[p.selection].name;
+ const shortLabel = p => selectedName(p)+' '+(p.market||'Moneyline');
+ function record(items) {
+  return unique(items).reduce((r,p)=>{if(p.result==='win')r.wins++;if(p.result==='loss')r.losses++;if(p.result==='push')r.pushes++;if(p.result==='void')r.voids++;return r;},{wins:0,losses:0,pushes:0,voids:0});
+ }
+ function resolveResult(parlay,lookup) {
+  if(settled(parlay.result)) return parlay.result;
+  const legs=(parlay.pick_ids||[]).map(id=>lookup.get(id));
+  if(!legs.length||legs.some(p=>!p))return 'pending';
+  if(legs.some(p=>p.result==='loss'))return 'loss';
+  if(legs.some(p=>!settled(p.result)))return 'pending';
+  if(legs.some(p=>p.result==='win'))return 'win';
+  return 'push';
+ }
+ function canAdd(selected,picks) {
+  const keys=new Set();
+  for(const p of [...selected,...picks]){
+   if(!validPick(p)||settled(p.result))return 'Only unsettled picks can be added.';
+   const key=gameKey(p);
+   if(keys.has(key))return 'Only one selection per game can be added to this parlay.';
+   keys.add(key);
+  }
+  return null;
+ }
+ return {validPick,unique,combined,gameKey,record,resolveResult,canAdd,shortLabel,settled};
+})();
+
+// Board interactions.
+(() => {
+ const data=JSON.parse(document.getElementById('laymaker-data').textContent);
+ const $=id=>document.getElementById(id);
+ const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const pct=value=>new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format(value)+'%';
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const boardDate=/^\d{4}-\d{2}-\d{2}$/.test(data.date||'')?data.date:today;
+ const dateObject=new Date(boardDate+'T12:00:00Z');
+ $('board-date').dateTime=boardDate;
+ $('board-date').textContent=new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(dateObject);
+ const history=data.history||{};
+ const picks=LaymakerModel.unique((data.picks||[]).filter(LaymakerModel.validPick)).filter(p=>(p.date||boardDate)===boardDate);
+ const lookup=new Map(LaymakerModel.unique([...(history.picks||[]),...(data.picks||[])].filter(LaymakerModel.validPick)).map(p=>[p.id,p]));
+ const current=new Map(picks.map(p=>[p.id,p]));
+ const selected=new Set();
+ const validParlay=p=>p&&typeof p.id==='string'&&Array.isArray(p.pick_ids)&&p.pick_ids.length>1&&new Set(p.pick_ids).size===p.pick_ids.length&&p.pick_ids.every(id=>lookup.has(id));
+ const suggested=(data.suggested_parlays||[]).filter(validParlay).filter(p=>p.pick_ids.every(id=>current.has(id)));
+ const ofredParlays=(data.ofred_parlays||[]).filter(validParlay).filter(p=>p.pick_ids.every(id=>current.has(id)));
+ const moneyline=p=>!p.market||p.market.toLowerCase()==='moneyline';
+ function matchMarkup(p) {
+  const team=side=>'<span class="match-team'+(p.selection===side?' chosen':'')+'">'+esc(p[side].name)+'</span>';
+  return team('home')+'<span class="versus">vs</span>'+team('away');
+ }
+ function gameTime(p){
+  if(!p.start_time||!Number.isFinite(Date.parse(p.start_time)))return 'Game time: TBA';
+  return 'Game time: '+new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short',timeZone:'America/New_York'}).format(new Date(p.start_time));
+ }
+ function description(p){
+  return (p.home.full_name||p.home.name)+' (home) vs '+(p.away.full_name||p.away.name)+' (away)\n'+
+   (moneyline(p)?'Moneyline · Pick to win: ':'Selection · ')+(p[p.selection].full_name||p[p.selection].name)+
+   (moneyline(p)?'':' · '+(p.market||''))+'\n'+gameTime(p)+'\nOCS: '+pct(p.ocs)+
+   (p.sportsbook?'\nSportsbook: '+p.sportsbook:'')+(p.note?'\n'+p.note:'')+
+   (LaymakerModel.settled(p.result)?'\nResult: '+p.result:'');
+ }
+ function pickButton(p,featured=false){
+  const active=selected.has(p.id),done=LaymakerModel.settled(p.result);
+  const sub=[!moneyline(p)?p.market:null,featured?p.sportsbook:null,done?p.result.toUpperCase():null].filter(Boolean).join(' · ');
+  return '<button type="button" class="pick-button" data-pick="'+esc(p.id)+'" aria-pressed="'+active+'" aria-label="'+esc(LaymakerModel.shortLabel(p)+', '+pct(p.ocs)+' OCS'+(done?', '+p.result:'') )+'"'+(done?' disabled':'')+' data-description="'+esc(description(p))+'"><span class="pick-text">'+matchMarkup(p)+(sub?'<span class="market-sub">'+esc(sub)+'</span>':'')+'</span><span class="pick-check" aria-hidden="true">✓</span></button>';
+ }
+ function empty(title,subtitle=''){
+  return '<div class="bet-empty"><span class="empty-mark"></span><strong>'+esc(title)+'</strong>'+(subtitle?'<p>'+esc(subtitle)+'</p>':'')+'</div>';
+ }
+ function table(items,emptyTitle){
+  if(!items.length)return empty(emptyTitle,'Check back for the next board.');
+  return '<table class="bet-table"><thead><tr><th scope="col">PICK · HOME vs AWAY</th><th scope="col">OCS</th></tr></thead><tbody>'+items.map(p=>'<tr class="'+(selected.has(p.id)?'is-selected':'')+'"><td>'+pickButton(p)+'</td><td class="ocs-cell">'+pct(p.ocs)+'</td></tr>').join('')+'</tbody></table>';
+ }
+ function recordMarkup(items){
+  const r=LaymakerModel.record(items),n=r.wins+r.losses+r.pushes+r.voids;
+  return n?'<span title="Wins – losses'+(r.pushes?' · '+r.pushes+' pushes':'')+(r.voids?' · '+r.voids+' void':'')+'"><span class="record-w">'+r.wins+'W</span> – <span class="record-l">'+r.losses+'L</span>'+(r.pushes?' · '+r.pushes+'P':'')+'</span>':'<span title="No settled results yet">— W–L</span>';
+ }
+ function parlayCards(items,emptyTitle){
+  if(!items.length)return empty(emptyTitle);
+  return items.map(p=>{
+   const legs=p.pick_ids.map(id=>current.get(id)),active=p.pick_ids.every(id=>selected.has(id)),done=LaymakerModel.settled(LaymakerModel.resolveResult(p,lookup));
+   return '<article class="parlay-card"><div class="parlay-card-head"><h3>'+esc(p.title||legs.length+'-leg parlay')+'</h3><span class="parlay-status">'+legs.length+' LEGS</span></div><ul class="parlay-legs">'+legs.map(l=>'<li>'+esc(LaymakerModel.shortLabel(l))+'</li>').join('')+'</ul><div class="parlay-card-foot"><span class="parlay-ocs">OCS '+pct(LaymakerModel.combined(legs))+'</span>'+(done?'<span class="parlay-status">'+esc(LaymakerModel.resolveResult(p,lookup))+'</span>':'<button class="small-button" type="button" data-parlay="'+esc(p.id)+'" aria-pressed="'+active+'">'+(active?'Remove picks':'Add picks +')+'</button>')+'</div></article>';
+  }).join('');
+ }
+ function render(){
+  $('locks-list').innerHTML=table(picks.filter(p=>p.ocs>=90),'No locks posted yet.');
+  $('likely-list').innerHTML=table(picks.filter(p=>p.ocs<90),'No likely picks posted yet.');
+  const hot=current.get(data.hot_take_id),daily=current.get(data.daily_pick_id);
+  $('hot-list').innerHTML=table(hot?[hot]:[],'Hot Take coming soon.');
+  $('daily-list').innerHTML=table(daily?[daily]:[],'No Daily Pick posted.');
+  const own=(data.ofred_pick_ids||[]).map(id=>current.get(id)).filter(Boolean);
+  $('ofred-list').innerHTML=own.length||ofredParlays.length?
+   (own.length?'<div class="subsection-label">PICKS</div>'+table(own,''):'')+
+   (ofredParlays.length?'<div class="subsection-label">PARLAYS</div>'+parlayCards(ofredParlays,''):''):
+   empty('No personal bets posted.');
+  $('suggested-list').innerHTML=parlayCards(suggested,'Suggested parlays coming soon.');
+  const must=(data.must_pick_ids||[]).map(id=>current.get(id)).filter(Boolean);
+  $('must-banner').hidden=!must.length;
+  $('must-picks').innerHTML=must.map(p=>'<div class="must-row">'+pickButton(p,true)+'<div class="must-ocs"><small>OCS</small>'+pct(p.ocs)+'</div></div>').join('');
+  renderBuilder();
+ }
+ const allPicks=[...lookup.values()];
+ $('locks-record').innerHTML=recordMarkup(allPicks.filter(p=>p.ocs>=90));
+ $('likely-record').innerHTML=recordMarkup(allPicks.filter(p=>p.ocs<90));
+ const ownHistory=[...(history.ofred_picks||[]),...(data.ofred_pick_ids||[]).map(id=>lookup.get(id))];
+ const allOwnParlays=LaymakerModel.unique([...(history.ofred_parlays||[]),...ofredParlays].filter(validParlay)).map(p=>({...p,id:'parlay:'+p.id,result:LaymakerModel.resolveResult(p,lookup)}));
+ $('ofred-record').innerHTML=recordMarkup([...ownHistory,...allOwnParlays]);
+ function renderBuilder(){
+  const legs=[...selected].map(id=>current.get(id)).filter(Boolean);
+  $('parlay-builder').hidden=!legs.length;
+  $('builder-count').textContent=legs.length+' '+(legs.length===1?'selection':'selections');
+  $('total-ocs').textContent=legs.length?pct(LaymakerModel.combined(legs)):'';
+  $('builder-selections').innerHTML=legs.map(p=>'<span class="selection-chip">'+esc(LaymakerModel.shortLabel(p))+'<button type="button" data-remove="'+esc(p.id)+'" aria-label="Remove '+esc(LaymakerModel.shortLabel(p))+'">×</button></span>').join('');
+  requestAnimationFrame(()=>{
+   const height=legs.length?$('parlay-builder').getBoundingClientRect().height:0;
+   document.body.style.paddingBottom=height?height+16+'px':'';
+   $('board-message').style.bottom=(height+15)+'px';
+  });
+ }
+ let messageTimer;
+ function message(text){
+  $('board-message').textContent=text;$('board-message').hidden=false;
+  clearTimeout(messageTimer);messageTimer=setTimeout(()=>$('board-message').hidden=true,4200);
+ }
+ function togglePick(id){
+  const p=current.get(id);if(!p||LaymakerModel.settled(p.result))return;
+  if(selected.has(id))selected.delete(id);
+  else{
+   const error=LaymakerModel.canAdd([...selected].map(x=>current.get(x)),[p]);
+   if(error){message(error);return;}
+   selected.add(id);
+  }
+  hideTip();render();
+ }
+ document.addEventListener('click',event=>{
+  const target=event.target.closest('[data-pick],[data-remove],[data-parlay]');
+  if(!target)return;
+  if(target.dataset.pick){togglePick(target.dataset.pick);return;}
+  if(target.dataset.remove){selected.delete(target.dataset.remove);render();return;}
+  const p=[...suggested,...ofredParlays].find(p=>p.id===target.dataset.parlay);
+  if(!p)return;
+  if(p.pick_ids.every(id=>selected.has(id)))p.pick_ids.forEach(id=>selected.delete(id));
+  else {
+   const additions=p.pick_ids.filter(id=>!selected.has(id)).map(id=>current.get(id));
+   const error=LaymakerModel.canAdd([...selected].map(id=>current.get(id)),additions);
+   if(error){message(error);return;}
+   additions.forEach(p=>selected.add(p.id));
+  }
+  render();
+ });
+ $('clear-parlay').addEventListener('click',()=>{selected.clear();render();});
+ const historicalParlays=LaymakerModel.unique([...(history.suggested_parlays||[]),...suggested].filter(validParlay));
+ function openOutcomes(){
+  const groups=new Map();
+  historicalParlays.forEach(p=>{
+   if(!LaymakerModel.settled(LaymakerModel.resolveResult(p,lookup)))return;
+   const n=p.pick_ids.length;
+   if(!groups.has(n))groups.set(n,[]);
+   groups.get(n).push({...p,result:LaymakerModel.resolveResult(p,lookup)});
+  });
+  const rows=[...groups].sort((a,b)=>a[0]-b[0]).map(([n,items])=>{
+   const r=LaymakerModel.record(items);
+   return '<tr><td>'+n+' legs</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+r.pushes+'</td></tr>';
+  });
+  $('outcomes-content').innerHTML=rows.length?'<table class="outcome-table"><thead><tr><th scope="col">Parlay</th><th scope="col">Wins</th><th scope="col">Losses</th><th scope="col">Pushes</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>':empty('No settled parlays yet.');
+  $('outcomes-dialog').showModal();
+ }
+ $('outcomes-button').addEventListener('click',openOutcomes);
+ const tip=$('board-tooltip'),hover=window.matchMedia('(hover: hover) and (pointer: fine)');
+ function hideTip(){tip.hidden=true;}
+ function showTip(target){
+  if(!hover.matches)return;
+  tip.textContent=target.dataset.description;tip.hidden=false;
+  const box=target.getBoundingClientRect(),rect=tip.getBoundingClientRect();
+  tip.style.left=Math.max(10,Math.min(box.left,innerWidth-rect.width-10))+'px';
+  tip.style.top=Math.max(10,Math.min(box.bottom+8,innerHeight-rect.height-10))+'px';
+ }
+ document.addEventListener('pointerover',event=>{
+  const target=event.target.closest('[data-description]');
+  if(target&&(!event.relatedTarget||!target.contains(event.relatedTarget)))showTip(target);
+ });
+ document.addEventListener('pointerout',event=>{
+  const target=event.target.closest('[data-description]');
+  if(target&&(!event.relatedTarget||!target.contains(event.relatedTarget)))hideTip();
+ });
+ document.addEventListener('focusin',event=>{const t=event.target.closest('[data-description]');if(t)showTip(t);});
+ document.addEventListener('focusout',hideTip);
+ document.addEventListener('scroll',hideTip,true);
+ window.addEventListener('resize',()=>{hideTip();renderBuilder();});
+ $('ofred-info').addEventListener('click',()=>{
+  $('pick-info-title').textContent="OFred's Picks";
+  $('pick-info-text').textContent=$('ofred-info').dataset.description;
+  $('pick-info-dialog').showModal();hideTip();
+ });
+ for(const dialog of document.querySelectorAll('.board-dialog')){
+  dialog.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('click',event=>{
+   if(event.target!==dialog)return;
+   const r=dialog.getBoundingClientRect();
+   if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();
+  });
+ }
+ document.addEventListener('keydown',event=>{if(event.key==='Escape')hideTip();});
+ render();
+})();
+
 </script>
 </body>
 </html>
