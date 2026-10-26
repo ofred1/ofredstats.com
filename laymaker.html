@@ -651,15 +651,116 @@ Keep previous picks and parlays in history to preserve records.\nMust-picks use 
 <script type="application/json" id="laymaker-data">
 {
   "date": "2026-11-02",
-  "picks": [],
-  "hot_take": null,
+  "picks": [
+    {
+      "id": "20261102-gonzaga-purdue",
+      "date": "2026-11-02",
+      "game_id": "20261102-gonzaga-purdue",
+      "home": {
+        "name": "Purdue",
+        "full_name": "Purdue University Boilermakers"
+      },
+      "away": {
+        "name": "Gonzaga",
+        "full_name": "Gonzaga University Bulldogs"
+      },
+      "market": "Spread",
+      "selection": "away",
+      "line": -4.5,
+      "ocs": 86,
+      "start_time": null,
+      "result": "pending",
+      "neutral_site": true,
+      "note": "Neutral site · Purdue is the designated home team."
+    },
+    {
+      "id": "20261102-byu-ohio-state",
+      "date": "2026-11-02",
+      "game_id": "20261102-byu-ohio-state",
+      "home": {
+        "name": "BYU",
+        "full_name": "Brigham Young University Cougars"
+      },
+      "away": {
+        "name": "Ohio State",
+        "full_name": "Ohio State University Buckeyes"
+      },
+      "market": "Spread",
+      "selection": "home",
+      "line": -1.5,
+      "ocs": 87,
+      "start_time": null,
+      "result": "pending",
+      "neutral_site": false
+    },
+    {
+      "id": "20261102-florida-miami",
+      "date": "2026-11-02",
+      "game_id": "20261102-florida-miami",
+      "home": {
+        "name": "Florida",
+        "full_name": "University of Florida Gators"
+      },
+      "away": {
+        "name": "Miami",
+        "full_name": "University of Miami Hurricanes"
+      },
+      "market": "Spread",
+      "selection": "home",
+      "line": -6.5,
+      "ocs": 81,
+      "start_time": null,
+      "result": "pending",
+      "neutral_site": false
+    }
+  ],
+  "hot_take": {
+    "id": "20261102-memphis-iowa-state",
+    "date": "2026-11-02",
+    "game_id": "20261102-memphis-iowa-state",
+    "home": {
+      "name": "Iowa State",
+      "full_name": "Iowa State University Cyclones"
+    },
+    "away": {
+      "name": "Memphis",
+      "full_name": "University of Memphis Tigers"
+    },
+    "market": "Moneyline",
+    "selection": "away",
+    "ocs": null,
+    "start_time": null,
+    "result": "pending",
+    "neutral_site": true,
+    "note": "Neutral site · Iowa State is the designated home team."
+  },
   "hot_take_id": null,
-  "daily_pick_id": null,
+  "daily_pick_id": "20261102-byu-ohio-state",
   "must_picks": [],
   "must_pick_ids": [],
   "ofred_pick_ids": [],
-  "suggested_parlays": [],
-  "ofred_parlays": [],
+  "suggested_parlays": [
+    {
+      "id": "20261102-suggested-two",
+      "title": "Suggested 2-Leg Parlay",
+      "pick_ids": [
+        "20261102-byu-ohio-state",
+        "20261102-gonzaga-purdue"
+      ],
+      "result": "pending"
+    }
+  ],
+  "ofred_parlays": [
+    {
+      "id": "20261102-ofred-two",
+      "title": "OFred's 2-Leg Parlay",
+      "pick_ids": [
+        "20261102-byu-ohio-state",
+        "20261102-gonzaga-purdue"
+      ],
+      "result": "pending"
+    }
+  ],
   "history": {
     "picks": [],
     "suggested_parlays": [],
