@@ -723,6 +723,7 @@ const $ = id => document.getElementById(id);
 const columns = [["rank","Rk"],["team","Team"],["conference","Conf"],["record","Record"],["evanmiya_roster_rank","Roster"],["net_rating","Net Rtg*"],["adjusted_offensive_efficiency","Off Eff*"],["adjusted_defensive_efficiency","Def Eff*"],["ppg","PPG"],["turnovers_per_game","TO/G"],["strength_of_schedule","SOS"],["pace","Pace"],["clutch_factor","CLUTCH"],["ofs","OFS"]];
 
 const definitions = {
+  ofs: ['OFS', 'Percent chance of winning title if dropped into MM Final Four.'],
   clutch_factor: ['Clutch factor', 'Measures projected ability to win close games. Higher number is better.'],
   strength_of_schedule: ['Strength of schedule', 'Measures opponent difficulty, from -1 to 1. Higher is better.'],
   pace: ['Pace', 'Estimated possessions per 40 minutes. Not adjusted for opponent strength.'],
@@ -798,6 +799,7 @@ function value(row, key) {
 
 function fmt(value, key) {
   if (value == null) return '—';
+  if (key === 'ofs' && Number.isFinite(value)) return value.toFixed(2) + '%';
   if (typeof value === 'number' &&
       ['ppg', 'rating', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency',
        'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) return value.toFixed(2);
@@ -899,7 +901,7 @@ function render() {
     }
     if (key === sortKey) button.setAttribute('data-sort', direction === 1 ? 'ascending' : 'descending');
 
-    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) {
+    if (['ppg', 'turnovers_per_game', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency', 'net_rating', 'pace', 'strength_of_schedule', 'clutch_factor', 'ofs'].includes(key)) {
       button.setAttribute('aria-describedby', 'column-tip');
       button.onmouseenter = () => showTip(button, key);
       button.onfocus = () => showTip(button, key);
@@ -1006,6 +1008,7 @@ function showTeam(row) {
   $('detailstats').replaceChildren();
   const stats = [
     ['Division I Rank', 'rank', false],
+    ['OFS', 'ofs', false],
     ['Offensive efficiency', 'adjusted_offensive_efficiency', false],
     ['Defensive efficiency', 'adjusted_defensive_efficiency', true],
     ['Roster', 'evanmiya_roster_rank', true],
