@@ -645,6 +645,7 @@ function value(row, key) {
 
 function fmt(value, key) {
   if (value == null) return '—';
+  if (key === 'ofs' && Number.isFinite(value)) return value.toFixed(2) + '%';
   if (typeof value === 'number' &&
       ['ppg', 'rating', 'adjusted_offensive_efficiency', 'adjusted_defensive_efficiency',
        'pace', 'strength_of_schedule', 'clutch_factor'].includes(key)) return value.toFixed(2);
@@ -672,6 +673,7 @@ function showTeam(row) {
   $('detailstats').replaceChildren();
   const stats = [
     ['Division I Rank', 'rank', false],
+    ['OFS', 'ofs', false],
     ['Offensive efficiency', 'adjusted_offensive_efficiency', false],
     ['Defensive efficiency', 'adjusted_defensive_efficiency', true],
     ['Roster', 'evanmiya_roster_rank', true],
