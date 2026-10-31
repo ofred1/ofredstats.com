@@ -468,6 +468,76 @@ calculate_clutch <- function(games, team_ids, season, mode, cache_path, save_cac
 }
 
 
+# OFS v1: percentage-point index anchored to the sixth-highest net rating.
+# Unrated teams stay missing; ties in SOS/CLUTCH receive average ranks.
+calculate_ofs <- function(rankings) {
+  required <- c("team_id", "team", "net_rating", "strength_of_schedule", "clutch_factor")
+  if (!all(required %in% names(rankings))) stop("OFS requires net rating, SOS and CLUTCH.")
+  if (anyDuplicated(rankings$team_id[!is.na(rankings$team_id)])) stop("Duplicate OFS team IDs.")
+  n <- nrow(rankings)
+  out <- data.frame(team_id = rankings$team_id, ofs = NA_real_,
+    ofs_net_raw = NA_real_, ofs_net_component = NA_real_,
+    ofs_sos_component = NA_real_, ofs_clutch_component = NA_real_,
+    ofs_sos_rank = NA_real_, ofs_clutch_rank = NA_real_)
+  diagnostics <- list(version = "ofs-v1", status = "insufficient_net_ratings",
+    ceiling = 75, reference_team = NULL, reference_team_id = NULL,
+    reference_net_rating = NULL, reference_net_anchor = NULL,
+    sos_ranked_teams = 0L, clutch_ranked_teams = 0L)
+  finish <- function() list(ratings = out, diagnostics = diagnostics)
+  scale_rank <- function(x, maximum) {
+    good <- is.finite(x)
+    k <- sum(good)
+    r <- value <- rep(NA_real_, length(x))
+    if (k) {
+      r[good] <- rank(-x[good], ties.method = "average")
+      value[good] <- if (k == 1L) maximum / 2 else maximum * (k - r[good]) / (k - 1)
+    }
+    list(rank = r, value = value, count = k)
+  }
+  sos <- scale_rank(rankings$strength_of_schedule, 15)
+  clutch <- scale_rank(rankings$clutch_factor, 5)
+  out$ofs_sos_rank <- sos$rank
+  out$ofs_clutch_rank <- clutch$rank
+  out$ofs_sos_component <- sos$value
+  out$ofs_clutch_component <- clutch$value
+  diagnostics$sos_ranked_teams <- sos$count
+  diagnostics$clutch_ranked_teams <- clutch$count
+  eligible <- which(is.finite(rankings$net_rating))
+  if (length(eligible) < 6L) return(finish())
+  order_net <- eligible[order(-rankings$net_rating[eligible],
+                              rankings$team[eligible], rankings$team_id[eligible])]
+  reference <- order_net[6L]
+  baseline <- rankings$net_rating[reference]
+  diagnostics$reference_team <- rankings$team[reference]
+  diagnostics$reference_team_id <- rankings$team_id[reference]
+  diagnostics$reference_net_rating <- baseline
+  net <- rankings$net_rating
+  above <- is.finite(net) & net >= baseline
+  below <- is.finite(net) & net < baseline
+  out$ofs_net_raw[above] <- pmin(55, 40 + 1.3 * floor(pmax(0, net[above] - floor(baseline))))
+  gap <- baseline - net[below]
+  penalty <- 1.9 * pmin(gap, 10) +
+    0.8 * pmin(pmax(gap - 10, 0), 10) + 0.1 * pmax(gap - 20, 0)
+  out$ofs_net_raw[below] <- pmax(0, 40 - penalty)
+  if (!is.finite(sos$value[reference]) || !is.finite(clutch$value[reference])) {
+    diagnostics$status <- "missing_reference_sos_or_clutch"
+    return(finish())
+  }
+  anchor <- 25 - sos$value[reference] - clutch$value[reference]
+  diagnostics$reference_net_anchor <- anchor
+  raw <- out$ofs_net_raw
+  low <- is.finite(raw) & raw <= 40
+  high <- is.finite(raw) & raw > 40
+  out$ofs_net_component[low] <- anchor * raw[low] / 40
+  out$ofs_net_component[high] <- anchor + (55 - anchor) * (raw[high] - 40) / 15
+  good <- is.finite(out$ofs_net_component) & is.finite(sos$value) & is.finite(clutch$value)
+  out$ofs[good] <- pmin(75, pmax(0,
+    out$ofs_net_component[good] + sos$value[good] + clutch$value[good]))
+  if (abs(out$ofs[reference] - 25) > 1e-8) stop("OFS reference calibration failed.")
+  diagnostics$status <- if (all(good)) "ready" else "partial"
+  finish()
+}
+
 update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
             length(season) == 1L, is.finite(season), season == as.integer(season),
@@ -718,6 +788,10 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   if (is.null(sos_saved)) message("Initializing frozen SOS history from pre-day results.")
   sos <- calculate_frozen_sos(all_games, sos_roster, sos_saved)
   rankings <- merge(rankings, sos$ratings, by = "team_id", all.x = TRUE)
+  ofs <- calculate_ofs(rankings)
+  for (column in setdiff(names(ofs$ratings), "team_id"))
+    rankings[[column]] <- ofs$ratings[[column]][match(rankings$team_id, ofs$ratings$team_id)]
+  message("OFS: ", ofs$diagnostics$status)
   # Completed season games drive the decay, including games missing PPT data.
   rankings$preseason_weight <- pmax(0, (12 - rankings$games) / 12)
   rankings$inseason_score <- NA_real_
@@ -774,6 +848,12 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
                   adjusted_efficiency_diagnostics = adjusted$diagnostics,
                   pace_formula = "40 * sum(team_estimated_possessions) / sum(game_minutes)",
                   estimated_possessions_formula = "FGA + 0.44 * FTA - OR + TO",
+                  ofs_model = "ofs-v1: net component anchored so sixth-highest net team totals 25 percentage points; ceiling 75",
+                  ofs_diagnostics = ofs$diagnostics,
+                  ofs_components = c(net_rating = 55, strength_of_schedule = 15, clutch = 5),
+                  ofs_rank_ties = "Average ranks; ranks scaled among teams with finite values for each metric",
+                  ofs_missing_inputs = "No final OFS without all three inputs and the reference team's SOS and CLUTCH",
+                  ofs_probability_status = "Heuristic percentage index; not empirically calibrated as a championship probability",
                   net_rating_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   adjusted_efficiency_margin_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   offensive_efficiency_formula = "100 * total_points / total_possessions",
