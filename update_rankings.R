@@ -847,6 +847,10 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   source_updated <- if (mode == "cached") state$source_updated_at else
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   payload <- list(status = main_model$diagnostics$status,
+                  games_collected = length(unique(all_games$game_id[
+                    all_games$team_id %in% teams$team_id &
+                    is.finite(all_games$points) & all_games$points > 0])),
+                  games_collected_definition = "Unique completed matchups represented by usable Division I team box scores; each game counted once",
                   overall_model_configured = model_configured,
                   overall_model = main_model$diagnostics,
                   clutch_formula = "(clutch_wins - clutch_losses) / clutch_games + 0.2 * regulation_clutch_games + 0.4 * overtime_clutch_games",
