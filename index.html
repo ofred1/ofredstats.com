@@ -515,6 +515,8 @@ header .nav { position: relative; }
  }
 }
 
+.data-coverage { margin: 0; padding: 0 18px 14px; font-size: 10px; line-height: 1.5; color: #748095; }
+@media (max-width: 700px) { .data-coverage { padding-inline: 12px; } }
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -577,6 +579,7 @@ header .nav { position: relative; }
       <span id="count" aria-live="polite">Loading rankings…</span>
       <span>Click a team for details</span>
     </div>
+    <p id="data-coverage" class="data-coverage" aria-live="polite"></p>
   </section>
 
   <div class="notice" id="notice" role="status" hidden></div>
@@ -821,8 +824,38 @@ function validate(data) {
   return data;
 }
 
+function coverageText(data) {
+  const rows = data.rankings || [];
+  let games = Number.isInteger(data.games_collected) && data.games_collected >= 0
+    ? data.games_collected : null;
+  // Older exports can be reconstructed only with complete possession coverage.
+  // D1-vs-D1 games occur twice in team totals; non-D1 matchups occur once.
+  if (games === null && rows.every(row => Number.isInteger(row.games) && row.games >= 0)) {
+    const teamGames = rows.reduce((sum, row) => sum + row.games, 0);
+    if (teamGames === 0) games = 0;
+    else if (rows.every(row =>
+      Number.isInteger(row.adjusted_games) && row.adjusted_games >= 0 &&
+      row.adjusted_games <= row.games &&
+      row.offense_eff_games === row.games && row.defense_eff_games === row.games)) {
+      const d1TeamGames = rows.reduce((sum, row) => sum + row.adjusted_games, 0);
+      if (d1TeamGames % 2 === 0) games = teamGames - d1TeamGames / 2;
+    }
+  }
+  const time = data.updated_at ? new Date(data.updated_at) : null;
+  const date = time && Number.isFinite(time.getTime())
+    ? new Intl.DateTimeFormat('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York'
+      }).format(time)
+    : 'unavailable';
+  const count = games === null ? 'Game count unavailable.'
+    : 'Showing data from ' + games.toLocaleString('en-US') + ' ' +
+      (games === 1 ? 'game.' : 'games.');
+  return count + ' Last updated ' + date + '.';
+}
+
 function apply(data) {
   dataset = validate(data);
+  $('data-coverage').textContent = coverageText(dataset);
   $('rankings-title').textContent = data.rankings.some(row => Number.isFinite(row.games) && row.games > 0)
     ? 'Team Rankings' : 'Team Rankings';
 
