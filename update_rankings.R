@@ -538,6 +538,40 @@ calculate_ofs <- function(rankings) {
   finish()
 }
 
+# Main ranking model: preseason percentile blended with net-rating percentile.
+# The in-season score uses no SOS, CLUTCH, OFS, PPT, or external CSV.
+calculate_net_rankings <- function(rankings) {
+  required <- c("team_id", "games", "preseason_score", "net_rating")
+  if (!all(required %in% names(rankings))) stop("Net ranking model is missing columns.")
+  if (any(!is.finite(rankings$games) | rankings$games < 0) ||
+      any(!is.finite(rankings$preseason_score) |
+          rankings$preseason_score < 0 | rankings$preseason_score > 100))
+    stop("Invalid game counts or preseason scores.")
+  out <- data.frame(team_id = rankings$team_id,
+    net_rating_rank = NA_real_, inseason_score = NA_real_,
+    planned_preseason_weight = pmax(0, (12 - rankings$games) / 12),
+    preseason_weight = 1, overall_score = rankings$preseason_score)
+  usable <- rankings$games > 0 & is.finite(rankings$net_rating)
+  count <- sum(usable)
+  if (count) {
+    out$net_rating_rank[usable] <- rank(-rankings$net_rating[usable],
+                                      ties.method = "average")
+    out$inseason_score[usable] <- if (count == 1L) 50 else
+      100 * (count - out$net_rating_rank[usable]) / (count - 1)
+    out$preseason_weight[usable] <- out$planned_preseason_weight[usable]
+    out$overall_score[usable] <- out$preseason_weight[usable] *
+      rankings$preseason_score[usable] + (1 - out$preseason_weight[usable]) *
+      out$inseason_score[usable]
+  }
+  list(ratings = out, diagnostics = list(
+    status = if (count) "ready" else "preseason_projection",
+    model = "preseason_to_net_rating", usable_net_teams = count,
+    inseason_basis = "net_rating only; higher is better",
+    inseason_scaling = "0–100 percentile across played teams with finite net ratings; average ties; one rated team = 50",
+    preseason_weight = "max(0, (12 - games) / 12)",
+    missing_net = "Keep preseason ordering inputs until usable net rating is available"))
+}
+
 update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish_active = FALSE) {
   stopifnot(mode %in% c("cached", "daily", "rebuild"),
             length(season) == 1L, is.finite(season), season == as.integer(season),
@@ -792,34 +826,13 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   for (column in setdiff(names(ofs$ratings), "team_id"))
     rankings[[column]] <- ofs$ratings[[column]][match(rankings$team_id, ofs$ratings$team_id)]
   message("OFS: ", ofs$diagnostics$status)
-  # Completed season games drive the decay, including games missing PPT data.
-  rankings$preseason_weight <- pmax(0, (12 - rankings$games) / 12)
-  rankings$inseason_score <- NA_real_
-  scores_path <- sprintf("data/inseason_scores_%s.csv", season)
-  played <- rankings$games > 0
-  model_configured <- file.exists(scores_path)
-  rankings$planned_preseason_weight <- rankings$preseason_weight
-  if (any(played) && !model_configured) {
-    message("Game statistics updated. Overall order remains the preseason projection ",
-            "until a separate in-season overall model is configured.")
-    rankings$preseason_weight <- 1
-  }
-  if (any(played) && model_configured) {
-    scores <- read.csv(scores_path, stringsAsFactors = FALSE)
-    check_columns(scores, c("team", "inseason_score"), "In-season scores")
-    if (anyDuplicated(team_key(scores$team)) || !is.numeric(scores$inseason_score) ||
-        any(!is.finite(scores$inseason_score) | scores$inseason_score < 0 |
-            scores$inseason_score > 100)) stop("Invalid in-season scores.")
-    rankings$inseason_score <- scores$inseason_score[
-      match(team_key(rankings$team), team_key(scores$team))]
-    if (any(!is.finite(rankings$inseason_score[played]))) {
-      stop("Missing in-season scores for played teams; no rankings published.")
-    }
-  }
-  rankings$overall_score <- rankings$preseason_score
-  blend_rows <- played & model_configured
-  rankings$overall_score[blend_rows] <- with(rankings[blend_rows, ],
-    preseason_weight * preseason_score + (1 - preseason_weight) * inseason_score)
+  # Keep the existing 12-game preseason fade; net rating is the sole in-season input.
+  main_model <- calculate_net_rankings(rankings)
+  for (column in setdiff(names(main_model$ratings), "team_id"))
+    rankings[[column]] <- main_model$ratings[[column]][match(rankings$team_id, main_model$ratings$team_id)]
+  model_configured <- TRUE
+  message("Main rankings: ", main_model$diagnostics$status,
+          " (", main_model$diagnostics$usable_net_teams, " teams with usable net ratings).")
   # Unique ranks: composite score, then original source ranks resolve exact ties.
   rankings <- rankings[order(-rankings$overall_score,
     rankings$kenpom_preseason_rank, rankings$evanmiya_roster_rank, rankings$team), ]
@@ -833,8 +846,9 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
   # pretend to have downloaded fresh data. Old caches have unknown freshness.
   source_updated <- if (mode == "cached") state$source_updated_at else
     format(now, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-  payload <- list(status = if (model_configured) "ready" else "preseason_projection",
+  payload <- list(status = main_model$diagnostics$status,
                   overall_model_configured = model_configured,
+                  overall_model = main_model$diagnostics,
                   clutch_formula = "(clutch_wins - clutch_losses) / clutch_games + 0.2 * regulation_clutch_games + 0.4 * overtime_clutch_games",
                   clutch_definition = "Margin <= 3 at any point with 3:00 or less in regulation second half; overtime qualifies",
                   clutch_no_qualifying_games = 0,
@@ -858,7 +872,7 @@ update_rankings <- function(season, mode = "cached", lookback_days = 7L, publish
                   adjusted_efficiency_margin_formula = "adjusted_offensive_efficiency - adjusted_defensive_efficiency",
                   offensive_efficiency_formula = "100 * total_points / total_possessions",
                   defensive_efficiency_formula = "100 * total_points_allowed / total_opponent_possessions",
-                  metric = "OFred overall composite", updated_at = if (is.null(source_updated)) NULL else source_updated,
+                  metric = "OFred preseason-to-net-rating rankings", updated_at = if (is.null(source_updated)) NULL else source_updated,
                   exported_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
                   season = season, formula = "preseason_weight * preseason_score + (1 - preseason_weight) * inseason_score",
                   ppt_formula = "ppg / turnovers_per_game",
