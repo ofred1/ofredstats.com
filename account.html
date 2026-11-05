@@ -582,7 +582,7 @@ main.lay-board{max-width:1160px}
 .account-card{max-width:460px;margin:45px auto;padding:28px;border:1px solid #dbe3ef;border-radius:16px;background:#fff}
 .account-card h1{margin:0 0 12px;font-size:28px}.account-card label{display:block;margin:17px 0 6px;font-weight:600}
 .account-card input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #bbc8da;border-radius:8px;font:inherit}
-.account-card button{margin:14px 8px 0 0}.account-card p{line-height:1.6;color:#526078}.account-tabs{display:flex;gap:8px}
+.account-card button{margin:14px 8px 0 0}.account-card p{line-height:1.6;color:#526078}.account-tabs{display:flex;gap:8px}.account-tabs[hidden]{display:none}
 .account-tabs button[aria-pressed="true"]{background:#205bc1;color:white}#account-message{min-height:26px;overflow-wrap:anywhere}
 @media(max-width:700px){.account-card{margin:24px 12px;padding:22px}}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/account-client.js"></script></head><body>
@@ -622,6 +622,7 @@ main.lay-board{max-width:1160px}
  const message=text=>$('account-message').textContent=text;
  function setMode(next){mode=next;$('submit-account').textContent=next==='signup'?'Create account':'Sign in';$('password').autocomplete=next==='signup'?'new-password':'current-password';$('sign-in-tab').setAttribute('aria-pressed',String(next==='signin'));$('sign-up-tab').setAttribute('aria-pressed',String(next==='signup'));message('');}
  async function sessionView(session){
+  document.querySelector('.account-tabs').hidden=!!session || recovery;
   $('signed-in').hidden=!session;
   if(session&&!recovery){$('account-form').hidden=true;message('Signed in as '+session.user.email+'. Open LAYmaker to check your access.');}
   else $('account-form').hidden=false;
