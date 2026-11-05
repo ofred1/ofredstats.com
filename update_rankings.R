@@ -495,7 +495,10 @@ calculate_ofs <- function(rankings) {
     list(rank = r, value = value, count = k)
   }
   sos <- scale_rank(rankings$strength_of_schedule, 15)
-  clutch <- scale_rank(rankings$clutch_factor, 5)
+  # Missing CLUTCH is treated as zero only inside OFS; keep the source stat missing.
+  clutch_for_ofs <- rankings$clutch_factor
+  clutch_for_ofs[!is.finite(clutch_for_ofs)] <- 0
+  clutch <- scale_rank(clutch_for_ofs, 5)
   out$ofs_sos_rank <- sos$rank
   out$ofs_clutch_rank <- clutch$rank
   out$ofs_sos_component <- sos$value
