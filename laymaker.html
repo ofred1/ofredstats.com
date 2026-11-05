@@ -578,6 +578,9 @@ main.lay-board{max-width:1160px}
 @media(max-width:480px){.must-single{padding:13px}.must-match{font-size:12px}.inline-pick-info{padding-right:10px}}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
+<style>main.lay-board[hidden]{display:none!important}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/account-client.js"></script>
 </head>
 <body>
 
@@ -593,12 +596,14 @@ main.lay-board{max-width:1160px}
  <a href="/eye-test.html">Thirsty Thirty</a>
  <a href="/conference-rankings.html">Conference Rankings</a>
  <span class="current-page" aria-current="page"><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 15-19 5 5-14 20c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M28 34c-2-2-3-4-3-7l.8-3.5c.4-1.5 2.5-1.3 2.5.4v1c4-1 6-4 6.5-7.5l.2-7c.1-2 2.8-2 3-.1l.3 6.6c.4 5.6-1 10-4.2 13.8L32 34Z" fill="#2864da"/></svg><span>MAKER</span></span></span>
+ <a href="/account.html">Account</a>
  </div>
 </nav>
 </header>
 
 
-<main class="lay-board">
+<section id="access-gate" style="max-width:560px;margin:55px auto;padding:24px;text-align:center"><h1>LAYmaker members</h1><p id="access-message" role="status">Checking access...</p><a class="btn" href="/account.html">Sign in / Create account</a></section>
+<main class="lay-board" hidden>
  <div class="board-heading">
   <h1 id="laymaker-title" class="laymaker-title"><span class="par-prefix">(par)</span><span class="laymaker-word" aria-label="LAYMAKER"><span>LAY</span><svg class="layup-icon" viewBox="0 0 46 64" fill="none" aria-hidden="true"><circle cx="22" cy="13" r="10.5" fill="#ed9347" stroke="#183454" stroke-width="1.5"/><path d="M12 13h20M22 3v20M15 5c8 4 7 12 14 16M29 5c-8 4-7 12-14 16" stroke="#183454" stroke-width="1.1"/><path d="m1 55 13-8 15-19 5 5-14 20c-1 2-3 3-5 4L3 63Z" fill="#2864da"/><path d="M28 34c-2-2-3-4-3-7l.8-3.5c.4-1.5 2.5-1.3 2.5.4v1c4-1 6-4 6.5-7.5l.2-7c.1-2 2.8-2 3-.1l.3 6.6c.4 5.6-1 10-4.2 13.8L32 34Z" fill="#2864da"/></svg><span>MAKER</span></span></h1>
   <div class="board-date"><time id="board-date"></time></div>
@@ -648,80 +653,7 @@ result:"pending"|"win"|"loss"|"push"|"void", sportsbook, note}.
 For spreads, line is the selected team’s signed handicap: -4.5, +4.5, or 0.\nDisplay order is away, then home; selection always identifies the correct side.\nUse hot_take_id/daily_pick_id/must_pick_ids/ofred_pick_ids to feature the same pick without duplicating it.
 Parlay: {id,title,pick_ids:[],result:"pending"|"win"|"loss"|"push"|"void"}.
 Keep previous picks and parlays in history to preserve records.\nMust-picks use must_picks, an independent array; OCS is optional and they are never selectable. -->
-<script type="application/json" id="laymaker-data">
-{
-  "date": "2026-11-05",
-  "picks": [],
-  "hot_take": null,
-  "hot_take_id": null,
-  "daily_pick_id": null,
-  "must_picks": [],
-  "must_pick_ids": [],
-  "ofred_pick_ids": [],
-  "suggested_parlays": [],
-  "ofred_parlays": [],
-  "history": {
-    "picks": [],
-    "suggested_parlays": [],
-    "ofred_picks": [],
-    "ofred_parlays": [],
-    "hot_takes": [],
-    "daily_picks": []
-  },
-  "archived_through": "2026-11-04",
-  "archived_parlay_outcomes": [
-    {
-      "legs": 2,
-      "wins": 1,
-      "losses": 0,
-      "pushes": 0,
-      "voids": 0
-    }
-  ],
-  "archived_daily_streak": {
-    "type": "win",
-    "count": 3
-  },
-  "archived_records": {
-    "locks": {
-      "wins": 0,
-      "losses": 0,
-      "pushes": 0,
-      "voids": 0
-    },
-    "likely": {
-      "wins": 5,
-      "losses": 0,
-      "pushes": 0,
-      "voids": 0
-    },
-    "hot": {
-      "wins": 3,
-      "losses": 0,
-      "pushes": 0,
-      "voids": 0
-    },
-    "daily": {
-      "wins": 3,
-      "losses": 0,
-      "pushes": 0,
-      "voids": 0
-    },
-    "suggested": {
-      "wins": 1,
-      "losses": 0,
-      "pushes": 0,
-      "voids": 0
-    },
-    "ofred": {
-      "wins": 1,
-      "losses": 0,
-      "pushes": 0,
-      "voids": 0
-    }
-  }
-}
-</script>
+<!-- LAYmaker data is loaded from the approved-member database, never public HTML. -->
 
 
 <script data-mobile-navigation="v1">
@@ -795,9 +727,24 @@ const LaymakerModel = (() => {
  return {validPick,unique,combined,gameKey,record,resolveResult,canAdd,shortLabel,settled,isSpread,lineLabel,marketLabel};
 })();
 
-// Board interactions.
-(() => {
- const data=JSON.parse(document.getElementById('laymaker-data').textContent);
+// Board data is enforced by Supabase RLS; no public-data fallback.
+(async () => {
+ let data;
+ try {
+  if(!window.ofredAuth)throw Error('Account service unavailable. Please try again.');
+  const {data:sessionData,error:sessionError}=await ofredAuth.auth.getSession();
+  if(sessionError)throw sessionError;
+  if(!sessionData.session){document.getElementById('access-message').textContent='Sign in to view LAYmaker. Access is available to approved accounts.';return;}
+  const {data:row,error}=await ofredAuth.from('laymaker_boards').select('payload').eq('id','current').maybeSingle();
+  if(error)throw Error('Member access is being set up. Please try again shortly.');
+  if(!row){document.getElementById('access-message').textContent='Your account is signed in. LAYmaker access needs approval from Ofred.';return;}
+  data=row.payload;
+  if(!data||!Array.isArray(data.picks)||!data.history)throw Error('The board is unavailable. Please try again.');
+  document.getElementById('access-gate').hidden=true;
+  document.querySelector('main.lay-board').hidden=false;
+  ofredAuth.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')location.reload();});
+ } catch(error) {document.getElementById('access-message').textContent=error.message;return;}
+
  const $=id=>document.getElementById(id);
  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const pct=value=>new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format(value)+'%';
