@@ -23,11 +23,16 @@ z <- x;z$clutch_factor <- 0
 tie <- calculate_ofs(z)
 stopifnot(all(abs(tie$ratings$ofs_clutch_component-2.5)<1e-12))
 z$clutch_factor[6] <- NA_real_
-stopifnot(all(is.na(calculate_ofs(z)$ratings$ofs)))
+stopifnot(isTRUE(all.equal(calculate_ofs(z)$ratings, tie$ratings)),
+ is.na(z$clutch_factor[6]))
 z <- x;z$clutch_factor[1] <- NA_real_
 partial <- calculate_ofs(z)
-stopifnot(partial$diagnostics$status=='partial',is.na(partial$ratings$ofs[1]),
- abs(partial$ratings$ofs[6]-25)<1e-10)
+explicit_zero <- z; explicit_zero$clutch_factor[1] <- 0
+stopifnot(partial$diagnostics$status=='ready',is.finite(partial$ratings$ofs[1]),
+ isTRUE(all.equal(partial$ratings, calculate_ofs(explicit_zero)$ratings)),
+ is.na(z$clutch_factor[1]), abs(partial$ratings$ofs[6]-25)<1e-10)
+z <- x; z$strength_of_schedule[1] <- NA_real_
+stopifnot(is.na(calculate_ofs(z)$ratings$ofs[1]))
 stopifnot(all(is.na(calculate_ofs(x[1:5,])$ratings$ofs)))
 invisible(parse(script))
 cat('PASS: OFS anchor, bounds, piecewise breakpoints, ties, missing inputs, partial coverage, and updater syntax.\n')
