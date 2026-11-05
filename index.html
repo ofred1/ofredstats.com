@@ -517,6 +517,17 @@ header .nav { position: relative; }
 
 .data-coverage { margin: 0; padding: 0 18px 14px; font-size: 10px; line-height: 1.5; color: #748095; }
 @media (max-width: 700px) { .data-coverage { padding-inline: 12px; } }
+.adjustment-tools { display:flex; align-items:center; gap:9px; }
+.metric-key-button { display:none; }
+.data-coverage { padding:0 18px 8px; font-size:10px; }
+#metric-key { width:min(560px,calc(100% - 28px)); max-height:80vh; overflow:auto; }
+#metric-key dl { margin:18px 0 0; }
+#metric-key dt { font-weight:700; margin-top:14px; font-size:13px; }
+#metric-key dd { margin:5px 0 0; color:#56647a; font-size:13px; line-height:1.55; }
+@media(max-width:700px) {
+ .metric-key-button { display:inline-flex; align-items:center; justify-content:center; min-height:32px; padding:4px 10px; border:1px solid #ced8e8; border-radius:7px; background:#f3f7ff; color:#245ac0; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; }
+ .data-coverage { padding:0 12px 8px; }
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
 </head>
@@ -562,8 +573,9 @@ header .nav { position: relative; }
 
     <div class="table-notes">
       <p class="projection-note">Current rankings are projections. Rankings will adjust as more games are played.</p>
-      <p class="adjustment-note"><span class="adjusted-mark">*</span> = Adjusted for opponent strength</p>
+      <div class="adjustment-tools"><p class="adjustment-note"><span class="adjusted-mark">*</span> = Adjusted for opponent strength</p><button type="button" class="metric-key-button" id="metric-key-open" aria-haspopup="dialog">Key</button></div>
     </div>
+    <p id="data-coverage" class="data-coverage" aria-live="polite"></p>
     <div class="tablewrap">
       <table>
         <colgroup><col style="width:34px"><col style="width:206px"><col style="width:84px"><col style="width:58px"><col style="width:60px"><col style="width:62px"><col style="width:62px"><col style="width:62px"><col style="width:54px"><col style="width:58px"><col style="width:56px"><col style="width:56px"><col style="width:62px"><col style="width:56px"></colgroup>
@@ -579,7 +591,6 @@ header .nav { position: relative; }
       <span id="count" aria-live="polite">Loading rankings…</span>
       <span>Click a team for details</span>
     </div>
-    <p id="data-coverage" class="data-coverage" aria-live="polite"></p>
   </section>
 
   <div class="notice" id="notice" role="status" hidden></div>
@@ -590,6 +601,10 @@ header .nav { position: relative; }
   </footer>
 </main>
 
+<dialog id="metric-key" aria-labelledby="metric-key-title">
+ <div class="dialoghead"><h2 id="metric-key-title">Statistics key</h2><button type="button" class="btn" id="metric-key-close">Close</button></div>
+ <dl id="metric-key-definitions"></dl>
+</dialog>
 <dialog id="detail">
   <div class="dialoghead">
     <div class="teamheading">
@@ -783,6 +798,25 @@ function showTip(button, key) {
   tip.style.left = Math.max(12, Math.min(box.left, innerWidth - 292)) + 'px';
   tip.style.top = Math.min(box.bottom + 9, innerHeight - tip.offsetHeight - 12) + 'px';
 }
+
+// Reuse desktop tooltip text so the mobile key always stays in sync.
+$('metric-key-open').addEventListener('click', () => {
+ const list = $('metric-key-definitions');
+ list.replaceChildren();
+ for (const [key, label] of columns) {
+  if (!['ppg','turnovers_per_game','adjusted_offensive_efficiency','adjusted_defensive_efficiency','net_rating','pace','strength_of_schedule','clutch_factor','ofs'].includes(key)) continue;
+  const term=document.createElement('dt'), description=document.createElement('dd');
+  term.textContent=label; description.textContent=definitions[key][1];
+  list.append(term,description);
+ }
+ $('metric-key').showModal();
+});
+$('metric-key-close').addEventListener('click', () => $('metric-key').close());
+$('metric-key').addEventListener('click', event => {
+ if(event.target!==$('metric-key'))return;
+ const r=event.target.getBoundingClientRect();
+ if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)event.target.close();
+});
 
 function hideTip() {
   $('column-tip').hidden = true;
