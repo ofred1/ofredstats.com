@@ -836,6 +836,7 @@ function value(row, key) {
 }
 
 function fmt(value, key) {
+  if (key === 'turnovers_per_game' && Number.isFinite(value)) return value.toFixed(1);
   if (key === 'clutch_factor' && !Number.isFinite(value)) return '0.00';
   if (value == null) return '—';
   if (key === 'ofs' && Number.isFinite(value)) return value.toFixed(2) + '%';
